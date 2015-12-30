@@ -1,0 +1,63 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "chai/chai.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "express/express.d.ts": {
+      "commit": "fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38"
+    },
+    "node/node.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "serve-static/serve-static.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "mime/mime.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "pg/pg.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "421d6610bdb09e1015b71f5991d7a68d079eca21"
+    },
+    "node-uuid/node-uuid.d.ts": {
+      "commit": "4f7b7e01d3a9622bfab0bef469e169529e60c66b"
+    },
+    "node-uuid/node-uuid-base.d.ts": {
+      "commit": "4f7b7e01d3a9622bfab0bef469e169529e60c66b"
+    },
+    "node-uuid/node-uuid-cjs.d.ts": {
+      "commit": "4f7b7e01d3a9622bfab0bef469e169529e60c66b"
+    },
+    "request-promise/request-promise.d.ts": {
+      "commit": "81a7f48ea554e1baf810af905d8bd9e4eb3b4e69"
+    },
+    "angular2/http-2.0.0-alpha.39.d.ts": {
+      "commit": "ba424f7ee39717d51c17699a09ac8df312a7e9a1"
+    },
+    "http-status/http-status.d.ts": {
+      "commit": "ba424f7ee39717d51c17699a09ac8df312a7e9a1"
+    },
+    "request/request.d.ts": {
+      "commit": "ba424f7ee39717d51c17699a09ac8df312a7e9a1"
+    },
+    "bluebird/bluebird.d.ts": {
+      "commit": "ba424f7ee39717d51c17699a09ac8df312a7e9a1"
+    },
+    "whatwg-fetch/whatwg-fetch.d.ts": {
+      "commit": "ba424f7ee39717d51c17699a09ac8df312a7e9a1"
+    },
+    "chai-as-promised/chai-as-promised.d.ts": {
+      "commit": "e48f0c7a0a5f9e9d35e9cfd7506461bab435cb49"
+    },
+    "promises-a-plus/promises-a-plus.d.ts": {
+      "commit": "e48f0c7a0a5f9e9d35e9cfd7506461bab435cb49"
+    }
+  }
+}

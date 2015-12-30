@@ -1,0 +1,33 @@
+{
+  "name": "oauth-client-to-server-ts",
+  "version": "0.1.0",
+  "description": "A simple typescript based oauth support library.",
+  "main": "index.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "directories": {
+    "test": "test",
+    "lib": "lib"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "http-status": "^0.2.0",
+    "node-fetch": "^1.3.3",
+    "node-uuid": "^1.4.6"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "chai-as-promised": "^5.1.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Campagneros <team-campagneros@zalando.de>",
+  "contributors": [
+    {
+      "name": "Jörg Dotkzi",
+      "email": "joerg.dotzki@zalando.de",
+      "url": "https://github.com/ISO50"
+    }
+  ]
+}

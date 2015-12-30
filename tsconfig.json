@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "target": "ES6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "newLine": "LF",
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "outDir": "./build"
+  },
+  "filesGlob": [],
+  "buildOnSave": true,
+  "compileOnSave": false,
+  "formatCodeOptions": {
+    "indentSize": 2,
+    "tabSize": 2,
+    "newLineCharacter": "\n",
+    "convertTabsToSpaces": true,
+    "insertSpaceAfterCommaDelimiter": true,
+    "insertSpaceAfterSemicolonInForStatements": true,
+    "insertSpaceBeforeAndAfterBinaryOperators": true,
+    "insertSpaceAfterKeywordsInControlFlowStatements": true,
+    "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+    "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+    "placeOpenBraceOnNewLineForFunctions": false,
+    "placeOpenBraceOnNewLineForControlBlocks": false
+  },
+  "files": [
+    "integration-test/data/Client.ts",
+    "integration-test/file/JsonFileReader.ts",
+    "integration-test/oauth/ClientUseCaseSpec.ts",
+    "integration-test/oauth/ServerUseCasesSpec.ts",
+    "src/bootstrap-content-server.ts",
+    "src/oauth/OAuthConfiguration.ts",
+    "src/oauth/OAuthService.ts",
+    "test/unit/oauth/OAuthConfigurationSpec.ts",
+    "test/unit/oauth/OAuthServiceSpec.ts",
+    "typings/chai-as-promised/chai-as-promised.d.ts",
+    "typings/chai/chai.d.ts",
+    "typings/express/express.d.ts",
+    "typings/http-status/http-status.d.ts",
+    "typings/mime/mime.d.ts",
+    "typings/mocha/mocha.d.ts",
+    "typings/node-fetch/node-fetch.d.ts",
+    "typings/node-uuid/node-uuid-base.d.ts",
+    "typings/node-uuid/node-uuid-cjs.d.ts",
+    "typings/node-uuid/node-uuid.d.ts",
+    "typings/node/node.d.ts",
+    "typings/promises-a-plus/promises-a-plus.d.ts",
+    "typings/serve-static/serve-static.d.ts",
+    "typings/tsd.d.ts",
+    "typings/whatwg-fetch/whatwg-fetch.d.ts"
+  ],
+  "exclude": [
+    "build",
+    "node_modules"
+  ],
+  "atom": {
+    "rewriteTsconfig": true
+  }
+}
