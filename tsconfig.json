@@ -50,6 +50,7 @@
     "typings/node-uuid/node-uuid.d.ts",
     "typings/node/node.d.ts",
     "typings/promises-a-plus/promises-a-plus.d.ts",
+    "typings/q/Q.d.ts",
     "typings/serve-static/serve-static.d.ts",
     "typings/tsd.d.ts",
     "typings/whatwg-fetch/whatwg-fetch.d.ts"

@@ -17,7 +17,8 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "chai-as-promised": "^5.1.0"
+    "chai-as-promised": "^5.1.0",
+    "q": "^1.4.1"
   },
   "scripts": {
     "test": "mocha"
@@ -25,9 +26,13 @@
   "author": "Campagneros <team-campagneros@zalando.de>",
   "contributors": [
     {
-      "name": "Jörg Dotkzi",
+      "name": "Jörg Dotzki",
       "email": "joerg.dotzki@zalando.de",
       "url": "https://github.com/ISO50"
+    },
+    {
+      "name": "Alexander Dellagi",
+      "email": "alexander.dellagi@zalando.de"
     }
   ]
 }

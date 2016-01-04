@@ -6,12 +6,39 @@ import * as express from 'express';
 import * as NodeURL from 'url';
 import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
+import * as q from 'q';
+import * as fs from 'fs';
+
 
 
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
+const USER_JSON = 'user.json'
 
+const fs_readFile = q.denodeify<any>(fs.readFile)
+
+function getUserDataFromFile(filePath: string): q.Promise<any> {
+  if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
+    filePath += '/';
+  }
+
+  return fs_readFile(filePath + USER_JSON);
+}
+
+function getAccessToken(credentials: any, serverUrl: string): Promise<string> {
+  //TODO add credentials
+  return fetch(serverUrl)
+  .then((res) => {
+    return res.json()
+  })
+  .then((json) => {
+    return json.access_token;
+  })
+  .catch((err) => {
+    //TODO
+  });
+}
 
 function match(url: string, patterns: Set<string>): boolean {
 
@@ -182,8 +209,6 @@ function rejectRequest(res, status?:number) {
   res.sendStatus(_status);
 }
 
-
-
 /**
  * A OAuth 2.0 middleware for Express 4.0.
  */
@@ -191,9 +216,30 @@ class OAuthService {
 
   private oauthConfig: OAuthConfiguration;
 
+  public getBearer(scopes: string): Promise<string> {
+
+    const self = this;
+
+    const credentialsDir = 'path';
+
+    // its a promise - I promise ;)
+    const promise: any = getUserDataFromFile(credentialsDir);
+
+     promise.then((credentials) => {
+      console.log(credentials);
+
+      return getAccessToken(credentials, NodeURL.format(self.oauthConfig.authServerUrl));
+    })
+    .catch((err) => {
+      console.error('Unable to read user.json', err);
+    });
+
+    return promise;
+  }
+
   public oauthMiddleware() {
 
-    var self = this;
+    const self = this;
 
     return function(req: any, res: any, next: any) {
 
