@@ -16,6 +16,7 @@
     "node-uuid": "^1.4.6"
   },
   "devDependencies": {
+    "btoa": "^1.1.2",
     "chai": "^3.4.1",
     "chai-as-promised": "^5.1.0",
     "q": "^1.4.1"

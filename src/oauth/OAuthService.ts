@@ -8,35 +8,45 @@ import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
 import * as q from 'q';
 import * as fs from 'fs';
-
-
-
+import * as btoa from 'btoa';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
-const USER_JSON = 'user.json'
+const AUTHORIZATION_BASIC = 'Authorization: Basic ';
+const USER_JSON = 'user.json';
+const CLIENT_JSON = 'client.json';
+const GRANT_TYPE = 'password';
 
 const fs_readFile = q.denodeify<any>(fs.readFile)
 
-function getUserDataFromFile(filePath: string): q.Promise<any> {
+/**
+ * @return a promise with the user object (as json) containing the user credentials.
+ */
+function getFileData(filePath: string, fileName: string): q.Promise<any> {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
 
-  return fs_readFile(filePath + USER_JSON);
+  return fs_readFile(filePath + fileName, 'utf-8');
 }
 
-function getAccessToken(credentials: any, serverUrl: string): Promise<string> {
-  //TODO add credentials
-  return fetch(serverUrl)
+/**
+ * @return the access token from the given server if the user credentials are valid.
+ */
+function getAccessToken(userRequest: any, clientCredentialsBase64: any, serverUrl: string, scopes: string): Promise<string> {
+
+  const authHeader = AUTHORIZATION_BASIC + clientCredentialsBase64;
+  console.log('call server', serverUrl);
+  return fetch(serverUrl, {method: 'POST', headers: {authHeader}, body: JSON.stringify(userRequest)})
   .then((res) => {
-    return res.json()
+    console.log(res);
+    return res.json();
   })
   .then((json) => {
     return json.access_token;
   })
   .catch((err) => {
-    //TODO
+    console.error("Could not get access token from server: " + serverUrl, err);
   });
 }
 
@@ -220,21 +230,30 @@ class OAuthService {
 
     const self = this;
 
-    const credentialsDir = 'path';
+    const accessTokenPromis: any = Promise.all([
+      getFileData(this.oauthConfig.credentialsDir, USER_JSON), //user data
+      getFileData(this.oauthConfig.credentialsDir, CLIENT_JSON)  //client data
+    ]).then((credentials) => {
 
-    // its a promise - I promise ;)
-    const promise: any = getUserDataFromFile(credentialsDir);
+      const userData = JSON.parse(credentials[0]);
+      const clientData = JSON.parse(credentials[1]);
 
-     promise.then((credentials) => {
-      console.log(credentials);
+      const userRequest = {
+        "grant-type": GRANT_TYPE,
+        "username": userData.application_username,
+        "password": userData.application_password,
+        "scope": scopes
+      };
 
-      return getAccessToken(credentials, NodeURL.format(self.oauthConfig.authServerUrl));
+      const clientCredentialsBase64 = btoa(clientData.client_id + ":" + clientData.client_secret);
+
+      return getAccessToken(userRequest, clientCredentialsBase64, NodeURL.format(self.oauthConfig.authServerUrl), scopes);
     })
     .catch((err) => {
-      console.error('Unable to read user.json', err);
+      console.error('Unable to read credentials', err);
     });
 
-    return promise;
+    return accessTokenPromis;
   }
 
   public oauthMiddleware() {

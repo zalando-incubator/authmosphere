@@ -29,15 +29,15 @@
     "placeOpenBraceOnNewLineForControlBlocks": false
   },
   "files": [
-    "integration-test/data/Client.ts",
-    "integration-test/file/JsonFileReader.ts",
     "integration-test/oauth/ClientUseCaseSpec.ts",
+    "integration-test/oauth/ServerAsClientToServerSpec.ts",
     "integration-test/oauth/ServerUseCasesSpec.ts",
     "src/bootstrap-content-server.ts",
     "src/oauth/OAuthConfiguration.ts",
     "src/oauth/OAuthService.ts",
     "test/unit/oauth/OAuthConfigurationSpec.ts",
     "test/unit/oauth/OAuthServiceSpec.ts",
+    "typings/btoa/btoa.d.ts",
     "typings/chai-as-promised/chai-as-promised.d.ts",
     "typings/chai/chai.d.ts",
     "typings/express/express.d.ts",
