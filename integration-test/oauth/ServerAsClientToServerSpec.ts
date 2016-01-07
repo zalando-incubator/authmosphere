@@ -46,13 +46,10 @@ describe('OAuth integration test for client use cases', () => {
 
   // Setup API server
   beforeEach(() => {
+    authServerApp.post('/oauth2/access_token', function(req, res) {
 
-    authServerApp.get('/oauth2/access_token', function(req, res) {
-console.log('blaaaaaa');
-      //let valid = req.query.access_token === 'c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=';
-      let valid = true;
+      let valid = req.headers['authorization'] === '+Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=';
       if (valid) {
-        console.log('token is valid', req);
         res
         .status(200)
         .send({
@@ -67,7 +64,7 @@ console.log('blaaaaaa');
           "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
         });
       } else {
-        res
+          res
           .status(401)
           .send('Unauthorized');
       }
@@ -82,16 +79,14 @@ console.log('blaaaaaa');
 
   it.only('should return the Bearer token', function(done) {
 
-    this.timeout(20000);
+    this.timeout(2000);
 
-    let result = oauthService.getBearer("campaing.edit_all campaign.read_all")
-    .then((token) => {
-        console.log('received access token:', token);
-    })
-    .then(() => {
-      setTimeout(done, 20000);
-    });
-
+    setTimeout(
+      oauthService.getBearer("campaing.edit_all campaign.read_all")
+      .then((token) => {
+          done();
+          return expect(token).to.deep.equal('4b70510f-be1d-4f0f-b4cb-edbca2c79d41');
+      }), 2000);
   });
 });
 

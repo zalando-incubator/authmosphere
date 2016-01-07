@@ -8,11 +8,11 @@ import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
 import * as q from 'q';
 import * as fs from 'fs';
-import * as btoa from 'btoa';
+import * as btoa from 'btoa'; //base64 encoding
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
-const AUTHORIZATION_BASIC = 'Authorization: Basic ';
+const BASIC = 'Basic ';
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
 const GRANT_TYPE = 'password';
@@ -35,11 +35,10 @@ function getFileData(filePath: string, fileName: string): q.Promise<any> {
  */
 function getAccessToken(userRequest: any, clientCredentialsBase64: any, serverUrl: string, scopes: string): Promise<string> {
 
-  const authHeader = AUTHORIZATION_BASIC + clientCredentialsBase64;
-  console.log('call server', serverUrl);
-  return fetch(serverUrl, {method: 'POST', headers: {authHeader}, body: JSON.stringify(userRequest)})
+  const headerValue = BASIC + clientCredentialsBase64;
+
+  return fetch(serverUrl, {method: 'POST', body: JSON.stringify(userRequest), headers: {'Authorization': headerValue}})
   .then((res) => {
-    console.log(res);
     return res.json();
   })
   .then((json) => {
