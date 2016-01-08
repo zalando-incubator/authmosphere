@@ -55,12 +55,14 @@ describe('OAuthConfiguration', () => {
       // when
       config.setAuthServerUrl(AUTH_URL);
       config.addPublicEndpoints(givenEndPoints);
+      config.setCredentialsDir('credentials/');
 
       // then
       const strResult = config.toString();
       expect(strResult)
       .to
       .equal('OAuth Configuration:\n' +
+             'Credentials directory: credentials/\n' +
              'Auth Server URL: https://auth.zalando.com/oauth2\n' +
              'Public access patterns:\n' +
              ' - assets\n' +

@@ -71,8 +71,8 @@ describe('OAuth integration test for client use cases', () => {
 
     //when
     let bearer = oauthService.getBearer("campaing.edit_all campaign.read_all")
-    .then((token) => {
-        return token;
+     .then((token) => {
+       return token;
       });
 
       //then
