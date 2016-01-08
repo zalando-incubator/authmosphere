@@ -13,10 +13,8 @@ import { OAuthService, requireScopes } from '../../src/oauth/OAuthService';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
-const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
-
-describe('OAuth integration test for client use cases', () => {
+describe('OAuth integration test for server as a client use cases', () => {
 
   let config: OAuthConfiguration;
   let oauthService: OAuthService;
@@ -30,7 +28,6 @@ describe('OAuth integration test for client use cases', () => {
 
     config = new OAuthConfiguration();
     config
-     .addPublicEndpoints([ '/public', '/healthcheck' ])
      .setAuthServerUrl( NodeURL.parse('http://127.0.0.1:30001/oauth2/access_token'))
      .setCredentialsDir('integration-test/credentials');
 
@@ -64,7 +61,7 @@ describe('OAuth integration test for client use cases', () => {
     return expect(bearer).to.become('4b70510f-be1d-4f0f-b4cb-edbca2c79d41');
   });
 
-  it('should return unauthorized', function() {
+  it('should return an undefined access token', function() {
 
     //given
     setupTestEnvironment('invalid');
@@ -88,14 +85,6 @@ function setupTestEnvironment(authHeader: string) {
         res
         .status(200)
         .send({
-          "expires_in": 3515,
-          "token_type": "Bearer",
-          "realm": "employees",
-          "scope": [
-            "campaign.read_all"
-          ],
-          "grant_type": "password",
-          "uid": "Mustermann",
           "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
         });
       } else {
