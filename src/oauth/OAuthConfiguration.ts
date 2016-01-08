@@ -6,9 +6,11 @@ class OAuthConfiguration {
 
   private _publicEndpoints: Set<string>;
   private _authServerUrl: NodeURL.Url;
+  private _credentialsDir: string;
 
   constructor() {
     this._publicEndpoints = new Set<string>();
+    this._credentialsDir = process.env.CREDENTIALS_DIR;
   }
 
   addPublicEndpoints(pattern:Array<string>): OAuthConfiguration {
@@ -30,12 +32,23 @@ class OAuthConfiguration {
     return this;
   }
 
+  setCredentialsDir(credentialsDir: string): OAuthConfiguration {
+
+    this._credentialsDir = credentialsDir;
+
+    return this;
+  }
+
   get publicEndpoints(): Set<string> {
     return new Set<string>(this._publicEndpoints);
   }
 
   get authServerUrl(): NodeURL.Url {
     return this._authServerUrl;
+  }
+
+  get credentialsDir(): string {
+    return this._credentialsDir;
   }
 
 
@@ -58,6 +71,7 @@ class OAuthConfiguration {
     }
 
     var strRep = 'OAuth Configuration:\n' +
+                 'Credentials directory: ' + this.credentialsDir + '\n' +
                  'Auth Server URL: ' + this.authServerUrl.href + '\n' +
                  endpointsToString(this.publicEndpoints);
 
