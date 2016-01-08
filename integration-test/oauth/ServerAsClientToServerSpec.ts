@@ -44,11 +44,46 @@ describe('OAuth integration test for client use cases', () => {
     authenticationServer = authServerApp.listen(30001);
   });
 
-  // Setup API server
-  beforeEach(() => {
-    authServerApp.post('/oauth2/access_token', function(req, res) {
+  // stop server after test
+  afterEach(() => {
+    authenticationServer.close();
+  });
 
-      let valid = req.headers['authorization'] === '+Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=';
+  it('should return the Bearer token', function() {
+
+    //given
+    setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=');
+
+    //when
+    let bearer = oauthService.getBearer("campaing.edit_all campaign.read_all")
+    .then((token) => {
+        return token;
+      });
+
+      //then
+    return expect(bearer).to.become('4b70510f-be1d-4f0f-b4cb-edbca2c79d41');
+  });
+
+  it('should return unauthorized', function() {
+
+    //given
+    setupTestEnvironment('invalid');
+
+    //when
+    let bearer = oauthService.getBearer("campaing.edit_all campaign.read_all")
+    .then((token) => {
+        return token;
+      });
+
+      //then
+    return expect(bearer).to.become(undefined);
+  });
+
+// Setup API server
+function setupTestEnvironment(authHeader: string) {
+  authServerApp.post('/oauth2/access_token', function(req, res) {
+
+    let valid = req.headers['authorization'] === authHeader;
       if (valid) {
         res
         .status(200)
@@ -64,233 +99,10 @@ describe('OAuth integration test for client use cases', () => {
           "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
         });
       } else {
-          res
+        res
           .status(401)
           .send('Unauthorized');
-      }
-    });
-  });
-
-  // stop server after test
-  afterEach(() => {
-    authenticationServer.close();
-  });
-
-
-  it.only('should return the Bearer token', function(done) {
-
-    this.timeout(2000);
-
-    setTimeout(
-      oauthService.getBearer("campaing.edit_all campaign.read_all")
-      .then((token) => {
-          done();
-          return expect(token).to.deep.equal('4b70510f-be1d-4f0f-b4cb-edbca2c79d41');
-      }), 2000);
-  });
+        }
+      });
+    }
 });
-
-/**
-  it('should return 401 if authorization header is not set', function() {
-
-    // given
-    addStandardAuthenticationEndpoint();
-
-    // when
-    const promise = fetch('http://127.0.0.1:30002/resource/user')
-    .then((res) => {
-      return res.status;
-    });
-
-    // then
-    return expect(promise).to.become(HttpStatus.UNAUTHORIZED);
-  });
-
-  it('should return 401 if server response is != 200 ', function() {
-
-    // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    add500Endpoint();
-
-
-    // when
-    var promise = fetch('http://127.0.0.1:30002/resource/user', {
-      method: 'GET',
-      headers: {
-        authorization: authHeader
-      }
-    })
-    .then((res) => {
-      return res.status;
-    });
-
-    // then
-    return expect(promise).to.become(HttpStatus.UNAUTHORIZED);
-  });
-
-
-  it('should return 403 if scope is not granted', () => {
-
-    // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addAuthenticationEndpointWithoutRequiredScopes();
-
-
-    // when
-    var promise = fetch('http://127.0.0.1:30002/resource/user', {
-      method: 'GET',
-      headers: {
-        authorization: authHeader
-      }
-    })
-    .then((res) => {
-      return res.status;
-    });
-
-    // then
-    return expect(promise).to.become(HttpStatus.FORBIDDEN);
-  });
-
-
-  it('should return 403 if uid matches not the resource owner \'services\'', () => {
-
-    // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addWrongUserEndpoint();
-
-
-    // when
-    var promise = fetch('http://127.0.0.1:30002/resource/user', {
-      method: 'GET',
-      headers: {
-        authorization: authHeader
-      }
-    })
-    .then((res) => {
-      return res.status;
-    });
-
-    // then
-    return expect(promise).to.become(HttpStatus.FORBIDDEN);
-  });
-
-
-  it('should return the resource if token is valid, _all_ scopes are  granted and resource belongs to the service user', function() {
-
-    // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addStandardAuthenticationEndpoint();
-
-    // when
-    var promise = fetch('http://127.0.0.1:30002/resource/user', {
-      method: 'GET',
-      headers: {
-        authorization: authHeader
-      }
-    })
-    .then((res: any) => {
-      return res.json();
-    })
-    .then((jsonData) => {
-      return jsonData;
-    })
-
-    // then
-    return expect(promise).to.become({
-      "userName": "JohnDoe",
-      "lastLogin": "2015-12-12"
-    });
-  });
-});
-
-
-  function addStandardAuthenticationEndpoint() {
-
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
-      if (valid) {
-        res
-        .status(200)
-        .send({
-          "expires_in": 3515,
-          "token_type": "Bearer",
-          "realm": "employees",
-          "scope": [
-            "campaign.editall",
-            "campaign.readall"
-          ],
-          "grant_type": "password",
-          "uid": "services",
-          "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
-        });
-      } else {
-        res
-          .status(401)
-          .send('Unauthorized');
-      }
-    });
-  }
-
-  function addAuthenticationEndpointWithoutRequiredScopes() {
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
-      if (valid) {
-        res
-        .status(200)
-        .send({
-          "expires_in": 3515,
-          "token_type": "Bearer",
-          "realm": "employees",
-          "scope": [
-            "campaign.readall"
-          ],
-          "grant_type": "password",
-          "uid": "services",
-          "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
-        });
-      } else {
-        res
-          .status(401)
-          .send('Unauthorized');
-      }
-    });
-  }
-
-  function add500Endpoint() {
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      res
-      .status(500)
-      .send('');
-    });
-  }
-
-  function addWrongUserEndpoint() {
-
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === 'c3R1cHNfY2FtcC1mcm9udGVuZDpRT25EQVN6UWNlem8uZ2xoKGpjVm85cnlLeG1TW0B4Mw==';
-
-      if (valid) {
-        res
-        .status(200)
-        .send({
-          "expires_in": 3515,
-          "token_type": "Bearer",
-          "realm": "employees",
-          "scope": [
-            "campaign.readall"
-          ],
-          "grant_type": "password",
-          "uid": "Mustermann",
-          "access_token": "c3R1cHNfY2FtcC1mcm9udGVuZDpRT25EQVN6UWNlem8uZ2xoKGpjVm85cnlLeG1TW0B4Mw=="
-        });
-      } else {
-        res
-          .status(401)
-          .send('Unauthorized');
-      }
-    });
-  }
-*/
