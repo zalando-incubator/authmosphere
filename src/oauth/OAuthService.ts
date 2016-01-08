@@ -37,7 +37,11 @@ function getAccessToken(userRequest: any, clientCredentialsBase64: any, serverUr
 
   const headerValue = BASIC + clientCredentialsBase64;
 
-  return fetch(serverUrl, {method: 'POST', body: JSON.stringify(userRequest), headers: {'Authorization': headerValue}})
+  return fetch(serverUrl, {
+    method: 'POST',
+    body: JSON.stringify(userRequest),
+    headers: {'Authorization': headerValue}
+  })
   .then((res) => {
     return res.json();
   })

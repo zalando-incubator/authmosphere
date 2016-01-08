@@ -37,7 +37,6 @@ class OAuthConfiguration {
     this._credentialsDir = credentialsDir;
 
     return this;
-
   }
 
   get publicEndpoints(): Set<string> {

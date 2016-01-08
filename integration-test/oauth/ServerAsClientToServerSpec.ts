@@ -29,7 +29,7 @@ describe('OAuth integration test for server as a client use cases', () => {
     config = new OAuthConfiguration();
     config
      .setAuthServerUrl( NodeURL.parse('http://127.0.0.1:30001/oauth2/access_token'))
-     .setCredentialsDir('integration-test/credentials');
+     .setCredentialsDir('integration-test/data/credentials');
 
     oauthService = new OAuthService(config);
   });
@@ -53,7 +53,7 @@ describe('OAuth integration test for server as a client use cases', () => {
 
     //when
     let bearer = oauthService.getBearer("campaing.edit_all campaign.read_all")
-    .then((token) => {
+      .then((token) => {
         return token;
       });
 
@@ -83,9 +83,9 @@ function setupTestEnvironment(authHeader: string) {
     let valid = req.headers['authorization'] === authHeader;
       if (valid) {
         res
-        .status(200)
-        .send({
-          "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
+          .status(200)
+          .send({
+            "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
         });
       } else {
         res
