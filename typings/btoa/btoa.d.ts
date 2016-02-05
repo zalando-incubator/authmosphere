@@ -4,7 +4,6 @@ interface btoaInterface{
 
 declare var btoaVar: btoaInterface;
 
-
 declare module "btoa" {
   export = btoaVar;
 }
