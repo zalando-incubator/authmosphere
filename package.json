@@ -25,6 +25,7 @@
     "tslint": "^3.3.0"
   },
   "scripts": {
+    "postinstall": "tsc",
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts",
     "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"

@@ -1,5 +1,5 @@
-node_modules
-build
+node_modules/
+lib/
 .DS_Store
 .vscode
 .idea
