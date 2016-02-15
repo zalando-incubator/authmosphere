@@ -9,15 +9,15 @@ import * as Http from 'http';
 import * as fetch from 'node-fetch';
 
 import {
-  handleAuthorziationBearer,
-  requireScopes,
+  handleOAuthRequestMiddleware,
+  requireScopesMiddleware,
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/oauth-tooling';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe('Integration test for express middlewares', () => {
+describe('Integration tests for express middlewares', () => {
 
   let authenticationServer: Http.Server;
   let resourceServer: Http.Server;
@@ -27,12 +27,12 @@ describe('Integration test for express middlewares', () => {
   beforeEach(() => {
     let app = Express();
 
-    app.use(handleAuthorziationBearer({
+    app.use(handleOAuthRequestMiddleware({
       publicEndpoints: [ '/public', '/healthcheck' ],
       tokenInfoEndpoint: NodeURL.parse('http://127.0.0.1:30001/oauth2/tokeninfo')
     }));
 
-    app.get('/resource/user', requireScopes(['campaign.readall', 'campaign.editall']), function(req, res) {
+    app.get('/resource/user', requireScopesMiddleware(['campaign.readall', 'campaign.editall']), function(req, res) {
       res.json({
         'userName': 'JohnDoe',
         'lastLogin': '2015-12-12'
@@ -110,6 +110,7 @@ describe('Integration test for express middlewares', () => {
   }
 
   function add500Endpoint() {
+
     authServerApp.get('/oauth2/tokeninfo', function(req, res) {
       res
       .status(500)
@@ -130,6 +131,7 @@ describe('Integration test for express middlewares', () => {
           'token_type': 'Bearer',
           'realm': 'employees',
           'scope': [
+            'campaign.editall',
             'campaign.readall'
           ],
           'grant_type': 'password',
@@ -203,12 +205,13 @@ describe('Integration test for express middlewares', () => {
   });
 
 
+  // TODO: what should this test achieve?
+  // Shouldnt everything be managed over scopes?
   it('should return 403 if uid matches not the resource owner \'services\'', () => {
 
     // given
     let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addWrongUserEndpoint();
-
 
     // when
     let promise = fetch('http://127.0.0.1:30002/resource/user', {

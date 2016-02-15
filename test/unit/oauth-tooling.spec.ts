@@ -2,48 +2,96 @@
 
 import * as chai from 'chai';
 
-// TODO write more unit tests
-import { handleAuthorziationBearer, getAccessToken } from '../../src/oauth-tooling';
+import {
+  handleOAuthRequestMiddleware,
+  requireScopesMiddleware,
+  createAuthCodeRequestUri } from '../../src/oauth-tooling';
 
 let expect = chai.expect;
 
-describe('OAuthService', () => {
+describe('oauth tooling', () => {
 
+  let requestMock: any;
   let responseMock: any;
 
   before(() => {
 
+    requestMock = {};
+
     responseMock = {};
-
-    responseMock.status = function(status: string) {
-      if (status) {
-        this._status = status;
-      }
-      return this;
-    };
-    responseMock.type = function(p: string) {
-      return this;
-    };
     responseMock.sendStatus = function(status: string) {
-      this.body = status;
-
-      return this;
-    };
-    responseMock.end = function() {
-      return this;
+      this.status = status;
     };
   });
 
   it('should throw exception on missing configuration', () => {
 
     // TODO
-    // then
-    //expect(() => {
-    //  new OAuthService(undefined);
-    //}).to.throw(/Missing OAuthConfiguration./);
   });
 
-  describe('handleAuthorziationBearer', () => {
+  describe('createAuthCodeRequestUri', () => {
+
+    it('should return the correct uri as string', () => {
+
+      // given
+      const authorizationEndpoint = 'https://some.end.point';
+      const clientId = 'clientID';
+      const redirectUri = 'https://some.redirect.uri';
+
+      // when
+      const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
+        redirectUri);
+
+      // then
+      const expected = authorizationEndpoint +
+        '?client_id=' + clientId +
+        '&redirect_uri=' + redirectUri +
+        '&response_type=code' +
+        '&realm=employees';
+
+      expect(result).to.equal(expected);
+    });
+  });
+
+  describe('requireScopesMiddleware', () => {
+
+    it('should reject request with 403 if required scopes are not met', () => {
+
+        // given
+        requestMock.scopes = ['uid', 'test'];
+        const requiredScopes = ['uid', 'test', 'additional'];
+        let called = false;
+        let next = () => {
+          called = true;
+        };
+
+        // when
+        requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+
+        // then
+        expect(called).to.be.false;
+        expect(responseMock.status).to.equal(403);
+      });
+
+    it('should call next() if required scopes are met', () => {
+
+      // given
+      requestMock.scopes = ['uid', 'test'];
+      const requiredScopes = ['uid', 'test'];
+      let called = false;
+      let next = () => {
+        called = true;
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+
+      // then
+      expect(called).to.be.true;
+    });
+  });
+
+  describe('handleOAuthRequestMiddleware', () => {
 
     it('should call #next on public endpoint', () => {
 
@@ -54,7 +102,7 @@ describe('OAuthService', () => {
       };
 
       // when
-      handleAuthorziationBearer({
+      handleOAuthRequestMiddleware({
         publicEndpoints: [ '/public', '/healthcheck' ]
       })({ 'originalUrl': '/healthcheck' }, undefined, next);
 
@@ -62,7 +110,7 @@ describe('OAuthService', () => {
       expect(called).to.be.true;
     });
 
-    it('should not call #next when public endpoint is specified', () => {
+    it('should not call #next when non-public endpoint', () => {
 
       // given
       let called = false;
@@ -71,7 +119,7 @@ describe('OAuthService', () => {
       };
 
       // when
-      handleAuthorziationBearer({
+      handleOAuthRequestMiddleware({
         publicEndpoints: [ '/public', '/healthcheck' ]
       })({ 'originalUrl': '/privateAPI', headers: {} }, responseMock, next);
 

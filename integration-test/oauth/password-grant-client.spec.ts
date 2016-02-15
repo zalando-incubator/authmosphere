@@ -27,7 +27,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
   });
 }
 
-describe('Password Credentials Grant integration test for client use cases', () => {
+describe('getAccessToken', () => {
 
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
@@ -43,7 +43,7 @@ describe('Password Credentials Grant integration test for client use cases', () 
     authenticationServer.close();
   });
 
-  it('should return the Bearer token', function() {
+  it('should become the access token', function() {
 
     //given
     setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
@@ -64,7 +64,7 @@ describe('Password Credentials Grant integration test for client use cases', () 
     return expect(bearer).to.become('4b70510f-be1d-4f0f-b4cb-edbca2c79d41');
   });
 
-  it('should return an undefined access token', function() {
+  it('should become an undefined access token', function() {
 
     //given
     setupTestEnvironment('invalid', authServerApp);

@@ -15,13 +15,16 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
 const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
+
 const AUTHORIZATION_CODE_GRANT = 'authorization_code';
 const PASSWORD_CREDENTIALS_GRANT = 'password';
+const SERVICES_REALM = 'services';
+const EMPLOYEES_REALM = 'employees';
 
 const fsReadFile = q.denodeify<any>(fs.readFile);
 
 /**
- * Returns a promise with the user object (as json) containing the user credentials.
+ * Returns a promise containing the file content as json object.
  *
  * @param filePath
  * @param fileName
@@ -33,37 +36,6 @@ function getFileData(filePath: string, fileName: string): q.Promise<any> {
   }
 
   return fsReadFile(filePath + fileName, 'utf-8');
-}
-
-/**
- * Returns the access token from the given server.
- *
- * @param bodyObject an object of values put in the body
- * @param authorizationHeaderValue
- * @param accessTokenEndpoint
- * @param realm
- * @returns {Promise<T>|Q.Promise<U>}
- */
-function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string): Promise<string> {
-
-  return fetch(accessTokenEndpoint + '?realm=' + realm, {
-    method: 'POST',
-    body: formurlencoded(bodyObject),
-    headers: {
-      'Authorization': authorizationHeaderValue,
-      'Content-Type': OAUTH_CONTENT_TYPE
-    }
-  })
-  .then((res) => {
-    return res.json();
-  })
-  .then((json) => {
-    return json.access_token;
-  })
-  .catch((err) => {
-    console.error('Could not get access token from server: ' + accessTokenEndpoint, err);
-  });
 }
 
 /**
@@ -130,43 +102,8 @@ function extractAccessToken(authHeader: string): string {
   }
 }
 
-function getTokenInfoFromServer(authServerUrl: NodeURL.Url,
-                                 accessToken: string,
-                                 res): Promise<any> {
-
-  const promise = new Promise(function(resolve, reject) {
-
-    // Get token info from oauth server
-    // and then start validation
-    fetch(NodeURL.format(authServerUrl) + '?access_token=' + accessToken)
-    .then( response => {
-      if (response.status !== 200) {
-        return reject ({
-          status: HttpStatus.UNAUTHORIZED,
-          resObj: res
-        });
-      } else {
-        return response.json();
-      }
-    })
-    .then((data) => {
-      return resolve({
-        response: res,
-        data: data
-      });
-    })
-    .catch( err => {
-      return reject ({
-        errorResponse: err,
-        resObj: res
-      });
-    });
-  });
-
-  return promise;
-}
-
-// TODO: how to validate?
+// TODO: what should this uid validation achieve?
+// Shouldnt everything be managed over scopes?
 /**
  * Validates an acces token from the token endpoint.
  *
@@ -229,41 +166,86 @@ function rejectRequest(res, status?: number) {
 }
 
 /**
- * Specifies the scopes needed to access this endpoint.
+ * Returns URI to request authorization code with the given parameters.
  *
- * Returns a function that validates the scopes against the
- * user scopes attached to the request.
- *
- * Usage:
- *  route.get('/path', requireScopes['scopeA', 'scopeB'], () => { // Do route work })
- *
- * @param scopes
- * @returns {function(any, any, any): undefined}
+ * @param authorizationEndpoint
+ * @param clientId
+ * @param redirectUri
+ * @returns {string}
  */
-function requireScopes(scopes: string[]) {
-  return function(req, res, next) {
+function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: string,
+                                  redirectUri: string) {
+  return authorizationEndpoint +
+    '?client_id=' + clientId +
+    '&redirect_uri=' + redirectUri +
+    '&response_type=code' +
+    '&realm=' + EMPLOYEES_REALM;
+}
 
-    const userScopes     = new Set<String>(req.scopes || []);
-    const requiredScopes = new Set<String>(scopes || []);
+/**
+ * Returns the access token from the given server.
+ *
+ * @param bodyObject an object of values put in the body
+ * @param authorizationHeaderValue
+ * @param accessTokenEndpoint
+ * @param realm
+ * @returns {Promise<T>|Q.Promise<U>}
+ */
+function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
+                            accessTokenEndpoint: string, realm: string): Promise<string> {
 
-    let userScopesMatchRequiredScopes = true;
+  return fetch(accessTokenEndpoint + '?realm=' + realm, {
+    method: 'POST',
+    body: formurlencoded(bodyObject),
+    headers: {
+      'Authorization': authorizationHeaderValue,
+      'Content-Type': OAUTH_CONTENT_TYPE
+    }
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((json) => {
+      return json.access_token;
+    })
+    .catch((err) => {
+      console.error('Could not get access token from server: ' + accessTokenEndpoint, err);
+    });
+}
 
-    if (userScopes.size !== requiredScopes.size) {
-      userScopesMatchRequiredScopes = false;
-    } else {
-      for (let scope of userScopes) {
-        if (!requiredScopes.has(scope)) {
-          userScopesMatchRequiredScopes = false;
+function getTokenInfo(authServerUrl: NodeURL.Url, accessToken: string,
+                      res): Promise<any> {
+
+  const promise = new Promise(function(resolve, reject) {
+
+    // Get token info from oauth server
+    // and then start validation
+    fetch(NodeURL.format(authServerUrl) + '?access_token=' + accessToken)
+      .then( response => {
+        if (response.status !== 200) {
+          return reject ({
+            status: HttpStatus.UNAUTHORIZED,
+            resObj: res
+          });
+        } else {
+          return response.json();
         }
-      }
-    }
+      })
+      .then((data) => {
+        return resolve({
+          response: res,
+          data: data
+        });
+      })
+      .catch( err => {
+        return reject ({
+          errorResponse: err,
+          resObj: res
+        });
+      });
+  });
 
-    if (userScopesMatchRequiredScopes) {
-      next();
-    } else {
-      rejectRequest(res, 403);
-    }
-  };
+  return promise;
 }
 
 /**
@@ -324,6 +306,44 @@ function getAccessToken(options: any): Promise<string> {
 }
 
 /**
+ * Specifies the scopes needed to access this endpoint.
+ *
+ * Returns a function that validates the scopes against the
+ * user scopes attached to the request.
+ *
+ * Usage:
+ *  route.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], () => { // Do route work })
+ *
+ * @param scopes
+ * @returns {function(any, any, any): undefined}
+ */
+function requireScopesMiddleware(scopes: string[]) {
+  return function(req, res, next) {
+
+    const userScopes     = new Set<String>(req.scopes || []);
+    const requiredScopes = new Set<String>(scopes || []);
+
+    let userScopesMatchRequiredScopes = true;
+
+    if (userScopes.size !== requiredScopes.size) {
+      userScopesMatchRequiredScopes = false;
+    } else {
+      for (let scope of userScopes) {
+        if (!requiredScopes.has(scope)) {
+          userScopesMatchRequiredScopes = false;
+        }
+      }
+    }
+
+    if (userScopesMatchRequiredScopes) {
+      next();
+    } else {
+      rejectRequest(res, HttpStatus.FORBIDDEN);
+    }
+  };
+}
+
+/**
  * Express middleware to extract and validate an access token.
  * Furthermore, it attaches the scopes matched by the token to the request for further usage.
  * If the token is not valid the request is rejected (with 401 Unauthorized).
@@ -333,12 +353,12 @@ function getAccessToken(options: any): Promise<string> {
  *  - tokenInfoEndpoint string
  *
  * Usage:
- * app.use(handleAuthorziationBearer(options))
+ * app.use(handleOAuthRequestMiddleware(options))
  *
  * @param options
  * @returns {function(any, any, any): undefined} express middleware
  */
-function handleAuthorziationBearer(options: any) {
+function handleOAuthRequestMiddleware(options: any) {
 
   return function(req: any, res: any, next: any) {
 
@@ -351,7 +371,7 @@ function handleAuthorziationBearer(options: any) {
     if (!accessToken) {
       rejectRequest(res);
     } else {
-      getTokenInfoFromServer(options.tokenInfoEndpoint, accessToken, res)
+      getTokenInfo(options.tokenInfoEndpoint, accessToken, res)
         .then(validateToken)
         .then(setScopes(req))
         .then(() => {
@@ -365,9 +385,13 @@ function handleAuthorziationBearer(options: any) {
 }
 
 export {
-  handleAuthorziationBearer,
-  requireScopes,
+  handleOAuthRequestMiddleware,
+  requireScopesMiddleware,
+  getTokenInfo,
   getAccessToken,
+  createAuthCodeRequestUri,
   AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT
+  PASSWORD_CREDENTIALS_GRANT,
+  SERVICES_REALM,
+  EMPLOYEES_REALM
 }
