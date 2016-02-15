@@ -2,8 +2,8 @@
   "name": "lib-oauth-tooling",
   "version": "0.4.0",
   "description": "A simple typescript based oauth support library.",
-  "main": ".lib/src/OAuthService.js",
-  "typings": ".lib/src/OAuthService.d.ts",
+  "main": "./lib/src/oauth-tooling.js",
+  "typings": "./lib/src/oauth-tooling.d.ts",
   "private": true,
   "license": "UNLICENSED",
   "directories": {
