@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A simple typescript based oauth tooling library.",
   "main": "./lib/src/oauth-tooling.js",
   "typings": "./lib/src/oauth-tooling.d.ts",

@@ -155,7 +155,7 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @returns {Promise<T>|Q.Promise<U>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string): Promise<string> {
+                            accessTokenEndpoint: string, realm: string): Promise<any> {
 
   return fetch(accessTokenEndpoint + '?realm=' + realm, {
     method: 'POST',
@@ -169,21 +169,29 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
       return res.json();
     })
     .then((json) => {
-      return json.access_token;
+      return { accessToken: json.access_token };
     })
     .catch((err) => {
-      console.error('Could not get access token from server: ' + accessTokenEndpoint, err);
+      return {
+        error: 'Could not get access token from server: ' + err
+      };
     });
 }
 
-function getTokenInfo(authServerUrl: string, accessToken: string,
+/**
+ * Makes a request to the `tokenInfoUrl` to validate the given `accessToken.
+ *
+ * @param tokenInfoUrl
+ * @param accessToken
+ * @param res
+ * @returns {Promise<T>}
+ */
+function getTokenInfo(tokenInfoUrl: string, accessToken: string,
                       res: express.Response): Promise<any> {
 
   const promise = new Promise(function(resolve, reject) {
 
-    // Get token info from oauth server
-    // and then start validation
-    fetch(authServerUrl + '?access_token=' + accessToken)
+    fetch(tokenInfoUrl + '?access_token=' + accessToken)
       .then( response => {
         if (response.status !== 200) {
           return reject ({
@@ -214,7 +222,7 @@ function getTokenInfo(authServerUrl: string, accessToken: string,
 /**
  * Helper function to get an access token for the specified scopes.
  *
- * Currently supports the following OAuth flows (specified by the `grant_type` property):
+ * Currently supports the following OAuth flows (specified by the `grantType` property):
  *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
  *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
  *
@@ -224,12 +232,13 @@ function getTokenInfo(authServerUrl: string, accessToken: string,
  *  - accessTokenEndpoint string
  *  - realm string
  *  - scopes string optional
- *  - redirect_uri string optional
- *  - code string optional
+ *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
+ *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
  *
  * @param scopes
  * @param options
- * @returns {any}
+ * @returns {any} object with property `accessToken` if everything worked fine,
+ *          otherwise object with property `error`containing an error message.
  */
 function getAccessToken(options: any): Promise<string> {
 
@@ -258,9 +267,10 @@ function getAccessToken(options: any): Promise<string> {
   }
 
   return Promise.all([
-    getFileData(options.credentialsDir, USER_JSON), //user data
-    getFileData(options.credentialsDir, CLIENT_JSON)  //client data
-  ]).then((credentials) => {
+    getFileData(options.credentialsDir, USER_JSON),
+    getFileData(options.credentialsDir, CLIENT_JSON)
+  ])
+    .then((credentials) => {
 
       const userData = JSON.parse(credentials[0]);
       const clientData = JSON.parse(credentials[1]);
@@ -280,6 +290,8 @@ function getAccessToken(options: any): Promise<string> {
           'code': options.code,
           'redirect_uri': options.redirectUri
         };
+      } else {
+        throw TypeError('invalid grantType');
       }
 
       const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
@@ -288,7 +300,9 @@ function getAccessToken(options: any): Promise<string> {
         options.accessTokenEndpoint, options.realm);
     })
     .catch((err) => {
-      console.error('Unable to read credentials', err);
+      return {
+        error: err
+      };
     });
 }
 
