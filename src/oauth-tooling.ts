@@ -1,7 +1,6 @@
 'use strict';
 
 import * as express from 'express';
-import * as NodeURL from 'url';
 import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
 import * as q from 'q';
@@ -80,8 +79,8 @@ function header(req: express.Request, field: string) {
  * @param client_secret
  * @returns {string}
  */
-function getBasicAuthHeaderValue(client_id, client_secret) {
-  return AUTHORIZATION_BASIC_PREFIX + ' ' + btoa(client_id + ':' + client_secret);
+function getBasicAuthHeaderValue(clientId: string, clientSecret: string) {
+  return AUTHORIZATION_BASIC_PREFIX + ' ' + btoa(clientId + ':' + clientSecret);
 }
 
 /**
@@ -102,54 +101,18 @@ function extractAccessToken(authHeader: string): string {
   }
 }
 
-// TODO: what should this uid validation achieve?
-// Shouldnt everything be managed over scopes?
 /**
- * Validates an acces token from the token endpoint.
- *
- * Example token:
- * {
- *  "expires_in": 3515,
- *  "token_type": "Bearer",
- *  "realm": "employees",
- *  "scope": [
- *    "uid"
- *   ],
- *  "grant_type": "password",
- *  "uid": "yourusername",
- *  "access_token": "4b70510f-be1d-4f0f-b4cb-edbca2c79d41"
- * }
- *
- * @param response
- * @returns {any}
- */
-function validateToken(response: any) {
-  /*const tokenInfo = response.data;
-  const res = response.cfgobj;
-
-  // uid should match with the resource owner
-  if (tokenInfo.uid !== 'services') {
-    throw {
-      response: res,
-      status: HttpStatus.FORBIDDEN
-    };
-  } else {
-    return response;
-  }*/
-
-  return response;
-}
-
-/**
- * Attach the user scopes on the req object for later validation.
+ * Attach scopes on the req object for later validation.
  *
  * @param req
  * @returns {function(any): undefined}
  */
-function setScopes(req) {
+function setScopes(req: express.Request) {
   return function(response: any) {
     const tokenInfo = response.data;
-    req.scopes = tokenInfo.scope;
+    Object.assign(req, {
+      scopes: tokenInfo.scope
+    });
   };
 }
 
@@ -159,7 +122,7 @@ function setScopes(req) {
  * @param res
  * @param status
  */
-function rejectRequest(res, status?: number) {
+function rejectRequest(res: express.Response, status?: number) {
 
   let _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
@@ -213,14 +176,14 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
     });
 }
 
-function getTokenInfo(authServerUrl: NodeURL.Url, accessToken: string,
-                      res): Promise<any> {
+function getTokenInfo(authServerUrl: string, accessToken: string,
+                      res: express.Response): Promise<any> {
 
   const promise = new Promise(function(resolve, reject) {
 
     // Get token info from oauth server
     // and then start validation
-    fetch(NodeURL.format(authServerUrl) + '?access_token=' + accessToken)
+    fetch(authServerUrl + '?access_token=' + accessToken)
       .then( response => {
         if (response.status !== 200) {
           return reject ({
@@ -270,6 +233,30 @@ function getTokenInfo(authServerUrl: NodeURL.Url, accessToken: string,
  */
 function getAccessToken(options: any): Promise<string> {
 
+  if (!options.credentialsDir) {
+    throw TypeError('credentialsDir must be defined');
+  }
+
+  if (!options.accessTokenEndpoint) {
+    throw TypeError('accessTokenEndpoint must be defined');
+  }
+
+  if (!options.realm) {
+    throw TypeError('realm must be defined');
+  }
+
+  if (!options.grantType) {
+    throw TypeError('grantType must be defined');
+  }
+
+  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.code) {
+    throw TypeError('code must be defined');
+  }
+
+  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
+    throw TypeError('redirectUri must be defined');
+  }
+
   return Promise.all([
     getFileData(options.credentialsDir, USER_JSON), //user data
     getFileData(options.credentialsDir, CLIENT_JSON)  //client data
@@ -280,25 +267,25 @@ function getAccessToken(options: any): Promise<string> {
 
       let bodyParameters;
 
-      if (options.grant_type === PASSWORD_CREDENTIALS_GRANT) {
+      if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
         bodyParameters = {
-          'grant_type': options.grant_type,
+          'grant_type': options.grantType,
           'username': userData.application_username,
           'password': userData.application_password,
-          'scope': options.scopes
+          'scope': options.scopes.join(' ')
         };
-      } else if (options.grant_type === AUTHORIZATION_CODE_GRANT) {
+      } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
         bodyParameters = {
-          'grant_type': options.grant_type,
+          'grant_type': options.grantType,
           'code': options.code,
-          'redirect_uri': options.redirect_uri
+          'redirect_uri': options.redirectUri
         };
       }
 
       const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
       return requestAccessToken(bodyParameters, authorizationHeaderValue,
-        NodeURL.format(options.accessTokenEndpoint), options.realm);
+        options.accessTokenEndpoint, options.realm);
     })
     .catch((err) => {
       console.error('Unable to read credentials', err);
@@ -318,7 +305,7 @@ function getAccessToken(options: any): Promise<string> {
  * @returns {function(any, any, any): undefined}
  */
 function requireScopesMiddleware(scopes: string[]) {
-  return function(req, res, next) {
+  return function(req: any, res: any, next: Function) {
 
     const userScopes     = new Set<String>(req.scopes || []);
     const requiredScopes = new Set<String>(scopes || []);
@@ -360,10 +347,14 @@ function requireScopesMiddleware(scopes: string[]) {
  */
 function handleOAuthRequestMiddleware(options: any) {
 
-  return function(req: any, res: any, next: any) {
+  if (!options.tokenInfoEndpoint) {
+    throw TypeError('tokenInfoEndpoint must be defined');
+  }
+
+  return function(req: any, res: any, next: Function) {
 
     // Skip OAuth validation for paths marked as public
-    if (match(req.originalUrl, options.publicEndpoints)) {
+    if (options.publicEndpoints && match(req.originalUrl, options.publicEndpoints)) {
       return next();
     }
 
@@ -372,7 +363,6 @@ function handleOAuthRequestMiddleware(options: any) {
       rejectRequest(res);
     } else {
       getTokenInfo(options.tokenInfoEndpoint, accessToken, res)
-        .then(validateToken)
         .then(setScopes(req))
         .then(() => {
           next();

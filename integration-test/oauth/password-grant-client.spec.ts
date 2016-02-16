@@ -2,11 +2,13 @@
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as NodeURL from 'url';
 import * as Express from 'express';
 import * as Http from 'http';
 
-import { getAccessToken, PASSWORD_CREDENTIALS_GRANT } from '../../src/oauth-tooling';
+import {
+  getAccessToken,
+  PASSWORD_CREDENTIALS_GRANT,
+  SERVICES_REALM } from '../../src/oauth-tooling';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -50,11 +52,11 @@ describe('getAccessToken', () => {
 
     //when
     let bearer = getAccessToken({
-      realm: 'services',
-      scopes: 'campaing.edit_all campaign.read_all',
-      accessTokenEndpoint: NodeURL.parse('http://127.0.0.1:30001/oauth2/access_token'),
+      realm: SERVICES_REALM,
+      scopes: ['campaing.edit_all', 'campaign.read_all'],
+      accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
       credentialsDir: 'integration-test/data/credentials',
-      grant_type: PASSWORD_CREDENTIALS_GRANT
+      grantType: PASSWORD_CREDENTIALS_GRANT
     })
       .then((token) => {
         return token;
@@ -71,11 +73,11 @@ describe('getAccessToken', () => {
 
     //when
       let bearer = getAccessToken({
-        realm: 'services',
-        scopes: 'campaing.edit_all campaign.read_all',
-        accessTokenEndpoint: NodeURL.parse('http://127.0.0.1:30001/oauth2/access_token'),
+        realm: SERVICES_REALM,
+        scopes: ['campaing.edit_all', 'campaign.read_all'],
+        accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
         credentialsDir: 'integration-test/data/credentials',
-        grant_type: PASSWORD_CREDENTIALS_GRANT
+        grantType: PASSWORD_CREDENTIALS_GRANT
       })
      .then((token) => {
        return token;

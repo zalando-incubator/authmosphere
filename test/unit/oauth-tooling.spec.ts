@@ -5,7 +5,10 @@ import * as chai from 'chai';
 import {
   handleOAuthRequestMiddleware,
   requireScopesMiddleware,
-  createAuthCodeRequestUri } from '../../src/oauth-tooling';
+  getAccessToken,
+  createAuthCodeRequestUri,
+  SERVICES_REALM,
+  AUTHORIZATION_CODE_GRANT } from '../../src/oauth-tooling';
 
 let expect = chai.expect;
 
@@ -24,9 +27,52 @@ describe('oauth tooling', () => {
     };
   });
 
-  it('should throw exception on missing configuration', () => {
+  describe('getAccessToken should throw TypeError', () => {
 
-    // TODO
+    let config = {
+      realm: SERVICES_REALM,
+      accessTokenEndpoint: '/oauth2/access_token',
+      credentialsDir: 'credentials',
+      grantType: AUTHORIZATION_CODE_GRANT,
+      redirectUri: '/some/redirect',
+      code: 'some-code'
+    };
+
+    it('if credentialsDir is not defined', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        credentialsDir: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if accessTokenEndpoint is not defined', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        accessTokenEndpoint: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if grantType is not defined', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        grantType: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if realm is not defined', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        realm: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if redirectUri is not defined (in case of Authorization Code Grant)', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        redirectUri: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if code is not defined (in case of Authorization Code Grant)', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        code: undefined
+      }))).to.throw(TypeError);
+    });
   });
 
   describe('createAuthCodeRequestUri', () => {
@@ -34,9 +80,9 @@ describe('oauth tooling', () => {
     it('should return the correct uri as string', () => {
 
       // given
-      const authorizationEndpoint = 'https://some.end.point';
+      const authorizationEndpoint = '/oauth2/authorize';
       const clientId = 'clientID';
-      const redirectUri = 'https://some.redirect.uri';
+      const redirectUri = '/redirect';
 
       // when
       const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
@@ -73,7 +119,7 @@ describe('oauth tooling', () => {
         expect(responseMock.status).to.equal(403);
       });
 
-    it('should call next() if required scopes are met', () => {
+    it('should call #next if required scopes are met', () => {
 
       // given
       requestMock.scopes = ['uid', 'test'];
@@ -103,8 +149,9 @@ describe('oauth tooling', () => {
 
       // when
       handleOAuthRequestMiddleware({
-        publicEndpoints: [ '/public', '/healthcheck' ]
-      })({ 'originalUrl': '/healthcheck' }, undefined, next);
+        publicEndpoints: [ '/public', '/healthcheck' ],
+        tokenInfoEndpoint: '/oauth2/tokeninfo'
+      })({ 'originalUrl': '/healthcheck' }, responseMock, next);
 
       // then
       expect(called).to.be.true;
@@ -120,7 +167,8 @@ describe('oauth tooling', () => {
 
       // when
       handleOAuthRequestMiddleware({
-        publicEndpoints: [ '/public', '/healthcheck' ]
+        publicEndpoints: [ '/public', '/healthcheck' ],
+        tokenInfoEndpoint: '/oauth2/tokeninfo'
       })({ 'originalUrl': '/privateAPI', headers: {} }, responseMock, next);
 
       // then

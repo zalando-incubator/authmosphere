@@ -2,7 +2,6 @@
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as NodeURL from 'url';
 import * as HttpStatus from 'http-status';
 import * as Express from 'express';
 import * as Http from 'http';
@@ -29,7 +28,7 @@ describe('Integration tests for express middlewares', () => {
 
     app.use(handleOAuthRequestMiddleware({
       publicEndpoints: [ '/public', '/healthcheck' ],
-      tokenInfoEndpoint: NodeURL.parse('http://127.0.0.1:30001/oauth2/tokeninfo')
+      tokenInfoEndpoint: 'http://127.0.0.1:30001/oauth2/tokeninfo'
     }));
 
     app.get('/resource/user', requireScopesMiddleware(['campaign.readall', 'campaign.editall']), function(req, res) {
@@ -118,34 +117,6 @@ describe('Integration tests for express middlewares', () => {
     });
   }
 
-  function addWrongUserEndpoint() {
-
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
-      if (valid) {
-        res
-        .status(200)
-        .send({
-          'expires_in': 3515,
-          'token_type': 'Bearer',
-          'realm': 'employees',
-          'scope': [
-            'campaign.editall',
-            'campaign.readall'
-          ],
-          'grant_type': 'password',
-          'uid': 'Mustermann',
-          'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
-        });
-      } else {
-        res
-          .status(401)
-          .send('Unauthorized');
-      }
-    });
-  }
-
   it('should return 401 if authorization header is not set', function()  {
 
     // given
@@ -188,30 +159,6 @@ describe('Integration tests for express middlewares', () => {
     // given
     let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addAuthenticationEndpointWithoutRequiredScopes();
-
-    // when
-    let promise = fetch('http://127.0.0.1:30002/resource/user', {
-      method: 'GET',
-      headers: {
-        authorization: authHeader
-      }
-    })
-    .then((res) => {
-      return res.status;
-    });
-
-    // then
-    return expect(promise).to.become(HttpStatus.FORBIDDEN);
-  });
-
-
-  // TODO: what should this test achieve?
-  // Shouldnt everything be managed over scopes?
-  it('should return 403 if uid matches not the resource owner \'services\'', () => {
-
-    // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addWrongUserEndpoint();
 
     // when
     let promise = fetch('http://127.0.0.1:30002/resource/user', {
