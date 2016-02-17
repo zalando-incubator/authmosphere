@@ -108,10 +108,9 @@ function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 function setScopes(req: express.Request) {
-  return function(response: any) {
-    const tokenInfo = response.data;
+  return function(data: any) {
     Object.assign(req, {
-      scopes: tokenInfo.scope
+      scopes: data.scope
     });
   };
 }
@@ -157,25 +156,36 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
                             accessTokenEndpoint: string, realm: string): Promise<any> {
 
-  return fetch(accessTokenEndpoint + '?realm=' + realm, {
-    method: 'POST',
-    body: formurlencoded(bodyObject),
-    headers: {
-      'Authorization': authorizationHeaderValue,
-      'Content-Type': OAUTH_CONTENT_TYPE
-    }
-  })
-    .then((res) => {
-      return res.json();
+  const promise = new Promise(function(resolve, reject) {
+
+    fetch(accessTokenEndpoint + '?realm=' + realm, {
+      method: 'POST',
+      body: formurlencoded(bodyObject),
+      headers: {
+        'Authorization': authorizationHeaderValue,
+        'Content-Type': OAUTH_CONTENT_TYPE
+      }
     })
-    .then((json) => {
-      return { accessToken: json.access_token };
-    })
-    .catch((err) => {
-      return {
-        error: 'Could not get access token from server: ' + err
-      };
-    });
+      .then((response) => {
+        if (response.status !== 200) {
+          return reject({
+            error: 'Got ' + response.status + ' from ' + accessTokenEndpoint
+          });
+        } else {
+          return response.json();
+        }
+      })
+      .then((json) => {
+        return resolve({ accessToken: json.access_token });
+      })
+      .catch((err) => {
+        return reject({
+          error: 'Could not get access token from server: ' + err
+        });
+      });
+  });
+
+  return promise;
 }
 
 /**
@@ -186,32 +196,26 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
  * @param res
  * @returns {Promise<T>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string,
-                      res: express.Response): Promise<any> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
 
   const promise = new Promise(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
       .then( response => {
         if (response.status !== 200) {
-          return reject ({
-            status: HttpStatus.UNAUTHORIZED,
-            resObj: res
+          return reject({
+            error: 'Got ' + response.status + ' from ' + tokenInfoUrl
           });
         } else {
           return response.json();
         }
       })
       .then((data) => {
-        return resolve({
-          response: res,
-          data: data
-        });
+        return resolve(data);
       })
       .catch( err => {
         return reject ({
-          errorResponse: err,
-          resObj: res
+          error: err
         });
       });
   });
@@ -288,7 +292,8 @@ function getAccessToken(options: any): Promise<string> {
         bodyParameters = {
           'grant_type': options.grantType,
           'code': options.code,
-          'redirect_uri': options.redirectUri
+          'redirect_uri': options.redirectUri,
+          'scope': options.scopes.join(' ')
         };
       } else {
         throw TypeError('invalid grantType');
@@ -376,7 +381,7 @@ function handleOAuthRequestMiddleware(options: any) {
     if (!accessToken) {
       rejectRequest(res);
     } else {
-      getTokenInfo(options.tokenInfoEndpoint, accessToken, res)
+      getTokenInfo(options.tokenInfoEndpoint, accessToken)
         .then(setScopes(req))
         .then(() => {
           next();
