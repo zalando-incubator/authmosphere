@@ -44,7 +44,9 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
 }
 
 /**
- * Returns the access token from the given server.
+ * Makes a request to the `accessTokenEndpoint` with the given parameters.
+ * Resolves with object containing property `accessToken` with the access token
+ * (in case of success). Otherwise, rejects with error message.
  *
  * @param bodyObject an object of values put in the body
  * @param authorizationHeaderValue
@@ -67,9 +69,7 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
     })
       .then((response) => {
         if (response.status !== HttpStatus.OK) {
-          return reject({
-            error: 'Got ' + response.status + ' from ' + accessTokenEndpoint
-          });
+          return reject('Got ' + response.status + ' from ' + accessTokenEndpoint);
         } else {
           return response.json();
         }
@@ -86,11 +86,12 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
 }
 
 /**
- * Makes a request to the `tokenInfoUrl` to validate the given `accessToken.
+ * Makes a request to the `tokenInfoUrl` to validate the given `accessToken`.
+ * Resolves with an object containing access token information in case of success.
+ * Otherwise, rejects with an error message.
  *
  * @param tokenInfoUrl
  * @param accessToken
- * @param res
  * @returns {Promise<T>}
  */
 function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
@@ -100,9 +101,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
       .then( response => {
         if (response.status !== HttpStatus.OK) {
-          return reject({
-            error: 'Got ' + response.status + ' from ' + tokenInfoUrl
-          });
+          return reject('Got ' + response.status + ' from ' + tokenInfoUrl);
         } else {
           return response.json();
         }
@@ -111,7 +110,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
         return resolve(data);
       })
       .catch( err => {
-        return reject(err);
+        return reject('Could not get tokeninfo from server: ' + err);
       });
   });
 
@@ -120,24 +119,27 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
 
 /**
  * Helper function to get an access token for the specified scopes.
+ * Reads client and user credentials (to build a valid authorization header) and makes a
+ * request to the `accessTokenEndpoint`.
+ *
+ * Resolves with object containing property `accessToken` with the access token
+ * (in case of success). Otherwise, rejects with error message.
  *
  * Currently supports the following OAuth flows (specified by the `grantType` property):
  *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
  *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
  *
- *  The options object can have the following properties:
+ *  The `options` object can have the following properties:
  *  - credentialsDir string
- *  - grant_type string
+ *  - grantType string
  *  - accessTokenEndpoint string
  *  - realm string
  *  - scopes string optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
  *
- * @param scopes
  * @param options
- * @returns {any} object with property `accessToken` if everything worked fine,
- *          otherwise object with property `error`containing an error message.
+ * @returns {Promise<T>}
  */
 function getAccessToken(options: any): Promise<string> {
 
@@ -180,13 +182,12 @@ function getAccessToken(options: any): Promise<string> {
 }
 
 /**
- * Specifies the scopes needed to access this endpoint.
- *
- * Returns a function that validates the scopes against the
- * user scopes attached to the request.
+ * Returns a function (middleware) that validates the scopes against the user scopes
+ * attached to the request (for example by `handleOAuthRequestMiddleware`).
+ * If the the requested scopes are not matched request is rejected (with 403 Forbidden).
  *
  * Usage:
- *  route.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], () => { // Do route work })
+ *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
  *
  * @param scopes
  * @returns {function(any, any, any): undefined}
@@ -211,8 +212,8 @@ function requireScopesMiddleware(scopes: string[]) {
 }
 
 /**
- * Express middleware to extract and validate an access token.
- * Furthermore, it attaches the scopes matched by the token to the request for further usage.
+ * Returns a function (middleware) to extract and validate an access token from a request.
+ * Furthermore, it attaches the scopes granted by the token to the request for further usage.
  * If the token is not valid the request is rejected (with 401 Unauthorized).
  *
  * The options object can have the following properties:

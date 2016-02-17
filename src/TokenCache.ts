@@ -13,11 +13,36 @@ const EXPIRE_THRESHOLD = 60 * 1000;
 
 /**
  * Class to request and cache tokens on client-side.
+ *
+ * Usage:
+ *  let tokenCache = new TokenCache({
+ *    'nucleus': ['write.all', 'read.all']
+ *  }, oAuthConfig);
+ *
+ *  tokenCache.get('nucleus')
+ *    .then((tokeninfo) => {
+ *      console.log(tokeninfo.access_token);
+ *    });
+ *
  */
 class TokenCache {
 
   private _tokens: any = {};
 
+  /**
+   * `oauthConfig`:
+   * `credentialsDir` string
+   * `grantType` string
+   * `accessTokenEndpoint` string
+   * `tokenInfoEndpoint` string
+   * `realm` string
+   * `scopes` string optional
+   * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
+   * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
+   *
+   * @param tokenConfig
+   * @param oauthConfig
+   */
   constructor(private tokenConfig: any, private oauthConfig: any) {
 
     validateOAuthConfig(oauthConfig);
@@ -29,7 +54,7 @@ class TokenCache {
 
   /**
    * Resolves with either a cached token for the given name or with a newly requested one (which is then cached).
-   * Rejects if there is no token present and was not able to request a new one.
+   * Rejects if there is no token present and is not able to request a new one.
    *
    * @param tokenName
    * @returns {Promise<T>}
