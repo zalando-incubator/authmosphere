@@ -8,8 +8,8 @@ import * as Http from 'http';
 import * as fetch from 'node-fetch';
 
 import {
-  handleOAuthRequestMiddleware,
-  PASSWORD_CREDENTIALS_GRANT
+  PASSWORD_CREDENTIALS_GRANT,
+  getTokenInfo
 } from '../../src/oauth-tooling';
 
 chai.use(chaiAsPromised);
@@ -18,20 +18,7 @@ const expect = chai.expect;
 describe('Integration tests for getTokenInfo', () => {
 
   let authenticationServer: Http.Server;
-  let resourceServer: Http.Server;
   let authServerApp: Express.Application;
-
-  // Setup API server
-  beforeEach(() => {
-    let app = Express();
-
-    app.use(handleOAuthRequestMiddleware({
-      publicEndpoints: [ '/public', '/healthcheck' ],
-      tokenInfoEndpoint: 'http://127.0.0.1:30001/oauth2/tokeninfo'
-    }));
-
-    resourceServer = app.listen(30002);
-  });
 
   // Setup AuthServer
   beforeEach(() => {
@@ -41,7 +28,6 @@ describe('Integration tests for getTokenInfo', () => {
 
   // stop server after test
   afterEach(() => {
-    resourceServer.close();
     authenticationServer.close();
   });
 
@@ -83,13 +69,8 @@ describe('Integration tests for getTokenInfo', () => {
     addStandardAuthenticationEndpoint();
 
     // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo?access_token=' + authToken;
-    let promise = fetch(url, {
-      method: 'GET'
-    })
-    .then((res: any) => {
-      return res.json();
-    })
+    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
+    let promise = getTokenInfo(url, authToken)
     .then((jsonData) => {
       return jsonData;
     });
@@ -109,13 +90,8 @@ describe('Integration tests for getTokenInfo', () => {
     addStandardAuthenticationEndpoint();
 
     // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo?access_token=' + authToken;
-    let promise = fetch(url, {
-      method: 'GET'
-    })
-    .then((res: any) => {
-      return res.json();
-    })
+    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
+    let promise = getTokenInfo(url, authToken)
     .then((jsonData) => {
       return jsonData;
     });
