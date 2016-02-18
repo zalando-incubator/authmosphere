@@ -11,6 +11,7 @@
     "lib": "lib"
   },
   "dependencies": {
+    "body-parser": "^1.14.2",
     "btoa": "^1.1.2",
     "form-urlencoded": "^1.2.0",
     "http-status": "^0.2.0",

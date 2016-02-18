@@ -42,6 +42,7 @@
   },
   "files": [
     "src/oauth-tooling.ts",
+    "typings/body-parser/body-parser.d.ts",
     "typings/btoa/btoa.d.ts",
     "typings/chai-as-promised/chai-as-promised.d.ts",
     "typings/chai/chai.d.ts",
