@@ -82,9 +82,12 @@ describe('Integration tests for getAccessToken', () => {
 
     it('should become the access token', function() {
 
+<<<<<<< HEAD
       //given
       setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
 
+=======
+>>>>>>> 2a8ecc9b76fb1ebb1f0df31a6dfec17545eb80d0
     //when
     let promise = getAccessToken(getAccessTokenOptions);
     //then
@@ -92,6 +95,7 @@ describe('Integration tests for getAccessToken', () => {
   });
 
   it('should be rejected if authorization header is invalid', function() {
+<<<<<<< HEAD
 
       //given
       setupTestEnvironment('invalid', authServerApp);
@@ -104,11 +108,14 @@ describe('Integration tests for getAccessToken', () => {
     });
 
     it('should be jrected if credentials can not be read', function() {
+=======
+>>>>>>> 2a8ecc9b76fb1ebb1f0df31a6dfec17545eb80d0
 
     //given
     setupTestEnvironment('invalid', authServerApp);
 
     //when
+<<<<<<< HEAD
     let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
         credentialsDir: 'integration-test/data/not-existing'
     }));
@@ -143,6 +150,9 @@ describe('Integration tests for getAccessToken', () => {
         .then((data) => {
           return data;
         });
+=======
+    let promise = getAccessToken(getAccessTokenOptions);
+>>>>>>> 2a8ecc9b76fb1ebb1f0df31a6dfec17545eb80d0
 
       //then
       return expect(bearer).to.become({ access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
@@ -160,6 +170,10 @@ describe('Integration tests for getAccessToken', () => {
     return expect(promise).to.be.rejected;
   });
 
+<<<<<<< HEAD
+=======
+  it('should be jrected if credentials can not be read', function() {
+>>>>>>> 2a8ecc9b76fb1ebb1f0df31a6dfec17545eb80d0
 
     it('should return error message if credentials can not be read', function() {
 
@@ -167,7 +181,11 @@ describe('Integration tests for getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
     //when
+<<<<<<< HEAD
     let promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
+=======
+    let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
+>>>>>>> 2a8ecc9b76fb1ebb1f0df31a6dfec17545eb80d0
         credentialsDir: 'integration-test/data/not-existing'
     }));
 
