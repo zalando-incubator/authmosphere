@@ -64,44 +64,34 @@ describe('getAccessToken', () => {
     setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
 
     //when
-    let bearer = getAccessToken(getAccessTokenOptions)
-      .then((data) => {
-        return data;
-      });
-
+    let promise = getAccessToken(getAccessTokenOptions);
     //then
-    return expect(bearer).to.become({ accessToken: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
+    return expect(promise).to.become({ access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
   });
 
-  it('should return error message if authorization header is invalid', function() {
+  it('should be rejected if authorization header is invalid', function() {
 
     //given
     setupTestEnvironment('invalid', authServerApp);
 
     //when
-      let bearer = getAccessToken(getAccessTokenOptions)
-        .then((data) => {
-          return data;
-        });
+    let promise = getAccessToken(getAccessTokenOptions);
 
     //then
-    return expect(bearer).to.eventually.haveOwnProperty('error')
+    return expect(promise).to.be.rejected;
   });
 
-  it('should return error message if credentials can not be read', function() {
+  it('should be jrected if credentials can not be read', function() {
 
     //given
     setupTestEnvironment('invalid', authServerApp);
 
     //when
-    let bearer = getAccessToken(Object.assign({}, getAccessTokenOptions, {
+    let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
         credentialsDir: 'integration-test/data/not-existing'
-    }))
-      .then((data) => {
-        return data;
-      });
+    }));
 
     //then
-    return expect(bearer).to.eventually.haveOwnProperty('error')
+    return expect(promise).to.be.rejected;
   });
 });

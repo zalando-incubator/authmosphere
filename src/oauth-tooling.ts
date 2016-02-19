@@ -175,13 +175,11 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
           return response.json();
         }
       })
-      .then((json) => {
-        return resolve({ accessToken: json.access_token });
+      .then((data) => {
+        return resolve(data);
       })
       .catch((err) => {
-        return reject({
-          error: 'Could not get access token from server: ' + err
-        });
+        return reject('Could not get access token from server: ' + err);
       });
   });
 
@@ -214,9 +212,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
         return resolve(data);
       })
       .catch( err => {
-        return reject ({
-          error: err
-        });
+        return reject(err);
       });
   });
 
@@ -303,11 +299,6 @@ function getAccessToken(options: any): Promise<string> {
 
       return requestAccessToken(bodyParameters, authorizationHeaderValue,
         options.accessTokenEndpoint, options.realm);
-    })
-    .catch((err) => {
-      return {
-        error: err
-      };
     });
 }
 
