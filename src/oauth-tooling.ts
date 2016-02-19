@@ -167,7 +167,7 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
       }
     })
       .then((response) => {
-        if (response.status !== 200) {
+        if (response.status !== HttpStatus.OK) {
           return reject({
             error: 'Got ' + response.status + ' from ' + accessTokenEndpoint
           });
@@ -200,7 +200,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
       .then( response => {
-        if (response.status !== 200) {
+        if (response.status !== HttpStatus.OK) {
           return reject({
             error: 'Got ' + response.status + ' from ' + tokenInfoUrl
           });
