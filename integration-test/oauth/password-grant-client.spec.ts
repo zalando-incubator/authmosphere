@@ -19,25 +19,25 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 // Setup API server
-function setupTestEnvironment(authHeader: string, authServerApp: Express.Application) {
-  authServerApp.use(bodyParser.urlencoded({ extended: true }));
+function setupTestEnvironment(authHeader:string, authServerApp:Express.Application) {
+  authServerApp.use(bodyParser.urlencoded({extended: true}));
   authServerApp.post('/oauth2/access_token', function(req, res) {
-    if(req.body.grant_type === PASSWORD_CREDENTIALS_GRANT){
+    if (req.body.grant_type === PASSWORD_CREDENTIALS_GRANT) {
       let valid = req.headers['authorization'] === authHeader;
       if (valid) {
         res
           .status(200)
-          .send({ 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
+          .send({'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
       } else {
         res
           .status(401)
           .send('Unauthorized');
       }
     } else {
-      if(req.body.code && req.body.redirect_uri && req.headers['authorization'] === authHeader){
+      if (req.body.code && req.body.redirect_uri && req.headers['authorization'] === authHeader) {
         res
           .status(200)
-          .send({ 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' })
+          .send({'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'})
       } else {
         res
           .status(401)
@@ -50,8 +50,8 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
 
 describe('Integration tests for getAccessToken', () => {
 
-  let authenticationServer: Http.Server;
-  let authServerApp: Express.Application;
+  let authenticationServer:Http.Server;
+  let authServerApp:Express.Application;
 
   let getAccessTokenOptions;
 
@@ -71,7 +71,7 @@ describe('Integration tests for getAccessToken', () => {
   describe('password oAuth flow', () => {
     let getAccessTokenOptions
     before(() => {
-       getAccessTokenOptions = {
+      getAccessTokenOptions = {
         realm: SERVICES_REALM,
         scopes: ['campaing.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
@@ -85,13 +85,13 @@ describe('Integration tests for getAccessToken', () => {
       //given
       setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
 
-    //when
-    let promise = getAccessToken(getAccessTokenOptions);
-    //then
-    return expect(promise).to.become({ access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
-  });
+      //when
+      let promise = getAccessToken(getAccessTokenOptions);
+      //then
+      return expect(promise).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
+    });
 
-  it('should be rejected if authorization header is invalid', function() {
+    it('should be rejected if authorization header is invalid', function() {
 
       //given
       setupTestEnvironment('invalid', authServerApp);
@@ -105,24 +105,24 @@ describe('Integration tests for getAccessToken', () => {
 
     it('should be jrected if credentials can not be read', function() {
 
-    //given
-    setupTestEnvironment('invalid', authServerApp);
+      //given
+      setupTestEnvironment('invalid', authServerApp);
 
-    //when
-    let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
+      //when
+      let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
         credentialsDir: 'integration-test/data/not-existing'
-    }));
+      }));
 
-    //then
-    return expect(promise).to.be.rejected;
+      //then
+      return expect(promise).to.be.rejected;
+    });
+
   });
-
-});
 
   describe('authorization_code oAuth flow', () => {
     let getAccessTokenOptionsAuthorization;
     before(() => {
-       getAccessTokenOptionsAuthorization = {
+      getAccessTokenOptionsAuthorization = {
         realm: SERVICES_REALM,
         scopes: ['campaing.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
@@ -145,7 +145,7 @@ describe('Integration tests for getAccessToken', () => {
         });
 
       //then
-      return expect(bearer).to.become({ access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' });
+      return expect(bearer).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
     });
 
     it('should return error message if authorization header is invalid', function() {
@@ -153,27 +153,27 @@ describe('Integration tests for getAccessToken', () => {
       //given
       setupTestEnvironment('invalid', authServerApp);
 
-    //when
-    let promise = getAccessToken(getAccessTokenOptionsAuthorization);
+      //when
+      let promise = getAccessToken(getAccessTokenOptionsAuthorization);
 
-    //then
-    return expect(promise).to.be.rejected;
-  });
+      //then
+      return expect(promise).to.be.rejected;
+    });
 
-  it('should be rejected if credentials can not be read', function() {
+    it('should be rejected if credentials can not be read', function() {
 
       //given
       setupTestEnvironment('invalid', authServerApp);
 
-    //when
-    let promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
+      //when
+      let promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
         credentialsDir: 'integration-test/data/not-existing'
-    }));
+      }));
 
-    //then
-    return expect(promise).to.be.rejected;
+      //then
+      return expect(promise).to.be.rejected;
+    });
+
   });
-
-});
 
 });
