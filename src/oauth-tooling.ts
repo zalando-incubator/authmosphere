@@ -320,19 +320,13 @@ function requireScopesMiddleware(scopes: string[]) {
     const userScopes     = new Set<String>(req.scopes || []);
     const requiredScopes = new Set<String>(scopes || []);
 
-    let userScopesMatchRequiredScopes = true;
+    let scopesCopy = new Set<String>(scopes || []);
 
-    if (userScopes.size !== requiredScopes.size) {
-      userScopesMatchRequiredScopes = false;
-    } else {
-      for (let scope of userScopes) {
-        if (!requiredScopes.has(scope)) {
-          userScopesMatchRequiredScopes = false;
-        }
-      }
+    for (let scope of userScopes) {
+      scopesCopy.delete(scope);
     }
 
-    if (userScopesMatchRequiredScopes) {
+    if (scopesCopy.size === 0) {
       next();
     } else {
       rejectRequest(res, HttpStatus.FORBIDDEN);

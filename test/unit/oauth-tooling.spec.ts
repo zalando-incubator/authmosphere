@@ -135,6 +135,23 @@ describe('oauth tooling', () => {
       // then
       expect(called).to.be.true;
     });
+
+    it('should call #next also if user has a superset of the required scopes', () => {
+
+      // given
+      requestMock.scopes = ['uid', 'test', 'additionalScope'];
+      const requiredScopes = ['uid', 'test'];
+      let called = false;
+      let next = () => {
+        called = true;
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+
+      // then
+      expect(called).to.be.true;
+    });
   });
 
   describe('handleOAuthRequestMiddleware', () => {
