@@ -11,7 +11,7 @@ import {
   handleOAuthRequestMiddleware,
   requireScopesMiddleware,
   PASSWORD_CREDENTIALS_GRANT
-} from '../../src/oauth-tooling';
+} from '../../src/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

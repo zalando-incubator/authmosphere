@@ -40,6 +40,9 @@
     },
     "whatwg-fetch/whatwg-fetch.d.ts": {
       "commit": "bcd5761826eb567876c197ccc6a87c4d05731054"
+    },
+    "nock/nock.d.ts": {
+      "commit": "dade4414712ce84e3c63393f1aae407e9e7e6af7"
     }
   }
 }

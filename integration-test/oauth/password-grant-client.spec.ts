@@ -12,7 +12,7 @@ import {
   PASSWORD_CREDENTIALS_GRANT,
   AUTHORIZATION_CODE_GRANT,
   SERVICES_REALM
-} from '../../src/oauth-tooling';
+} from '../../src/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

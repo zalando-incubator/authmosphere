@@ -1,15 +1,20 @@
 'use strict';
 
 import * as chai from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 
 import {
+  TokenCache,
   handleOAuthRequestMiddleware,
   requireScopesMiddleware,
   getAccessToken,
   createAuthCodeRequestUri,
   SERVICES_REALM,
-  AUTHORIZATION_CODE_GRANT } from '../../src/oauth-tooling';
+  AUTHORIZATION_CODE_GRANT,
+  PASSWORD_CREDENTIALS_GRANT
+} from '../../src/index';
 
+chai.use(chaiAsPromised);
 let expect = chai.expect;
 
 describe('oauth tooling', () => {
@@ -190,6 +195,37 @@ describe('oauth tooling', () => {
 
       // then
       expect(called).to.be.false;
+    });
+  });
+
+  describe('TokenCache', () => {
+
+    it('should throw if tokenInfoEndpoint is not specified', () => {
+
+      expect(() => {
+        return new TokenCache({
+          'foo': ['uid']
+        }, {
+          realm: SERVICES_REALM,
+          accessTokenEndpoint: '/access_token',
+          credentialsDir: '/credentials',
+          grantType: PASSWORD_CREDENTIALS_GRANT
+        });
+      }).to.throw(TypeError);
+    });
+
+    it('should throw an error if it tries to request a token with an invalid name', () => {
+
+      let tokenCache = new TokenCache({
+        'foo': ['uid']
+      }, {
+        realm: SERVICES_REALM,
+        accessTokenEndpoint: '/access_token',
+        tokenInfoEndpoint: '/tokeninfo',
+        credentialsDir: '/credentials',
+        grantType: PASSWORD_CREDENTIALS_GRANT
+      });
+      return expect(tokenCache.get('bar')).to.be.rejected;
     });
   });
 });

@@ -1,9 +1,9 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "A simple typescript based oauth tooling library.",
-  "main": "./lib/src/oauth-tooling.js",
-  "typings": "./lib/src/oauth-tooling.d.ts",
+  "main": "./lib/src/",
+  "typings": "./lib/src/",
   "private": true,
   "license": "UNLICENSED",
   "directories": {
@@ -23,6 +23,7 @@
     "chai": "^3.4.1",
     "chai-as-promised": "^5.1.0",
     "express": "^4.13.3",
+    "nock": "^7.2.2",
     "tslint": "^3.3.0"
   },
   "scripts": {

@@ -2,15 +2,13 @@
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as HttpStatus from 'http-status';
 import * as Express from 'express';
 import * as Http from 'http';
-import * as fetch from 'node-fetch';
 
 import {
   PASSWORD_CREDENTIALS_GRANT,
   getTokenInfo
-} from '../../src/oauth-tooling';
+} from '../../src/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -57,7 +55,7 @@ describe('Integration tests for getTokenInfo', () => {
           .send({
             'error': 'invalid_request',
             'error_description': 'Access Token not valid'
-          })
+          });
       }
     });
   }
@@ -65,7 +63,7 @@ describe('Integration tests for getTokenInfo', () => {
   it('should return error if token is not valid', () => {
 
     // given
-    let authToken = 'invalid'
+    let authToken = 'invalid';
     addStandardAuthenticationEndpoint();
 
     // when
@@ -86,7 +84,7 @@ describe('Integration tests for getTokenInfo', () => {
   it('should return the token info if token is valid', function() {
 
     // given
-    let authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
+    let authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addStandardAuthenticationEndpoint();
 
     // when
