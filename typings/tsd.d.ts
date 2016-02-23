@@ -10,3 +10,4 @@
 /// <reference path="promises-a-plus/promises-a-plus.d.ts" />
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="whatwg-fetch/whatwg-fetch.d.ts" />
+/// <reference path="nock/nock.d.ts" />

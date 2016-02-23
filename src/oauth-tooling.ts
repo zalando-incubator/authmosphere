@@ -1,131 +1,30 @@
 'use strict';
 
-import * as express from 'express';
 import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
-import * as q from 'q';
-import * as fs from 'fs';
-import * as btoa from 'btoa';
 import * as formurlencoded from 'form-urlencoded';
 
+import {
+  getFileData,
+  getBasicAuthHeaderValue,
+  match,
+  setScopes,
+  getHeaderValue,
+  rejectRequest,
+  extractAccessToken,
+  validateOAuthConfig
+} from './utils';
+
+import {
+  EMPLOYEES_REALM,
+  AUTHORIZATION_CODE_GRANT,
+  PASSWORD_CREDENTIALS_GRANT
+} from './constants';
+
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
-const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
-const AUTHORIZATION_BASIC_PREFIX = 'Basic';
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
 const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
-
-const AUTHORIZATION_CODE_GRANT = 'authorization_code';
-const PASSWORD_CREDENTIALS_GRANT = 'password';
-const SERVICES_REALM = 'services';
-const EMPLOYEES_REALM = 'employees';
-
-const fsReadFile = q.denodeify<any>(fs.readFile);
-
-/**
- * Returns a promise containing the file content as json object.
- *
- * @param filePath
- * @param fileName
- * @returns {Promise<any>}
- */
-function getFileData(filePath: string, fileName: string): q.Promise<any> {
-  if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
-    filePath += '/';
-  }
-
-  return fsReadFile(filePath + fileName, 'utf-8');
-}
-
-/**
- * Checks whether a given url matches one of a set of given patterns.
- *
- * @param url
- * @param patterns
- * @returns {boolean}
- */
-function match(url: string, patterns: Set<string>): boolean {
-
-  let isPatternMatch: boolean = false;
-
-  patterns.forEach((pattern) => {
-    if (url.startsWith(pattern)) {
-      isPatternMatch = true;
-    }
-  });
-
-  return isPatternMatch;
-}
-
-/**
- * Returns the value of a specified header field from a request
- *
- * @param req
- * @param field The name of the field to return
- * @returns {string} The value of the header field
- */
-function header(req: express.Request, field: string) {
-  if (req && field && req.headers.hasOwnProperty(field)) {
-    return req.headers[field];
-  } else {
-    return '';
-  }
-}
-
-/**
- * Returns a basic authentication header value with the given credentials
- *
- * @param client_id
- * @param client_secret
- * @returns {string}
- */
-function getBasicAuthHeaderValue(clientId: string, clientSecret: string) {
-  return AUTHORIZATION_BASIC_PREFIX + ' ' + btoa(clientId + ':' + clientSecret);
-}
-
-/**
- * Extracts and returns an access_token from an authorization header
- *
- * @param authHeader
- * @returns {any}
- */
-function extractAccessToken(authHeader: string): string {
-
-  const parts = authHeader.split(' ');
-
-  // if type is bearer
-  if (parts[0] === AUTHORIZATION_BEARER_PREFIX && parts.length === 2) {
-    return parts[1];
-  } else {
-    return undefined;
-  }
-}
-
-/**
- * Attach scopes on the req object for later validation.
- *
- * @param req
- * @returns {function(any): undefined}
- */
-function setScopes(req: express.Request) {
-  return function(data: any) {
-    Object.assign(req, {
-      scopes: data.scope
-    });
-  };
-}
-
-/**
- * Reject a request with 401 or the given status code.
- *
- * @param res
- * @param status
- */
-function rejectRequest(res: express.Response, status?: number) {
-
-  let _status = status ? status : HttpStatus.UNAUTHORIZED;
-  res.sendStatus(_status);
-}
 
 /**
  * Returns URI to request authorization code with the given parameters.
@@ -242,29 +141,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  */
 function getAccessToken(options: any): Promise<string> {
 
-  if (!options.credentialsDir) {
-    throw TypeError('credentialsDir must be defined');
-  }
-
-  if (!options.accessTokenEndpoint) {
-    throw TypeError('accessTokenEndpoint must be defined');
-  }
-
-  if (!options.realm) {
-    throw TypeError('realm must be defined');
-  }
-
-  if (!options.grantType) {
-    throw TypeError('grantType must be defined');
-  }
-
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.code) {
-    throw TypeError('code must be defined');
-  }
-
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
-    throw TypeError('redirectUri must be defined');
-  }
+  validateOAuthConfig(options);
 
   return Promise.all([
     getFileData(options.credentialsDir, USER_JSON),
@@ -318,7 +195,6 @@ function requireScopesMiddleware(scopes: string[]) {
   return function(req: any, res: any, next: Function) {
 
     const userScopes     = new Set<String>(req.scopes || []);
-    const requiredScopes = new Set<String>(scopes || []);
 
     let scopesCopy = new Set<String>(scopes || []);
 
@@ -362,7 +238,7 @@ function handleOAuthRequestMiddleware(options: any) {
       return next();
     }
 
-    const accessToken = extractAccessToken(header(req, AUTHORIZATION_HEADER_FIELD_NAME));
+    const accessToken = extractAccessToken(getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME));
     if (!accessToken) {
       rejectRequest(res);
     } else {
@@ -383,9 +259,5 @@ export {
   requireScopesMiddleware,
   getTokenInfo,
   getAccessToken,
-  createAuthCodeRequestUri,
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  SERVICES_REALM,
-  EMPLOYEES_REALM
+  createAuthCodeRequestUri
 }
