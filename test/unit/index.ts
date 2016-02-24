@@ -10,6 +10,7 @@ import {
   getAccessToken,
   createAuthCodeRequestUri,
   SERVICES_REALM,
+  EMPLOYEES_REALM,
   AUTHORIZATION_CODE_GRANT,
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
@@ -98,7 +99,7 @@ describe('oauth tooling', () => {
         '?client_id=' + clientId +
         '&redirect_uri=' + redirectUri +
         '&response_type=code' +
-        '&realm=employees';
+        '&realm=' + EMPLOYEES_REALM;
 
       expect(result).to.equal(expected);
     });
