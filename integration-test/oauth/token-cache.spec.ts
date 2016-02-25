@@ -52,7 +52,7 @@ describe('token service', () => {
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
     nock(oauthHost)
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: accessToken
       })
@@ -89,7 +89,7 @@ describe('token service', () => {
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
     nock(oauthHost)
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: accessToken
       })
@@ -131,7 +131,7 @@ describe('token service', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: firstAccessToken
       })
@@ -146,7 +146,7 @@ describe('token service', () => {
         'uid': 'uid',
         'access_token': firstAccessToken
       })
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: secondAccessToken
       })
@@ -188,7 +188,7 @@ describe('token service', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: firstAccessToken
       })
@@ -202,7 +202,7 @@ describe('token service', () => {
         'uid': 'uid',
         'access_token': firstAccessToken
       })
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: secondAccessToken
       })
@@ -244,7 +244,7 @@ describe('token service', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: firstAccessToken
       })
@@ -258,7 +258,7 @@ describe('token service', () => {
         'uid': 'uid',
         'access_token': firstAccessToken
       })
-      .post('/access_token?realm=services')
+      .post('/access_token?realm=/services')
       .reply(HttpStatus.OK, {
         access_token: secondAccessToken
       })
