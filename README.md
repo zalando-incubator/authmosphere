@@ -14,18 +14,21 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 Run `npm install --save git+ssh://git@github.bus.zalan.do:graviton/lib-oauth-tooling.git#TAG/COMMIT` where `TAG/COMMIT` has to be replaced with the release tag or commit id you want to use.
 Import a member of this lib like so (of course ES5 syntax is working as well...):
-```
+
+```typescript
 import {
     TokenCache,
     handleOAuthRequestMiddleware,
     requireScopesMiddleware,
     ...
-} from 'oauth-lib-tooling';
+} from 'lib-oauth-tooling';
 ```
 
 #### TokenCache(tokenConfig: any, oauthConfig: any)
-Class to request and cache tokens on client-side. 
-```
+
+Class to request and cache tokens on client-side.
+
+```typescript
 let tokenCache = new TokenCache({
   'service-foo': ['foo.read', 'foo.write'],
   'service-bar': ['bar.read']
@@ -36,42 +39,50 @@ tokenCache.get('your-app-name')
     console.log(tokeninfo.access_token);
   });
 ```
+
 `oauthConfig`:
 * `credentialsDir` string
-* `grantType` string
+* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
 * `tokenInfoEndpoint` string
-* `realm` string
+* `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 
 #### handleOAuthRequestMiddleware(options: any)
+
 Express middleware to extract and validate an access token. It attaches the scopes matched by the token to the request (`request.scopes`) for further usage.
 If the token is not valid the request is rejected (with 401 Unauthorized).
-```
+
+```typescript
 app.use(handleOAuthRequestMiddleware({
     publicEndpoints: ['/heartbeat', '/status'],
     tokenInfoEndpoint: 'auth.example.com/tokeninfo'
 });
 ```
+
 `options`:
 * `publicEndpoints` string[]
 * `tokenInfoEndpoint` string
 
 
 #### requireScopesMiddleware(scopes: string[])
+
 Specifies the scopes needed to access an endpoint. Assumes that there is an `req.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
 If the the requested scopes are not matched request is rejected (with 403 Forbidden).
-```
+
+```typescript
 app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (req, res) => {
     // do your work...
 })
 ```
 
 #### getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any>
+
 Makes a request to the `tokenInfoUrl` to validate the given `accessToken`.
-```
+
+```typescript
 getTokenInfo(tokenInfoUrl, accessToken)
   .then((tokeninfo) => {
     console.log(tokeninfo.access_token);
@@ -82,8 +93,10 @@ getTokenInfo(tokenInfoUrl, accessToken)
 ```
 
 #### getAccessToken(options: any)
+
 Helper function to get an access token for the specified scopes.
-```
+
+```typescript
 getAccessToken(options)
   .then((accessToken) => {
     console.log(accessToken);
@@ -92,25 +105,30 @@ getAccessToken(options)
     console.log(err);
   });
 ```
+
 `options`:
 * `credentialsDir` string
-* `grantType` string
+* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
-* `realm` string
+* `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 
 #### AUTHORIZATION_CODE_GRANT
+
 String constant specifying the Authorization Code Grant type.
 
 #### PASSWORD_CREDENTIALS_GRANT
+
 String constant specifying the Resource Owner Password Credentials Grant type.
 
 #### SERVICES_REALM
+
 String constant specifying the services realm.
 
 #### EMPLOYEES_REALM
+
 String constant specifying the employees realm.
 
 
@@ -131,3 +149,12 @@ Both commands require a global installed mocha (`npm install -g mocha`) and ts-n
 * `node-inspector &`
 * open in chrome http://127.0.0.1:8080/debug?port=5858
   * enjoy debugging
+
+## Create a new version
+
+* [ ] `tsc` - compile
+* [ ] run the following npm scripts (`npm run scriotName`) to lint and test: `tslint`, `test`, `integration-test`
+* [ ] if no errors occur, increase version in `package.json`
+* [ ] `git commit -m "increase version"`
+* [ ] `git tag -a x.y.z -m "Message(optional) Tagged x.y.z"` (use [semantic versioning](http://semver.org/))
+* [ ] `git push origin `
