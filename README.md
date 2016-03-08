@@ -34,7 +34,7 @@ let tokenCache = new TokenCache({
   'service-bar': ['bar.read']
 }, oAuthConfig);
 
-tokenCache.get('your-app-name')
+tokenCache.get('service-foo')
   .then((tokeninfo) => {
     console.log(tokeninfo.access_token);
   });
@@ -69,21 +69,21 @@ app.use(handleOAuthRequestMiddleware({
 
 #### requireScopesMiddleware(scopes: string[])
 
-Specifies the scopes needed to access an endpoint. Assumes that there is an `req.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
+Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
 If the the requested scopes are not matched request is rejected (with 403 Forbidden).
 
 ```typescript
-app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (req, res) => {
+app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
     // do your work...
 })
 ```
 
-#### getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any>
+#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<any>
 
-Makes a request to the `tokenInfoUrl` to validate the given `accessToken`.
+Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
 ```typescript
-getTokenInfo(tokenInfoUrl, accessToken)
+getTokenInfo(tokenInfoEndpoint, accessToken)
   .then((tokeninfo) => {
     console.log(tokeninfo.access_token);
   })
@@ -141,19 +141,10 @@ Both commands require a global installed mocha (`npm install -g mocha`) and ts-n
 * [How to Debug Mocha Tests With Chrome](http://blog.andrewray.me/how-to-debug-mocha-tests-with-chrome/)
 
 
-## Debugging
-
-* https://greenido.wordpress.com/2013/08/27/debug-nodejs-like-a-pro/
-* start app:  node debug build/js/bootstrap-content-server.js
-  * type `c` for next break point
-* `node-inspector &`
-* open in chrome http://127.0.0.1:8080/debug?port=5858
-  * enjoy debugging
-
 ## Create a new version
 
 * [ ] `tsc` - compile
-* [ ] run the following npm scripts (`npm run scriotName`) to lint and test: `tslint`, `test`, `integration-test`
+* [ ] run the following npm scripts (`npm run scriptName`) to lint and test: `tslint`, `test`, `integration-test`
 * [ ] if no errors occur, increase version in `package.json`
 * [ ] `git commit -m "increase version"`
 * [ ] `git tag -a x.y.z -m "Message(optional) Tagged x.y.z"` (use [semantic versioning](http://semver.org/))
