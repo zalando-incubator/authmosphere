@@ -2,110 +2,60 @@
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as Express from 'express';
-import * as Http from 'http';
+import * as nock from 'nock';
 
-import {
-  PASSWORD_CREDENTIALS_GRANT,
-  getTokenInfo
-} from '../../src/index';
+import { getTokenInfo } from '../../src/index';
+import { mockTokeninfoEndpoint } from '../../src/mock-tooling/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
+const host = 'http://localhost:5001';
+const route = '/tokeninfo';
+const endpoint = host + route;
+
 describe('Integration tests for getTokenInfo', () => {
 
-  let authenticationServer: Http.Server;
-  let authServerApp: Express.Application;
-
-  // Setup AuthServer
-  beforeEach(() => {
-    authServerApp = Express();
-    authenticationServer = authServerApp.listen(30001);
-  });
-
-  // stop server after test
   afterEach(() => {
-    authenticationServer.close();
+
+    nock.cleanAll();
   });
-
-  function addStandardAuthenticationEndpoint() {
-
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
-      if (valid) {
-        res
-        .status(200)
-        .send({
-          'expires_in': 3515,
-          'token_type': 'Bearer',
-          'realm': 'employees',
-          'scope': [
-            'campaign.editall',
-            'campaign.readall'
-          ],
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
-          'uid': 'services',
-          'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
-        });
-      } else {
-        res
-          .status(200)
-          .send({
-            'error': 'invalid_request',
-            'error_description': 'Access Token not valid'
-          });
-      }
-    });
-  }
 
   it('should return error if token is not valid', () => {
 
     // given
-    let authToken = 'invalid';
-    addStandardAuthenticationEndpoint();
-
-    // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    let promise = getTokenInfo(url, authToken)
-    .then((jsonData) => {
-      return jsonData;
+    mockTokeninfoEndpoint({
+      host,
+      route
     });
 
+    // when
+    let promise = getTokenInfo(endpoint, 'invalid');
+
     // then
-    return expect(promise).to.become({
-        'error': 'invalid_request',
-        'error_description': 'Access Token not valid'
-      });
+    return expect(promise).to.rejected;
   });
 
 
   it('should return the token info if token is valid', function() {
 
     // given
-    let authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addStandardAuthenticationEndpoint();
+    const validAuthToken = {
+      'expires_in': 3600,
+      'realm': 'services',
+      'scope': [ 'uid' ],
+      'access_token': 'foo'
+    };
+    mockTokeninfoEndpoint({
+      host,
+      route,
+      tokens: [validAuthToken]
+    });
 
     // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    let promise = getTokenInfo(url, authToken)
-    .then((jsonData) => {
-      return jsonData;
-    });
+    let promise = getTokenInfo(endpoint, 'foo');
 
     // then
-    return expect(promise).to.become({
-      'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41',
-      'expires_in': 3515,
-      'grant_type': 'password',
-      'realm': 'employees',
-      'scope': [
-        'campaign.editall',
-        'campaign.readall'
-      ],
-      'token_type': 'Bearer',
-      'uid': 'services'
-    });
+    return expect(promise).to.become(validAuthToken);
   });
 });
