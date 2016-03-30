@@ -2,15 +2,35 @@
 
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
+import * as uuid from 'node-uuid';
+
+// TODO: provide cleanup function
 
 let tokens = [];
 
+function generateToken(options: any) {
+
+  return {
+    expires_in: 3600,
+    scope: options.scopes || [ 'uid' ],
+    access_token: uuid.v4()
+  };
+}
+
 export function mockAccessTokenEndpoint(options) {
 
-  // register requested tokens in `tokens` to make them available for later
-  // validation
-  // ...
-};
+  return nock(options.host)
+    .post(options.route)
+    .query(true)
+    .reply((uri, body) => {
+
+      // TODO: extrat scopes from body
+      const newToken = generateToken({});
+      tokens.push(newToken);
+
+      return [HttpStatus.OK, newToken];
+    });
+}
 
 export function mockTokeninfoEndpoint(options) {
 
@@ -39,4 +59,4 @@ export function mockTokeninfoEndpoint(options) {
 
       return [HttpStatus.BAD_REQUEST, { error: 'invalid_request' }];
     });
-};
+}

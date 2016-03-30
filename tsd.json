@@ -12,7 +12,7 @@
       "commit": "bcd5761826eb567876c197ccc6a87c4d05731054"
     },
     "node/node.d.ts": {
-      "commit": "bcd5761826eb567876c197ccc6a87c4d05731054"
+      "commit": "dbb2d9f1f1f0e50a3530dcfc02944f492be246dd"
     },
     "mime/mime.d.ts": {
       "commit": "bcd5761826eb567876c197ccc6a87c4d05731054"
@@ -43,6 +43,15 @@
     },
     "nock/nock.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
+    },
+    "node-uuid/node-uuid.d.ts": {
+      "commit": "dbb2d9f1f1f0e50a3530dcfc02944f492be246dd"
+    },
+    "node-uuid/node-uuid-base.d.ts": {
+      "commit": "dbb2d9f1f1f0e50a3530dcfc02944f492be246dd"
+    },
+    "node-uuid/node-uuid-cjs.d.ts": {
+      "commit": "dbb2d9f1f1f0e50a3530dcfc02944f492be246dd"
     }
   }
 }
