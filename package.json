@@ -31,7 +31,7 @@
   "scripts": {
     "postinstall": "tsc",
     "test": "mocha --opts test/mocha.opts",
-    "integration-test": "mocha --opts integration-test/mocha.opts",
+    "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
     "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
   },
   "author": "Graviton <team-graviton@zalando.de>",
