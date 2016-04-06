@@ -18,12 +18,12 @@ import {
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-const host = 'http://localhost:5001';
-const tokeninfoRoute = '/tokeninfo';
-const accessTokenRoute = '/access_token';
+const HOST = 'http://localhost:5001';
+const TOKENINFO_ROUTE = '/tokeninfo';
+const ACCESS_TOKEN_ROUTE = '/access_token';
 
-const tokeninfoEndpoint = host + tokeninfoRoute;
-const accessTokenEndpoint = host + accessTokenRoute;
+const tokeninfoEndpoint = HOST + TOKENINFO_ROUTE;
+const accessTokenEndpoint = HOST + ACCESS_TOKEN_ROUTE;
 
 describe('Integration tests for mock tooling', () => {
 
@@ -33,8 +33,8 @@ describe('Integration tests for mock tooling', () => {
 
       // given
       mockTokeninfoEndpoint({
-        host,
-        route: tokeninfoRoute
+        host: HOST,
+        route: TOKENINFO_ROUTE
       });
 
       // when
@@ -54,8 +54,8 @@ describe('Integration tests for mock tooling', () => {
         'access_token': 'foo'
       };
       mockTokeninfoEndpoint({
-        host,
-        route: tokeninfoRoute,
+        host: HOST,
+        route: TOKENINFO_ROUTE,
         tokens: [validAuthToken]
       });
 
@@ -76,8 +76,8 @@ describe('Integration tests for mock tooling', () => {
         'access_token': 'foo'
       };
       mockTokeninfoEndpoint({
-        host,
-        route: tokeninfoRoute,
+        host: HOST,
+        route: TOKENINFO_ROUTE,
         tokens: [validAuthToken],
         times: 3
       });
@@ -119,12 +119,12 @@ describe('Integration tests for mock tooling', () => {
         grantType: PASSWORD_CREDENTIALS_GRANT
       };
       mockAccessTokenEndpoint({
-        host,
-        route: accessTokenRoute
+        host: HOST,
+        route: ACCESS_TOKEN_ROUTE
       });
       mockTokeninfoEndpoint({
-        host,
-        route: tokeninfoRoute
+        host: HOST,
+        route: TOKENINFO_ROUTE
       });
 
       // when
@@ -137,7 +137,5 @@ describe('Integration tests for mock tooling', () => {
       // then
       return expect(promise).to.eventually.haveOwnProperty('access_token');
     });
-
   });
-
 });

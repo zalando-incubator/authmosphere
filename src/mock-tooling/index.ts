@@ -21,11 +21,12 @@ function generateToken() {
  * @param options
  * @returns {Scope}
  */
-export function mockAccessTokenEndpoint(options: {
-  host: string;
-  route: string;
-  times?: number;
-}) {
+export function mockAccessTokenEndpoint(
+  options: {
+   host: string;
+   route: string;
+   times?: number;
+  }) {
 
   return nock(options.host)
     .post(options.route)
@@ -47,12 +48,13 @@ export function mockAccessTokenEndpoint(options: {
  * @param options
  * @returns {Scope}
  */
-export function mockTokeninfoEndpoint(options: {
-  host: string;
-  route: string;
-  tokens?: any[];
-  times?: number;
-}) {
+export function mockTokeninfoEndpoint(
+  options: {
+    host: string;
+    route: string;
+    tokens?: any[];
+    times?: number;
+  }) {
 
   return nock(options.host)
     .get(options.route)
