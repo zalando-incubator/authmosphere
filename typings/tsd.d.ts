@@ -11,3 +11,6 @@
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="whatwg-fetch/whatwg-fetch.d.ts" />
 /// <reference path="nock/nock.d.ts" />
+/// <reference path="node-uuid/node-uuid-base.d.ts" />
+/// <reference path="node-uuid/node-uuid-cjs.d.ts" />
+/// <reference path="node-uuid/node-uuid.d.ts" />

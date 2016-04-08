@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "A simple typescript based oauth tooling library.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -15,7 +15,9 @@
     "btoa": "^1.1.2",
     "form-urlencoded": "^1.2.0",
     "http-status": "^0.2.0",
+    "nock": "^7.5.0",
     "node-fetch": "^1.3.3",
+    "node-uuid": "^1.4.7",
     "q": "^1.4.1",
     "typescript": "^1.7.5"
   },
@@ -29,7 +31,7 @@
   "scripts": {
     "postinstall": "tsc",
     "test": "mocha --opts test/mocha.opts",
-    "integration-test": "mocha --opts integration-test/mocha.opts",
+    "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
     "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
   },
   "author": "Graviton <team-graviton@zalando.de>",
