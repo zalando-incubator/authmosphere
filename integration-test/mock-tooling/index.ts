@@ -30,8 +30,7 @@ describe('Integration tests for mock tooling', () => {
 
       // given
       mockTokeninfoEndpoint({
-        host: HOST,
-        route: TOKENINFO_ROUTE
+        url: tokeninfoEndpoint
       });
 
       // when
@@ -51,8 +50,7 @@ describe('Integration tests for mock tooling', () => {
         'access_token': 'foo'
       };
       mockTokeninfoEndpoint({
-        host: HOST,
-        route: TOKENINFO_ROUTE,
+        url: tokeninfoEndpoint,
         tokens: [validAuthToken]
       });
 
@@ -73,8 +71,7 @@ describe('Integration tests for mock tooling', () => {
         'access_token': 'foo'
       };
       mockTokeninfoEndpoint({
-        host: HOST,
-        route: TOKENINFO_ROUTE,
+        url: tokeninfoEndpoint,
         tokens: [validAuthToken],
         times: 3
       });
@@ -116,12 +113,10 @@ describe('Integration tests for mock tooling', () => {
         grantType: PASSWORD_CREDENTIALS_GRANT
       };
       mockAccessTokenEndpoint({
-        host: HOST,
-        route: ACCESS_TOKEN_ROUTE
+        url: accessTokenEndpoint
       });
       mockTokeninfoEndpoint({
-        host: HOST,
-        route: TOKENINFO_ROUTE
+        url: tokeninfoEndpoint
       });
 
       // when

@@ -3,6 +3,7 @@
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'node-uuid';
+import * as url from 'url';
 
 let tokens = [];
 
@@ -23,13 +24,14 @@ function generateToken() {
  */
 export function mockAccessTokenEndpoint(
   options: {
-   host: string;
-   route: string;
+   url: string;
    times?: number;
   }) {
 
-  return nock(options.host)
-    .post(options.route)
+  const parsedUrl = url.parse(options.url);
+
+  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    .post(parsedUrl.path)
     .times(options.times || 1)
     .query(true)
     .reply((uri, body) => {
@@ -50,14 +52,15 @@ export function mockAccessTokenEndpoint(
  */
 export function mockTokeninfoEndpoint(
   options: {
-    host: string;
-    route: string;
+    url: string;
     tokens?: any[];
     times?: number;
   }) {
 
-  return nock(options.host)
-    .get(options.route)
+  const parsedUrl = url.parse(options.url);
+
+  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    .get(parsedUrl.path)
     .times(options.times || 1)
     .query(true)
     .reply((uri) => {
