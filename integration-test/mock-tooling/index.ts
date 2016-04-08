@@ -7,13 +7,10 @@ import {
   getTokenInfo,
   getAccessToken,
   SERVICES_REALM,
-  PASSWORD_CREDENTIALS_GRANT
-} from '../../src/index';
-
-import {
+  PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint
-} from '../../src/mock-tooling/index';
+} from '../../src/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

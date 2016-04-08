@@ -89,7 +89,7 @@ export function mockTokeninfoEndpoint(
 /**
  * Removes generated tokens and mocked endpoints.
  */
-export function clean() {
+export function cleanMock() {
 
   nock.cleanAll();
   tokens = [];
