@@ -108,7 +108,7 @@ describe('token service', () => {
       })
       .get('/tokeninfo?access_token=' + accessToken)
       .times(2)
-      .reply(HttpStatus.OK, tokeninfo)
+      .reply(HttpStatus.OK, tokeninfo);
 
     // when
     const tokenService = new TokenCache({
@@ -120,9 +120,9 @@ describe('token service', () => {
       .then(() => {
 
         return tokenService.get('nucleus')
-          .then((tokeninfo) => {
+          .then((data) => {
 
-            return tokeninfo.access_token;
+            return data.access_token;
           });
       });
 
