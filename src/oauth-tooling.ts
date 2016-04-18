@@ -167,8 +167,7 @@ function getAccessToken(options: any): Promise<string> {
         bodyParameters = {
           'grant_type': options.grantType,
           'code': options.code,
-          'redirect_uri': options.redirectUri,
-          'scope': options.scopes.join(' ')
+          'redirect_uri': options.redirectUri
         };
       } else {
         throw TypeError('invalid grantType');
