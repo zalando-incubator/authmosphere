@@ -51,7 +51,7 @@ describe('Integration tests for getTokenInfo', () => {
           });
       } else {
         res
-          .status(200)
+          .status(401)
           .send({
             'error': 'invalid_request',
             'error_description': 'Access Token not valid'
@@ -70,14 +70,12 @@ describe('Integration tests for getTokenInfo', () => {
     const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
     let promise = getTokenInfo(url, authToken)
       .then((jsonData) => {
+
         return jsonData;
       });
 
     // then
-    return expect(promise).to.become({
-      'error': 'invalid_request',
-      'error_description': 'Access Token not valid'
-    });
+    return expect(promise).be.rejected;
   });
 
 
