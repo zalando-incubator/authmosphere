@@ -29,6 +29,10 @@ describe('token service', () => {
     };
   });
 
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it('#get should reject if there is no token and is not able to request a new one', () => {
 
     // given
@@ -87,6 +91,15 @@ describe('token service', () => {
 
     // given
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const tokeninfo = {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': accessToken
+    };
 
     nock(oauthHost)
       .post('/access_token?realm=/services')
@@ -94,15 +107,8 @@ describe('token service', () => {
         access_token: accessToken
       })
       .get('/tokeninfo?access_token=' + accessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': accessToken
-      });
+      .times(2)
+      .reply(HttpStatus.OK, tokeninfo);
 
     // when
     const tokenService = new TokenCache({
@@ -114,9 +120,9 @@ describe('token service', () => {
       .then(() => {
 
         return tokenService.get('nucleus')
-          .then((tokeninfo) => {
+          .then((data) => {
 
-            return tokeninfo.access_token;
+            return data.access_token;
           });
       });
 
@@ -170,6 +176,66 @@ describe('token service', () => {
     let promise = tokenService.get('nucleus')
       .then(() => {
 
+        return tokenService.get('nucleus')
+          .then((tokeninfo) => {
+
+            return tokeninfo.access_token;
+          });
+      });
+
+    // then
+    return expect(promise).to.become(secondAccessToken);
+  });
+
+  it('#get should resolve with a new token if the cached one is invalid (but not expired)', () => {
+
+    // given
+    const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
+
+    nock(oauthHost)
+      .post('/access_token?realm=/services')
+      .reply(HttpStatus.OK, {
+        access_token: firstAccessToken
+      })
+      .get('/tokeninfo?access_token=' + firstAccessToken)
+      .reply(HttpStatus.OK, {
+        'expires_in': 3600,
+        'token_type': 'Bearer',
+        'realm': 'employees',
+        'scope': ['nucleus.write', 'nucleus.read'],
+        'grant_type': PASSWORD_CREDENTIALS_GRANT,
+        'uid': 'uid',
+        'access_token': firstAccessToken
+      })
+      .get('/tokeninfo?access_token=' + firstAccessToken)
+      .reply(HttpStatus.BAD_REQUEST, {
+        error: 'invalid_request',
+        error_description: 'Access token not valid'
+      })
+      .post('/access_token?realm=/services')
+      .reply(HttpStatus.OK, {
+        access_token: secondAccessToken
+      })
+      .get('/tokeninfo?access_token=' + secondAccessToken)
+      .reply(HttpStatus.OK, {
+        'expires_in': 3600,
+        'token_type': 'Bearer',
+        'realm': 'employees',
+        'scope': ['nucleus.write', 'nucleus.read'],
+        'grant_type': PASSWORD_CREDENTIALS_GRANT,
+        'uid': 'uid',
+        'access_token': secondAccessToken
+      });
+
+    // when
+    const tokenService = new TokenCache({
+      'nucleus': ['nucleus.write', 'nucleus.read'],
+      'halo': ['all']
+    }, oauthConfig);
+
+    let promise = tokenService.get('nucleus')
+      .then(() => {
         return tokenService.get('nucleus')
           .then((tokeninfo) => {
 

@@ -142,10 +142,16 @@ class TokenCache {
     }
 
     const token = this._tokens[tokenName];
-     if (token.local_expiry < Date.now()) {
+    if (token.local_expiry < Date.now()) {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
-    return Promise.resolve(token);
+
+    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
+      .then(token => {
+        return Promise.resolve(token);
+      }).catch(() => {
+        return Promise.reject(`Token ${tokenName} is invalid.`);
+      });
   }
 }
 
