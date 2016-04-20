@@ -30,7 +30,10 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
       } else {
         res
           .status(HttpStatus.UNAUTHORIZED)
-          .send('Unauthorized');
+          .send({
+            error: 'internal_error',
+            error_description: 'Request method GET not supported'
+          });
       }
     } else {
       if (req.body.code && req.body.redirect_uri && req.headers['authorization'] === authHeader) {
@@ -40,7 +43,10 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
       } else {
         res
           .status(HttpStatus.UNAUTHORIZED)
-          .send('Unauthorized');
+          .send({
+            error: 'internal_error',
+            error_description : 'Request method GET not supported'
+          });
       }
     }
 

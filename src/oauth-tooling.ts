@@ -68,17 +68,25 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
       }
     })
       .then((response) => {
-        if (response.status !== HttpStatus.OK) {
-          return reject('Got ' + response.status + ' from ' + accessTokenEndpoint);
-        } else {
-          return response.json();
-        }
-      })
-      .then((data) => {
-        return resolve(data);
+
+        const status = response.status;
+
+        return response
+          .json()
+          .then((data) => {
+
+            if (response.status !== HttpStatus.OK) {
+              throw { status, data };
+            } else {
+              return resolve(data);
+            }
+        });
       })
       .catch((err) => {
-        return reject('Could not get access token from server: ' + err);
+        return reject({
+          msg: `Error requesting access token from ${accessTokenEndpoint}`,
+          err
+        });
       });
   });
 
@@ -99,18 +107,26 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
   const promise = new Promise(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
-      .then( response => {
-        if (response.status !== HttpStatus.OK) {
-          return reject('Got ' + response.status + ' from ' + tokenInfoUrl);
-        } else {
-          return response.json();
-        }
-      })
-      .then((data) => {
-        return resolve(data);
+      .then((response) => {
+
+        const status = response.status;
+
+        return response
+          .json()
+          .then((data) => {
+
+            if (response.status !== HttpStatus.OK) {
+              throw { status, data };
+            } else {
+              return resolve(data);
+            }
+          });
       })
       .catch( err => {
-        return reject('Could not get tokeninfo from server: ' + err);
+        return reject({
+          msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
+          err
+        });
       });
   });
 
