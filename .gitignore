@@ -4,3 +4,4 @@ lib/
 .vscode
 .idea
 **/npm-debug.log
+typings/
