@@ -132,13 +132,21 @@ String constant specifying the services realm.
 String constant specifying the employees realm.
 
 
+## Development
+
+* clone this repo
+* `npm install`
+* clone https://github.bus.zalan.do/graviton/graviton-typings in the parent directory of this repo
+* `typings install` (run `npm install typings -g`)
+* run `tsc` to compile
+
+
 ## Testing
 
 Both commands require a global installed mocha (`npm install -g mocha`) and ts-node (`npm install -g ts-node`).
 
 * `npm test` - runs unit tests
 * `npm run integration-test` - runs integration tests
-* [How to Debug Mocha Tests With Chrome](http://blog.andrewray.me/how-to-debug-mocha-tests-with-chrome/)
 
 
 ## Create a new version

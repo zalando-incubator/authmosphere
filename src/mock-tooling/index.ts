@@ -63,7 +63,7 @@ export function mockTokeninfoEndpoint(
     .get(parsedUrl.path)
     .times(options.times || 1)
     .query(true)
-    .reply((uri) => {
+    .reply((uri, body) => {
 
       // token to validate
       const givenToken = uri.split('=')[1];
