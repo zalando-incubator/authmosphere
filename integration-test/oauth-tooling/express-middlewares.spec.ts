@@ -153,7 +153,6 @@ describe('Integration tests for express middlewares', () => {
     return expect(promise).to.become(HttpStatus.UNAUTHORIZED);
   });
 
-
   it('should return 403 if scope is not granted', () => {
 
     // given
@@ -174,7 +173,6 @@ describe('Integration tests for express middlewares', () => {
     // then
     return expect(promise).to.become(HttpStatus.FORBIDDEN);
   });
-
 
   it('should return the resource if token is valid, _all_ scopes are  granted and resource belongs to the service user', function() {
 

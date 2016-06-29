@@ -23,13 +23,17 @@
     "no-require-imports": true,
     "no-shadowed-variable": true,
     "no-switch-case-fall-through": true,
-    "no-trailing-comma": true,
     "no-trailing-whitespace": true,
+    "trailing-comma": [true, {
+      "multiline": "never",
+      "singleline": "never"
+    }],
     "no-unused-expression": true,
     "no-unused-variable": true,
     "no-unreachable": true,
     "no-use-before-declare": true,
     "no-var-keyword ": true,
+    "no-consecutive-blank-lines": true,
     "one-line": [
       true,
       "check-open-brace",

@@ -5,3 +5,4 @@ lib/
 .idea
 **/npm-debug.log
 typings/
+graviton-typings/
