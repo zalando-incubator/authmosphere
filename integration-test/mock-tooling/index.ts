@@ -119,8 +119,6 @@ describe('Integration tests for mock tooling', () => {
         tokens: [validAuthToken]
       });
 
-      console.log(validAuthToken);
-
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
         .then((token: any) => {
