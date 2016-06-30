@@ -9,7 +9,8 @@ import {
   SERVICES_REALM,
   PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
-  mockAccessTokenEndpoint
+  mockAccessTokenEndpoint,
+  cleanMock
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -26,11 +27,16 @@ describe('Integration tests for mock tooling', () => {
 
   describe('tokeninfo endpoint', () => {
 
+    afterEach(() => {
+      cleanMock();
+    });
+
     it('should return error if token is not valid', () => {
 
       // given
       mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint
+        url: tokeninfoEndpoint,
+        times: 1
       });
 
       // when
@@ -51,7 +57,8 @@ describe('Integration tests for mock tooling', () => {
       };
       mockTokeninfoEndpoint({
         url: tokeninfoEndpoint,
-        tokens: [validAuthToken]
+        tokens: [validAuthToken],
+        times: 1
       });
 
       // when
@@ -98,9 +105,50 @@ describe('Integration tests for mock tooling', () => {
       return expect(promise).to.rejected;
     });
 
+    it('should return the tokeninfo Number.MAX_SAFE_INTEGER times when `times` option not defined', function () {
+
+      // given
+      const validAuthToken = {
+        'expires_in': 3600,
+        'realm': 'services',
+        'scope': ['uid'],
+        'access_token': 'foo'
+      };
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint,
+        tokens: [validAuthToken]
+      });
+
+      // when
+      return getTokenInfo(tokeninfoEndpoint, 'foo')
+        .then((token: any) => {
+
+          expect(token).to.deep.equal(validAuthToken);
+          return getTokenInfo(tokeninfoEndpoint, 'foo');
+        })
+        .then((token: any) => {
+
+          expect(token).to.deep.equal(validAuthToken);
+          return getTokenInfo(tokeninfoEndpoint, 'foo');
+        })
+        .then((token: any) => {
+
+          expect(token).to.deep.equal(validAuthToken);
+          return getTokenInfo(tokeninfoEndpoint, 'foo');
+        })
+        .then((token: any) => {
+
+          expect(token).to.deep.equal(validAuthToken);
+        });
+    });
+
   });
 
   describe('accessToken endpoint', () => {
+
+    afterEach(() => {
+      cleanMock();
+    });
 
     it('accessToken endpoint should return valid token', function () {
 

@@ -32,7 +32,7 @@ export function mockAccessTokenEndpoint(
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
     .post(parsedUrl.path)
-    .times(options.times || 1)
+    .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
     .reply((uri, body) => {
 
@@ -61,7 +61,7 @@ export function mockTokeninfoEndpoint(
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
     .get(parsedUrl.path)
-    .times(options.times || 1)
+    .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
     .reply((uri, body) => {
 
