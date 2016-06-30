@@ -78,7 +78,6 @@ describe('Integration tests for getTokenInfo', () => {
     return expect(promise).be.rejected;
   });
 
-
   it('should return the token info if token is valid', function() {
 
     // given

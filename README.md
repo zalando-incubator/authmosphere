@@ -152,7 +152,7 @@ Both commands require a global installed mocha (`npm install -g mocha`) and ts-n
 ## Create a new version
 
 * [ ] `tsc` - compile
-* [ ] run the following npm scripts (`npm run scriptName`) to lint and test: `tslint`, `test`, `integration-test`
+* [ ] run the following npm scripts (`npm run <scriptName>`) to lint and test: `tslint`, `test`, `integration-test`
 * [ ] if no errors occur, increase version in `package.json`
 * [ ] `git commit -m "increase version"`
 * [ ] `git tag -a x.y.z -m "Message(optional) Tagged x.y.z"` (use [semantic versioning](http://semver.org/))

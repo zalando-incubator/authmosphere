@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "A simple typescript based oauth tooling library.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -26,10 +26,11 @@
     "chai-as-promised": "^5.1.0",
     "express": "^4.13.3",
     "nock": "^7.2.2",
-    "tslint": "^3.3.0"
+    "tslint": "^3.5.0"
   },
   "scripts": {
-    "postinstall": "tsc",
+    "preinstall": "rm -rf graviton-typings; git clone git@github.bus.zalan.do:graviton/graviton-typings.git ./graviton-typings",
+    "postinstall": "typings install && tsc",
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
     "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
