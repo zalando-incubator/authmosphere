@@ -1,0 +1,24 @@
+# Zappr application configuration: enterprise
+
+X-Zalando-Team: "ncng"
+X-Zalando-Type: code
+
+# path to zapprfile in repository
+VALID_ZAPPR_FILE_PATHS:
+  - "/.zappr.yaml"
+  - "/.zappr.yml"
+ZAPPR_DEFAULT_CONFIG:
+  autobranch:
+    pattern: "{number}-{title}"
+    length: 60
+  commit:
+    message:
+      patterns:
+        - "^(feat|fix|docs|style|refactor|perf|test|chore)\(.*\):"
+  approvals:
+    minimum: 2
+    ignore: none
+    pattern: "^(:\\+1:|👍)$"
+    veto:
+      # veto/blocking a PR = comment that matches this regex
+      pattern: "^(:\\-1:|👎)$"
