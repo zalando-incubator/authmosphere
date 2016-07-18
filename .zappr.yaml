@@ -14,7 +14,7 @@ ZAPPR_DEFAULT_CONFIG:
   commit:
     message:
       patterns:
-        - "^(feat|fix|docs|style|refactor|perf|test|chore)\(.*\):"
+        - "^(feat|fix|docs|style|refactor|perf|test|chore)\\(.*\\):"
   approvals:
     minimum: 2
     ignore: none
