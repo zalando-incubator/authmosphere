@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
@@ -23,7 +21,7 @@ const ACCESS_TOKEN_ROUTE = '/access_token';
 const tokeninfoEndpoint = HOST + TOKENINFO_ROUTE;
 const accessTokenEndpoint = HOST + ACCESS_TOKEN_ROUTE;
 
-describe('Integration tests for mock tooling', () => {
+describe('mock tooling', () => {
 
   describe('tokeninfo endpoint', () => {
 

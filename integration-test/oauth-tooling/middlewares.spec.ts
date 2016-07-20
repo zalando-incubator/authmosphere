@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
@@ -16,7 +14,7 @@ import {
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe('Integration tests for express middlewares', () => {
+describe('middlewares', () => {
 
   let authenticationServer: Http.Server;
   let resourceServer: Http.Server;

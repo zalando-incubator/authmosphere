@@ -1,5 +1,3 @@
-'use strict';
-
 import * as HttpStatus from 'http-status';
 import * as fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
@@ -176,8 +174,7 @@ function getAccessToken(options: any): Promise<string> {
         bodyParameters = {
           'grant_type': options.grantType,
           'username': userData.application_username,
-          'password': userData.application_password,
-          'scope': options.scopes.join(' ')
+          'password': userData.application_password
         };
       } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
         bodyParameters = {
@@ -187,6 +184,13 @@ function getAccessToken(options: any): Promise<string> {
         };
       } else {
         throw TypeError('invalid grantType');
+      }
+
+      // attach scope property if defined
+      if (options.scopes) {
+        Object.assign(bodyParameters, {
+          scope: options.scopes
+        });
       }
 
       const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);

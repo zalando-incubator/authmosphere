@@ -1,5 +1,3 @@
-'use strict';
-
 import * as fs from 'fs';
 import * as q from 'q';
 import * as express from 'express';
