@@ -14,7 +14,7 @@
   "filesGlob": [
     "integration/**/*.ts",
     "src/**/*.ts",
-    "typings/**/*.d.ts",
+    "typings/index.d.ts",
     "test/**/*.ts"
   ],
   "buildOnSave": true,
@@ -36,8 +36,6 @@
   "exclude": [
     "lib",
     "node_modules",
-    "typings/browser.d.ts",
-    "typings/browser",
     "graviton-typings"
   ]
 }
