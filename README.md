@@ -12,6 +12,8 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 ## Usage
 
+Note: `node >= 6.0.0` required to consume this library.
+
 Run `npm install --save git+ssh://git@github.bus.zalan.do:graviton/lib-oauth-tooling.git#TAG/COMMIT` where `TAG/COMMIT` has to be replaced with the release tag or commit id you want to use.
 Import a member of this lib like so (of course ES5 syntax is working as well...):
 
