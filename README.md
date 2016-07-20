@@ -180,12 +180,14 @@ Helpful when having multiple tests in a test suite, you can call `cleanMock()` i
 cleanMock();
 ```
 
+
 ## Development
 
+* globally install `typings` >= 1.0 (`npm install typings -g`)
 * clone this repo
 * `npm install`
 * clone https://github.bus.zalan.do/graviton/graviton-typings in the parent directory of this repo
-* `typings install` (run `npm install typings -g`)
+* `typings install`
 * run `tsc` to compile
 
 
