@@ -1,11 +1,12 @@
 # lib-oauth-tooling
 
-A simple typescript based OAuth support library supporting OAuth2 flow, currently it supports:
+A simple typescript based library for supporting OAuth2 flows.
+Currently the following flows are supported:
 
-* Authorization Code flow
-* Resource Owner Password Credentials Grant
+* [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-1.3.1)
+* [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3)
 * Express middlewares to simplify authentication/authorization
-* `TokenCache` service to manage your access tokens in your node application
+* `TokenCache` service to manage access tokens in your application
 
 See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
 
@@ -14,7 +15,7 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 Note: `node >= 6.0.0` required to consume this library.
 
-Run `npm install --save git+ssh://git@github.bus.zalan.do:graviton/lib-oauth-tooling.git#TAG/COMMIT` where `TAG/COMMIT` has to be replaced with the release tag or commit id you want to use.
+Run `npm install --save git+https://github.com/zalando-incubator/lib-oauth-tooling.git#<commit-ish>` where `<commit-ish>` has to be replaced with the release tag or commit id you want to use.
 Import a member of this lib like so (of course ES5 syntax is working as well...):
 
 ```typescript
@@ -201,11 +202,6 @@ Both commands require a global installed mocha (`npm install -g mocha`) and ts-n
 * `npm run integration-test` - runs integration tests
 
 
-## Create a new version
+## License
 
-* [ ] `tsc` - compile
-* [ ] run the following npm scripts (`npm run <scriptName>`) to lint and test: `tslint`, `test`, `integration-test`
-* [ ] if no errors occur, increase version in `package.json`
-* [ ] `git commit -m "increase version"`
-* [ ] `git tag -a x.y.z -m "Message(optional) Tagged x.y.z"` (use [semantic versioning](http://semver.org/))
-* [ ] `git push origin `
+MIT
