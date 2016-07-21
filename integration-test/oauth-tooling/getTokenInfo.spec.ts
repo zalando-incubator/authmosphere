@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as Express from 'express';
@@ -13,7 +11,7 @@ import {
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe('Integration tests for getTokenInfo', () => {
+describe('getTokenInfo', () => {
 
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;

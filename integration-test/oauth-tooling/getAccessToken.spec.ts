@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as Express from 'express';
@@ -17,8 +15,8 @@ import {
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-// Setup API server
 function setupTestEnvironment(authHeader: string, authServerApp: Express.Application) {
+
   authServerApp.use(bodyParser.urlencoded({extended: true}));
   authServerApp.post('/oauth2/access_token', function(req, res) {
     if (req.body.grant_type === PASSWORD_CREDENTIALS_GRANT) {
@@ -53,7 +51,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
   });
 }
 
-describe('Integration tests for getAccessToken', () => {
+describe('getAccessToken', () => {
 
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
@@ -71,9 +69,7 @@ describe('Integration tests for getAccessToken', () => {
     authenticationServer.close();
   });
 
-  // set up getAccessToken options object
-
-  describe('password oAuth flow', () => {
+  describe('password credentails grant', () => {
 
     before(() => {
       getAccessTokenOptions = {
@@ -92,6 +88,7 @@ describe('Integration tests for getAccessToken', () => {
 
       //when
       let promise = getAccessToken(getAccessTokenOptions);
+
       //then
       return expect(promise).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
     });
@@ -108,7 +105,7 @@ describe('Integration tests for getAccessToken', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should be jrected if credentials can not be read', function() {
+    it('should be rejected if credentials can not be read', function() {
 
       //given
       setupTestEnvironment('invalid', authServerApp);
@@ -124,7 +121,7 @@ describe('Integration tests for getAccessToken', () => {
 
   });
 
-  describe('authorization_code oAuth flow', () => {
+  describe('authorization code grant', () => {
     let getAccessTokenOptionsAuthorization;
     before(() => {
       getAccessTokenOptionsAuthorization = {
@@ -178,7 +175,5 @@ describe('Integration tests for getAccessToken', () => {
       //then
       return expect(promise).to.be.rejected;
     });
-
   });
-
 });

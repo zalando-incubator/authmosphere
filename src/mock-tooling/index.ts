@@ -1,5 +1,3 @@
-'use strict';
-
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'node-uuid';

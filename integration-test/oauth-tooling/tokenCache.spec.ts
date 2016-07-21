@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
@@ -14,7 +12,7 @@ import {
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe('token service', () => {
+describe('tokenCache', () => {
 
   let oauthConfig = {};
   const oauthHost = 'http://auth.zalando.com/oauth2';
