@@ -4,6 +4,7 @@ import * as Express from 'express';
 import * as Http from 'http';
 import * as HttpStatus from 'http-status';
 import * as bodyParser from 'body-parser';
+import * as nock from 'nock';
 
 import {
   getAccessToken,
@@ -67,9 +68,10 @@ describe('getAccessToken', () => {
   // stop server after test
   afterEach(() => {
     authenticationServer.close();
+    nock.cleanAll();
   });
 
-  describe('password credentails grant', () => {
+  describe('password credentials grant', () => {
 
     before(() => {
       getAccessTokenOptions = {
@@ -122,14 +124,16 @@ describe('getAccessToken', () => {
   });
 
   describe('authorization code grant', () => {
+
     let getAccessTokenOptionsAuthorization;
+
     before(() => {
       getAccessTokenOptionsAuthorization = {
         realm: SERVICES_REALM,
         scopes: ['campaing.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
         credentialsDir: 'integration-test/data/credentials',
-        code: 'blabla',
+        code: 'foo',
         redirectUri: 'http://127.0.0.1:30001/oauth2/access_token',
         grantType: AUTHORIZATION_CODE_GRANT
       };
@@ -174,6 +178,39 @@ describe('getAccessToken', () => {
 
       //then
       return expect(promise).to.be.rejected;
+    });
+
+    it('getAccessToken should create request with correct body parameters', function() {
+
+      // given
+      let match = true;
+      nock('http://127.0.0.1:30001/oauth2')
+        .post('/access_token?realm=/services', (body) => {
+
+          if (body.grant_type !== getAccessTokenOptionsAuthorization.grantType) {
+            match = false;
+          }
+
+          if (body.scope !== getAccessTokenOptionsAuthorization.scopes.join(' ')) {
+            match = false;
+          }
+
+          if (body.redirect_uri !== getAccessTokenOptionsAuthorization.redirectUri) {
+            match = false;
+          }
+
+          if (body.code !== getAccessTokenOptionsAuthorization.code) {
+            match = false;
+          }
+
+          return true;
+        })
+        .reply(HttpStatus.OK, { 'access_token': 'foo' });
+
+      // when
+      return getAccessToken(getAccessTokenOptionsAuthorization).then(() => {
+        expect(match).to.be.true;
+      });
     });
   });
 });

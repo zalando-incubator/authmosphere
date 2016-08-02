@@ -186,10 +186,9 @@ function getAccessToken(options: any): Promise<string> {
         throw TypeError('invalid grantType');
       }
 
-      // attach scope property if defined
       if (options.scopes) {
         Object.assign(bodyParameters, {
-          scope: options.scopes
+          scope: options.scopes.join(' ')
         });
       }
 
