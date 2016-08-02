@@ -190,8 +190,6 @@ cleanMock();
 * globally install `typings` >= 1.0 (`npm install typings -g`)
 * clone this repo
 * `npm install`
-* clone https://github.bus.zalan.do/graviton/graviton-typings in the parent directory of this repo
-* run `tsc` to compile
 
 
 ## Testing
