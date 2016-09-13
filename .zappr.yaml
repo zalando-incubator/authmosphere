@@ -1,6 +1,3 @@
-X-Zalando-Team: "ncng"
-X-Zalando-Type: code
-
 commit:
   message:
     patterns:
