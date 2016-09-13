@@ -5,7 +5,8 @@ import * as HttpStatus from 'http-status';
 import * as btoa from 'btoa';
 
 import {
-  AUTHORIZATION_CODE_GRANT
+  AUTHORIZATION_CODE_GRANT,
+  REFRESH_TOKEN_GRANT
 } from './constants';
 
 const fsReadFile = q.denodeify<any>(fs.readFile);
@@ -147,5 +148,10 @@ export function validateOAuthConfig(options: any) {
 
   if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
     throw TypeError('redirectUri must be defined');
+  }
+
+
+  if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
+    throw TypeError('refreshToken must be defined');
   }
 }

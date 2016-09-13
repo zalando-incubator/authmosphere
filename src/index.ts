@@ -1,40 +1,7 @@
-import {
-  handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  createAuthCodeRequestUri,
-  getAccessToken,
-  getTokenInfo
-} from './oauth-tooling';
+export * from './oauth-tooling';
 
-import {
-  TokenCache
-} from './TokenCache';
+export * from './TokenCache';
 
-import {
-  PASSWORD_CREDENTIALS_GRANT,
-  AUTHORIZATION_CODE_GRANT,
-  SERVICES_REALM,
-  EMPLOYEES_REALM
-} from './constants';
+export * from './constants';
 
-import {
-  mockAccessTokenEndpoint,
-  mockTokeninfoEndpoint,
-  cleanMock
-} from './mock-tooling/index'
-
-export {
-  handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  createAuthCodeRequestUri,
-  getAccessToken,
-  getTokenInfo,
-  TokenCache,
-  PASSWORD_CREDENTIALS_GRANT,
-  AUTHORIZATION_CODE_GRANT,
-  SERVICES_REALM,
-  EMPLOYEES_REALM,
-  mockAccessTokenEndpoint,
-  mockTokeninfoEndpoint,
-  cleanMock
-};
+export * from './mock-tooling/index';

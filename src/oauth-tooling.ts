@@ -16,7 +16,8 @@ import {
 import {
   EMPLOYEES_REALM,
   AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT
+  PASSWORD_CREDENTIALS_GRANT,
+  REFRESH_TOKEN_GRANT
 } from './constants';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
@@ -142,6 +143,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  * Currently supports the following OAuth flows (specified by the `grantType` property):
  *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
  *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
+ *  - Refresh Token Grant (REFRESH_TOKEN_GRANT)
  *
  *  The `options` object can have the following properties:
  *  - credentialsDir string
@@ -151,6 +153,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  *  - scopes string optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
+ *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
  *
  * @param options
  * @returns {Promise<T>}
@@ -181,6 +184,11 @@ function getAccessToken(options: any): Promise<string> {
           'grant_type': options.grantType,
           'code': options.code,
           'redirect_uri': options.redirectUri
+        };
+      } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+        bodyParameters = {
+          'grant_type': options.grantType,
+          'refresh_token': options.refreshToken
         };
       } else {
         throw TypeError('invalid grantType');
