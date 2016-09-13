@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
@@ -12,7 +10,8 @@ import {
   SERVICES_REALM,
   EMPLOYEES_REALM,
   AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT
+  PASSWORD_CREDENTIALS_GRANT,
+  REFRESH_TOKEN_GRANT
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -77,6 +76,12 @@ describe('oauth tooling', () => {
     it('if code is not defined (in case of Authorization Code Grant)', () => {
       expect(getAccessToken.bind(undefined, Object.assign({}, config, {
         code: undefined
+      }))).to.throw(TypeError);
+    });
+
+    it('if refreshToken is not defined (in case of Refresh Token Grant)', () => {
+      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+        grantType: REFRESH_TOKEN_GRANT
       }))).to.throw(TypeError);
     });
   });
