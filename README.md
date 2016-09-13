@@ -5,6 +5,7 @@ Currently the following flows are supported:
 
 * [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-1.3.1)
 * [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3)
+* [Refresh token Grant](https://tools.ietf.org/html/rfc6749#section-6)
 * Express middlewares to simplify authentication/authorization
 * `TokenCache` service to manage access tokens in your application
 
@@ -14,6 +15,8 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 ## Usage
 
 Note: `node >= 6.0.0` required to consume this library.
+
+Currently the npm packages `typescript` and `typings` must be installed globally: `npm install typescript -g && npm install typings -g` since we have to compile locally.
 
 Run `npm install --save git+https://github.com/zalando-incubator/lib-oauth-tooling.git#<commit-ish>` where `<commit-ish>` has to be replaced with the release tag or commit id you want to use.
 Import a member of this lib like so (of course ES5 syntax is working as well...):
@@ -111,12 +114,13 @@ getAccessToken(options)
 
 `options`:
 * `credentialsDir` string
-* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
+* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT` | `REFRESH_TOKEN_GRANT`)
 * `accessTokenEndpoint` string
 * `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
+* `refreshToken` string optional (required with REFRESH_TOKEN_GRANT)
 
 #### AUTHORIZATION_CODE_GRANT
 
@@ -125,6 +129,10 @@ String constant specifying the Authorization Code Grant type.
 #### PASSWORD_CREDENTIALS_GRANT
 
 String constant specifying the Resource Owner Password Credentials Grant type.
+
+#### REFRESH_TOKEN_GRANT
+
+String constant specifying the Refresh Token Grant type.
 
 #### SERVICES_REALM
 

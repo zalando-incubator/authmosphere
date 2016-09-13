@@ -10,7 +10,9 @@ import {
   getAccessToken,
   PASSWORD_CREDENTIALS_GRANT,
   AUTHORIZATION_CODE_GRANT,
-  SERVICES_REALM
+  REFRESH_TOKEN_GRANT,
+  SERVICES_REALM,
+  EMPLOYEES_REALM
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -183,34 +185,86 @@ describe('getAccessToken', () => {
     it('getAccessToken should create request with correct body parameters', function() {
 
       // given
-      let match = true;
-      nock('http://127.0.0.1:30001/oauth2')
+      const host = 'http://127.0.0.1:30001/oauth2';
+      const options = {
+        realm: SERVICES_REALM,
+        scopes: ['campaing.edit_all', 'campaign.read_all'],
+        accessTokenEndpoint: `${host}/access_token`,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: AUTHORIZATION_CODE_GRANT,
+        code: 'foo-bar',
+        redirectUri: '/redirect/'
+      };
+
+      const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
+
+      nock(host)
         .post('/access_token?realm=/services', (body) => {
 
-          if (body.grant_type !== getAccessTokenOptionsAuthorization.grantType) {
-            match = false;
+          if (body.grant_type !== options.grantType) {
+            return false;
           }
 
-          if (body.scope !== getAccessTokenOptionsAuthorization.scopes.join(' ')) {
-            match = false;
+          if (body.scope !== options.scopes.join(' ')) {
+            return false;
           }
 
-          if (body.redirect_uri !== getAccessTokenOptionsAuthorization.redirectUri) {
-            match = false;
+          if (body.redirect_uri !== options.redirectUri) {
+            return false;
           }
 
-          if (body.code !== getAccessTokenOptionsAuthorization.code) {
-            match = false;
+          if (body.code !== options.code) {
+            return false;
           }
 
           return true;
         })
-        .reply(HttpStatus.OK, { 'access_token': 'foo' });
+        .reply(HttpStatus.OK, responseObject);
 
       // when
-      return getAccessToken(getAccessTokenOptionsAuthorization).then(() => {
-        expect(match).to.be.true;
-      });
+      let promise = getAccessToken(options);
+
+      // then
+      return expect(promise).to.become(responseObject);
+    });
+  });
+
+  describe('refresh token grant', () => {
+
+    it('should become the access token', function () {
+
+      // given
+      const host = 'http://127.0.0.1:30001/oauth2';
+      const options =  {
+        realm: EMPLOYEES_REALM,
+        accessTokenEndpoint: `${host}/access_token`,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: REFRESH_TOKEN_GRANT,
+        refreshToken: 'foo-bar-xxxx'
+      };
+
+      const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
+
+      nock(host)
+        .post('/access_token?realm=/employees', (body) => {
+
+          if (body.grant_type !== options.grantType) {
+            return false;
+          }
+
+          if (body.refresh_token !== options.refreshToken) {
+            return false;
+          }
+
+          return true;
+        })
+        .reply(HttpStatus.OK, responseObject);
+
+      // when
+      let promise = getAccessToken(options);
+
+      // then
+      return expect(promise).to.become(responseObject);
     });
   });
 });
