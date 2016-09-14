@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -41,6 +41,7 @@
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
     "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts",
+    "prepublish": "npm i;",
     "publish": "rm -rf dist; mkdir dist; tsc; cp -r ./lib ./dist/lib; cp package.json ./dist; cp README.md ./dist; cp LICENSE ./dist; npm publish ./dist"
   },
   "repository": {
