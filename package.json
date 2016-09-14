@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.19.2",
+  "version": "0.21.0",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -10,10 +10,12 @@
     "oauth2",
     "typescript"
   ],
-  "directories": {
-    "test": "test",
-    "lib": "lib"
-  },
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
   "engines" : {
     "node" : ">=6.0"
   },
@@ -36,12 +38,10 @@
     "tslint": "^3.5.0"
   },
   "scripts": {
-    "preinstall": "rm -rf graviton-typings; git clone git@github.bus.zalan.do:graviton/graviton-typings.git ./graviton-typings",
-    "postinstall": "typings install && tsc",
+    "setup-dev": "rm -rf graviton-typings; git clone git@github.bus.zalan.do:graviton/graviton-typings.git ./graviton-typings",
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
-    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts",
-    "publish": "npm i; rm -rf dist; mkdir dist; tsc; cp -r ./lib ./dist/lib; cp package.json ./dist; cp README.md ./dist; cp LICENSE ./dist; npm publish ./dist"
+    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
   },
   "repository": {
     "type": "git",

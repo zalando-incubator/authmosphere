@@ -191,6 +191,10 @@ cleanMock();
 * globally install `typings` >= 1.0 (`npm install typings -g`)
 * clone this repo
 * `npm install`
+* `typings install`
+* `npm run setup-dev`
+* to build: `tsc`
+* to lint: `npm run tslint`
 
 
 ## Testing
