@@ -1,9 +1,9 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.18.3",
+  "version": "0.19.0",
   "description": "A simple typescript based oauth tooling library",
-  "main": "./lib/src/index.js",
-  "typings": "./lib/src/index.d.ts",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "license": "MIT",
   "keywords": [
     "zalando",
@@ -13,6 +13,9 @@
   "directories": {
     "test": "test",
     "lib": "lib"
+  },
+  "engines" : {
+    "node" : ">=6.0"
   },
   "dependencies": {
     "body-parser": "^1.14.2",
@@ -37,7 +40,8 @@
     "postinstall": "typings install && tsc",
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
-    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
+    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts",
+    "publish": "rm -rf dist; mkdir dist; tsc; cp -r ./lib ./dist/lib; cp package.json ./dist; cp README.md ./dist; cp LICENSE ./dist; npm publish ./dist"
   },
   "repository": {
     "type": "git",

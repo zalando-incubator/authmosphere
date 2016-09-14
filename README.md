@@ -15,7 +15,8 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 Note: `node >= 6.0.0` required to consume this library.
 
-Run `npm install --save git+https://github.com/zalando-incubator/lib-oauth-tooling.git#<commit-ish>` where `<commit-ish>` has to be replaced with the release tag or commit id you want to use.
+Run `npm install lib-oauth-tooling`.
+
 Import a member of this lib like so (of course ES5 syntax is working as well...):
 
 ```typescript
