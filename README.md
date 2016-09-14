@@ -20,6 +20,7 @@ Run `npm install lib-oauth-tooling`.
 
 Import a member of this lib like so (of course ES5 syntax is working as well...):
 
+
 ```typescript
 import {
     TokenCache,
@@ -193,8 +194,6 @@ cleanMock();
 
 ## Development
 
-* globally install `typescript` >= 1.8 (`npm install typescript -g`)
-* globally install `typings` >= 1.0 (`npm install typings -g`)
 * clone this repo
 * `npm install`
 * `typings install`
