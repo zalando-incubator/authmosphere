@@ -44,7 +44,8 @@
     "setup-dev": "rm -rf graviton-typings; git clone git@github.bus.zalan.do:graviton/graviton-typings.git ./graviton-typings",
     "test": "mocha --opts test/mocha.opts",
     "integration-test": "mocha --opts integration-test/mocha.opts --harmony_default_parameters",
-    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts"
+    "tslint": "tslint src/**/*.ts test/**/*.ts integration-test/**/*.ts",
+    "prepublish": "npm run tslint && npm run test && npm run integration-test && rm -rf lib && tsc"
   },
   "repository": {
     "type": "git",
