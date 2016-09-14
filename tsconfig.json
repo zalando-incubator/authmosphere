@@ -11,12 +11,6 @@
     "sourceMap": true,
     "outDir": "./lib"
   },
-  "filesGlob": [
-    "integration/**/*.ts",
-    "src/**/*.ts",
-    "typings/index.d.ts",
-    "test/**/*.ts"
-  ],
   "buildOnSave": true,
   "compileOnSave": false,
   "formatCodeOptions": {
@@ -36,6 +30,9 @@
   "exclude": [
     "lib",
     "node_modules",
-    "graviton-typings"
+    "graviton-typings",
+    "test",
+    "integration-test",
+    "dist"
   ]
 }
