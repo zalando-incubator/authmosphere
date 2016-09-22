@@ -51,6 +51,19 @@ class TokenCache {
   }
 
   /**
+   * The resolveAccessTokenFactory function, creates a function, 
+   * which resolves a specific access_token.
+   *  
+   * @param {string} The key configured on the tokenCache instance
+   * @return {Promise<string>} the resolved access_token 
+   */
+  public resolveAccessTokenFactory(key: string): () => Promise<string> {
+      return () => this
+                    .get(key)
+                    .then(tokenInfo => tokenInfo.access_token);
+  }
+
+  /**
    * Resolves with either a cached token for the given name or with a newly requested one (which is then cached).
    * Rejects if there is no token present and is not able to request a new one.
    *
