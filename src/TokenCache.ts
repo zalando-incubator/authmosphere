@@ -58,9 +58,9 @@ class TokenCache {
    * @return {Promise<string>} the resolved access_token 
    */
   public resolveAccessTokenFactory(key: string): () => Promise<string> {
-      return () => this
-                    .get(key)
-                    .then(tokenInfo => tokenInfo.access_token);
+    return () => this
+      .get(key)
+      .then(tokenInfo => tokenInfo.access_token);
   }
 
   /**
