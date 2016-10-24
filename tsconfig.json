@@ -11,28 +11,14 @@
     "sourceMap": true,
     "outDir": "./lib"
   },
-  "buildOnSave": true,
-  "compileOnSave": false,
-  "formatCodeOptions": {
-    "indentSize": 2,
-    "tabSize": 2,
-    "newLineCharacter": "\n",
-    "convertTabsToSpaces": true,
-    "insertSpaceAfterCommaDelimiter": true,
-    "insertSpaceAfterSemicolonInForStatements": true,
-    "insertSpaceBeforeAndAfterBinaryOperators": true,
-    "insertSpaceAfterKeywordsInControlFlowStatements": true,
-    "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-    "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
-    "placeOpenBraceOnNewLineForFunctions": false,
-    "placeOpenBraceOnNewLineForControlBlocks": false
-  },
-  "exclude": [
-    "lib",
-    "node_modules",
-    "graviton-typings",
-    "test",
-    "integration-test",
-    "dist"
+  "files": [
+    "node_modules/@graviton/graviton-typings/typings/node-fetch/node-fetch.d.ts",
+    "node_modules/@graviton/graviton-typings/typings/btoa/btoa.d.ts",
+    "node_modules/@graviton/graviton-typings/typings/form-urlencoded/form-urlencoded.d.ts"
+  ],
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "integration-test/**/*"
   ]
 }

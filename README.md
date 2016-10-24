@@ -196,17 +196,14 @@ cleanMock();
 
 * clone this repo
 * `npm install`
-* `typings install`
-* `npm run setup-dev`
 * to build: `tsc`
 * to lint: `npm run tslint`
 
 
 ## Testing
 
-Both commands require a global installed mocha (`npm install -g mocha`) and ts-node (`npm install -g ts-node`).
-
-* `npm test` - runs unit tests
+* `npm test` - runs all tests
+* `npm run unit-test` - runs unit tests
 * `npm run integration-test` - runs integration tests
 
 
