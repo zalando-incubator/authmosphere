@@ -10,6 +10,9 @@
     "oauth2",
     "typescript"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "files": [
     "lib",
     "README.md",
