@@ -51,11 +51,11 @@ class TokenCache {
   }
 
   /**
-   * The resolveAccessTokenFactory function, creates a function, 
+   * The resolveAccessTokenFactory function, creates a function,
    * which resolves a specific access_token.
-   *  
+   *
    * @param {string} The key configured on the tokenCache instance
-   * @return {Promise<string>} the resolved access_token 
+   * @return {Promise<string>} the resolved access_token
    */
   public resolveAccessTokenFactory(key: string): () => Promise<string> {
     return () => this
@@ -158,8 +158,8 @@ class TokenCache {
     }
 
     return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .then(token => {
-        return Promise.resolve(token);
+      .then(validatedToken => {
+        return Promise.resolve(validatedToken);
       }).catch(() => {
         return Promise.reject(`Token ${tokenName} is invalid.`);
       });

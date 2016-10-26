@@ -150,7 +150,6 @@ export function validateOAuthConfig(options: any) {
     throw TypeError('redirectUri must be defined');
   }
 
-
   if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
