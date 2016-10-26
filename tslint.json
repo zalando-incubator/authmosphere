@@ -15,7 +15,6 @@
     "no-bitwise": true,
     "no-construct": true,
     "no-conditional-assignment ": true,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
