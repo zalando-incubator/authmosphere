@@ -3,8 +3,6 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   TokenCache,
-  handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
   getAccessToken,
   createAuthCodeRequestUri,
   SERVICES_REALM,

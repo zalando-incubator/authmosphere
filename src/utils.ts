@@ -99,10 +99,37 @@ export function extractAccessToken(authHeader: string): string {
  * @param req
  * @returns {function(any): undefined}
  */
-export function setScopes(req: express.Request) {
+export function setTokeninfo(req: express.Request) {
   return function(data: any) {
+
+    /* tslint:disable */
+    const {
+      uid,
+      scope,
+      grant_type,
+      authorization_code,
+      cn,
+      realm,
+      token_type,
+      expires_in,
+      client_id
+    } = data;
+
+    const tokeninfo = {
+      uid,
+      scope,
+      grant_type,
+      authorization_code,
+      cn,
+      realm,
+      token_type,
+      expires_in,
+      client_id
+    };
+    /* tslint:enable */
+
     Object.assign(req, {
-      scopes: data.scope
+      $$tokeninfo: tokeninfo
     });
   };
 }

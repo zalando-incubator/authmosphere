@@ -3,7 +3,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
+  requireScopesMiddleware
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -24,14 +24,14 @@ describe('oauth tooling', () => {
     };
   });
 
-
-
   describe('requireScopesMiddleware', () => {
 
     it('should reject request with 403 if required scopes are not met', () => {
 
         // given
-        requestMock.scopes = ['uid', 'test'];
+        requestMock.$$tokeninfo = {
+          scope: ['uid', 'test']
+        };
         const requiredScopes = ['uid', 'test', 'additional'];
         let called = false;
         let next = () => {
@@ -49,7 +49,9 @@ describe('oauth tooling', () => {
     it('should call #next if required scopes are met', () => {
 
       // given
-      requestMock.scopes = ['uid', 'test'];
+      requestMock.$$tokeninfo = {
+        scope: ['uid', 'test']
+      };
       const requiredScopes = ['uid', 'test'];
       let called = false;
       let next = () => {
@@ -66,10 +68,12 @@ describe('oauth tooling', () => {
     it('should call #next also if user has a superset of the required scopes', () => {
 
       // given
-      requestMock.scopes = ['uid', 'test', 'additionalScope'];
+      requestMock.$$tokeninfo = {
+        scope: ['uid', 'test', 'additionalScope']
+      };
       const requiredScopes = ['uid', 'test'];
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 
@@ -78,6 +82,51 @@ describe('oauth tooling', () => {
 
       // then
       expect(called).to.be.true;
+    });
+
+    it('should call #next if precedence function returns true', (done) => {
+
+      // given
+      requestMock.$$tokeninfo = {
+        scope: ['uid']
+      };
+      const requiredScopes = ['test'];
+      const next = () => {
+        done();
+      };
+
+      const preFun = () => {
+        return Promise.resolve(true);
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+
+      // then
+      // We wait for the done call here this we get no async handler back on that we can wait
+    });
+
+    it('should not call #next if precedence function returns false', () => {
+
+      // given
+      requestMock.$$tokeninfo = {
+        scope: ['uid']
+      };
+      const requiredScopes = ['test'];
+      let called = false;
+      let next = () => {
+        called = true;
+      };
+
+      const preFun = () => {
+        return Promise.resolve(false);
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+
+      // then
+      expect(called).to.be.false;
     });
   });
 
