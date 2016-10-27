@@ -208,36 +208,6 @@ function getAccessToken(options: any): Promise<string> {
 }
 
 /**
- * Returns a function (middleware) that validates the scopes against the user scopes
- * attached to the request (for example by `handleOAuthRequestMiddleware`).
- * If the the requested scopes are not matched request is rejected (with 403 Forbidden).
- *
- * Usage:
- *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
- *
- * @param scopes
- * @returns {function(any, any, any): undefined}
- */
-function requireScopesMiddleware(scopes: string[]) {
-  return function(req: any, res: any, next: Function) {
-
-    const userScopes     = new Set<String>(req.scopes || []);
-
-    let scopesCopy = new Set<String>(scopes || []);
-
-    for (let scope of userScopes) {
-      scopesCopy.delete(scope);
-    }
-
-    if (scopesCopy.size === 0) {
-      next();
-    } else {
-      rejectRequest(res, HttpStatus.FORBIDDEN);
-    }
-  };
-}
-
-/**
  * Returns a function (middleware) to extract and validate an access token from a request.
  * Furthermore, it attaches the scopes granted by the token to the request for further usage.
  * If the token is not valid the request is rejected (with 401 Unauthorized).
@@ -283,7 +253,6 @@ function handleOAuthRequestMiddleware(options: any) {
 
 export {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
   getTokenInfo,
   getAccessToken,
   createAuthCodeRequestUri
