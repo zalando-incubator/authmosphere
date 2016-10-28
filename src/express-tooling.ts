@@ -14,6 +14,10 @@ import {
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
+interface IPrecedenceFunction {
+  (req: any, res: any, next: Function): Promise<boolean>;
+}
+
 /**
  * Returns a function (middleware) that validates the scopes against the user scopes
  * attached to the request (for example by `handleOAuthRequestMiddleware`).
@@ -28,7 +32,9 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  *                             and next is called
  * @returns {function(any, any, any): undefined}
  */
-function requireScopesMiddleware(scopes: string[], precedenceFunction?: Function) {
+function requireScopesMiddleware(scopes: string[],
+                                 precedenceFunction?: IPrecedenceFunction) {
+
   return function(req: any, res: any, next: Function) {
 
     if (precedenceFunction) {
@@ -38,6 +44,7 @@ function requireScopesMiddleware(scopes: string[], precedenceFunction?: Function
           next();
         }
       });
+      return; // skip normal scope validation
     }
 
     const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
@@ -103,6 +110,7 @@ function handleOAuthRequestMiddleware(options: any) {
 }
 
 export {
+  IPrecedenceFunction,
   requireScopesMiddleware,
   handleOAuthRequestMiddleware,
 }

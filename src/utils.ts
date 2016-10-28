@@ -102,31 +102,23 @@ export function extractAccessToken(authHeader: string): string {
 export function setTokeninfo(req: express.Request) {
   return function(data: any) {
 
-    /* tslint:disable */
     const {
       uid,
       scope,
-      grant_type,
-      authorization_code,
       cn,
-      realm,
-      token_type,
+      /* tslint:disable */
       expires_in,
-      client_id
+      /* tslint:enable */
     } = data;
 
     const tokeninfo = {
       uid,
       scope,
-      grant_type,
-      authorization_code,
       cn,
-      realm,
-      token_type,
+      /* tslint:disable */
       expires_in,
-      client_id
+      /* tslint:enable */
     };
-    /* tslint:enable */
 
     Object.assign(req, {
       $$tokeninfo: tokeninfo
