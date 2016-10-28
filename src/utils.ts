@@ -115,9 +115,7 @@ export function setTokeninfo(req: express.Request) {
       uid,
       scope,
       cn,
-      /* tslint:disable */
-      expires_in,
-      /* tslint:enable */
+      expires_in, // tslint:disable-line
     };
 
     Object.assign(req, {

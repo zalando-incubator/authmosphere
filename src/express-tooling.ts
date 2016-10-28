@@ -42,26 +42,14 @@ function requireScopesMiddleware(scopes: string[],
       .then(result => {
         if (result) {
           next();
+        } else {
+          validateScopes(req, res, next, scopes);
         }
       });
       return; // skip normal scope validation
     }
 
-    const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
-
-    const userScopes = new Set<String>(requestScopes || []);
-
-    let scopesCopy = new Set<String>(scopes || []);
-
-    for (let scope of userScopes) {
-      scopesCopy.delete(scope);
-    }
-
-    if (scopesCopy.size === 0) {
-      next();
-    } else {
-      rejectRequest(res, HttpStatus.FORBIDDEN);
-    }
+    validateScopes(req, res, next, scopes);
   };
 }
 
@@ -107,6 +95,25 @@ function handleOAuthRequestMiddleware(options: any) {
         });
     }
   };
+}
+
+function validateScopes(req, res, next, scopes) {
+
+  const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
+
+  const userScopes = new Set<String>(requestScopes || []);
+
+  let scopesCopy = new Set<String>(scopes || []);
+
+  for (let scope of userScopes) {
+    scopesCopy.delete(scope);
+  }
+
+  if (scopesCopy.size === 0) {
+    next();
+  } else {
+    rejectRequest(res, HttpStatus.FORBIDDEN);
+  }
 }
 
 export {

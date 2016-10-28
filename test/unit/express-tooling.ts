@@ -106,11 +106,34 @@ describe('oauth tooling', () => {
       // We wait for the done call here this we get no async handler back on that we can wait
     });
 
-    it('should not call #next if precedence function returns false', () => {
+    it('should not call #next if precedence function returns false and scopes do not match', () => {
 
       // given
       requestMock.$$tokeninfo = {
         scope: ['uid']
+      };
+      const requiredScopes = ['test'];
+      let called = false;
+      let next = () => {
+        called = true;
+      };
+
+      const preFun = () => {
+        return Promise.resolve(false);
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+
+      // then
+      expect(called).to.be.false;
+    });
+
+    it('should not call #next if precedence function returns false and scopes matches', () => {
+
+      // given
+      requestMock.$$tokeninfo = {
+        scope: ['test']
       };
       const requiredScopes = ['test'];
       let called = false;
