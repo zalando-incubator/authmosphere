@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "0.26.2",
+  "version": "0.26.3",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -33,7 +33,6 @@
     "q": "^1.4.1"
   },
   "devDependencies": {
-    "@graviton/graviton-typings": "1.0.0",
     "@types/body-parser": "0.0.33",
     "@types/chai": "^3.4.33",
     "@types/chai-as-promised": "0.0.29",
