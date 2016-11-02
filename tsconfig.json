@@ -11,11 +11,6 @@
     "sourceMap": true,
     "outDir": "./lib"
   },
-  "files": [
-    "node_modules/@graviton/graviton-typings/typings/node-fetch/node-fetch.d.ts",
-    "node_modules/@graviton/graviton-typings/typings/btoa/btoa.d.ts",
-    "node_modules/@graviton/graviton-typings/typings/form-urlencoded/form-urlencoded.d.ts"
-  ],
   "include": [
     "src/**/*",
     "test/**/*",
