@@ -1,6 +1,6 @@
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
-import * as uuid from 'node-uuid';
+import * as uuid from 'uuid';
 import * as url from 'url';
 
 let tokens = [];
