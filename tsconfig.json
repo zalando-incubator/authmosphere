@@ -5,6 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "newLine": "LF",
+    "noUnusedLocals": true,
     "isolatedModules": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

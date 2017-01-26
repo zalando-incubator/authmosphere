@@ -345,9 +345,9 @@ describe('tokenCache', () => {
 
     let promise = tokenService.refreshAllTokens()
       .then((res) => {
-        return res.map(tokeninfo => tokeninfo['access_token']);
+        const tokens = res.map(tokeninfo => tokeninfo['access_token']);
+        return tokens.sort();
       });
-
     // then
     return expect(promise).to.become([ firstAccessToken, secondAccessToken ]);
   });

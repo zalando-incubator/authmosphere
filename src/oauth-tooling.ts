@@ -152,7 +152,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  * @param options
  * @returns {Promise<T>}
  */
-function getAccessToken(options: any): Promise<string> {
+function getAccessToken(options: any): Promise<any> {
 
   validateOAuthConfig(options);
 
