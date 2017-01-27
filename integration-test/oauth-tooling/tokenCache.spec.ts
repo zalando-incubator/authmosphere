@@ -343,12 +343,9 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.refreshAllTokens()
-      .then((res) => {
-        return res.map(tokeninfo => tokeninfo['access_token']);
-      });
-
-    // then
-    return expect(promise).to.become([ firstAccessToken, secondAccessToken ]);
+    return tokenService.refreshAllTokens().then(tokens => {
+      expect(tokens['nucleus'].access_token).to.equal(firstAccessToken);
+      expect(tokens['halo'].access_token).to.equal(secondAccessToken);
+    });
   });
 });

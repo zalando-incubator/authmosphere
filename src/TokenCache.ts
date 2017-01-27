@@ -122,16 +122,18 @@ class TokenCache {
 
   /**
    * Forces the cache to delete present tokens and request new ones.
-   * Will resolve with an array of the newly requested tokens if the request was successful.
+   * Will resolve with an hashmap of the newly requested tokens if the request was successful.
    * Otherwise, rejects.
    *
-   * @returns {Promise<T[]>}
+   * @returns {Promise<T>}
    */
   refreshAllTokens(): Promise<any> {
 
     let refreshPromises = Object.keys(this.tokenConfig).map(tokenName => this.refreshToken(tokenName));
+
     this._tokens = {};
-    return Promise.all(refreshPromises);
+
+    return Promise.all(refreshPromises).then(() => this._tokens);
   }
 
   /**
