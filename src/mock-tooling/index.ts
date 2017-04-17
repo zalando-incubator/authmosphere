@@ -3,7 +3,7 @@ import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
 
-let tokens = [];
+let tokens: any[] = [];
 
 function generateToken() {
 

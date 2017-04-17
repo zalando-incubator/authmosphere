@@ -1,5 +1,5 @@
 import * as HttpStatus from 'http-status';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
 
 import {

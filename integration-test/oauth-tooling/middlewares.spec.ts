@@ -3,7 +3,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
 import * as Express from 'express';
 import * as Http from 'http';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import {
   handleOAuthRequestMiddleware,

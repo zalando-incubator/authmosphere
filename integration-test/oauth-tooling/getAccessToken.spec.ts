@@ -59,7 +59,7 @@ describe('getAccessToken', () => {
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
 
-  let getAccessTokenOptions;
+  let getAccessTokenOptions: any;
 
   // Setup AuthServer
   beforeEach(() => {
@@ -127,7 +127,7 @@ describe('getAccessToken', () => {
 
   describe('authorization code grant', () => {
 
-    let getAccessTokenOptionsAuthorization;
+    let getAccessTokenOptionsAuthorization: any;
 
     before(() => {
       getAccessTokenOptionsAuthorization = {
@@ -199,7 +199,7 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-        .post('/access_token?realm=/services', (body) => {
+        .post('/access_token?realm=/services', (body: any) => {
 
           if (body.grant_type !== options.grantType) {
             return false;
@@ -246,7 +246,7 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-        .post('/access_token?realm=/employees', (body) => {
+        .post('/access_token?realm=/employees', (body: any) => {
 
           if (body.grant_type !== options.grantType) {
             return false;

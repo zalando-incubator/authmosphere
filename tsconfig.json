@@ -6,6 +6,7 @@
     "moduleResolution": "node",
     "newLine": "LF",
     "noUnusedLocals": true,
+    "noImplicitAny": true,
     "isolatedModules": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
