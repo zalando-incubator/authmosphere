@@ -14,7 +14,7 @@ const expect = chai.expect;
 
 describe('tokenCache', () => {
 
-  let oauthConfig = {};
+  let oauthConfig : OAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
 
   before(() => {

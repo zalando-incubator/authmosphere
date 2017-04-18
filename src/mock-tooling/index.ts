@@ -3,9 +3,9 @@ import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
 
-let tokens: any[] = [];
+let tokens : TokenInfo[] = [];
 
-function generateToken() {
+function generateToken(): TokenInfo {
 
   return {
     expires_in: 3600,
@@ -51,7 +51,7 @@ export function mockAccessTokenEndpoint(
 export function mockTokeninfoEndpoint(
   options: {
     url: string;
-    tokens?: any[];
+    tokens?: TokenInfo[];
     times?: number;
   }) {
 

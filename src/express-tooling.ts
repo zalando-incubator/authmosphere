@@ -97,7 +97,7 @@ function handleOAuthRequestMiddleware(options: any) {
   };
 }
 
-function validateScopes(req: any, res: any, next: any, scopes: any) {
+function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
 

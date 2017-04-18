@@ -30,7 +30,7 @@ import {
 } from 'lib-oauth-tooling';
 ```
 
-#### TokenCache(tokenConfig: any, oauthConfig: any)
+#### TokenCache(tokenConfig: any, oauthConfig: OAuthConfig)
 
 Class to request and cache tokens on client-side.
 

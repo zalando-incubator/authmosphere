@@ -83,17 +83,17 @@ describe('mock tooling', () => {
 
       // when
       let promise = getTokenInfo(tokeninfoEndpoint, 'foo')
-        .then((token: any) => {
+        .then((token: TokenInfo) => {
 
           expect(token).to.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
         })
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
         })
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
@@ -119,22 +119,22 @@ describe('mock tooling', () => {
 
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.deep.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
         })
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.deep.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
         })
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.deep.equal(validAuthToken);
           return getTokenInfo(tokeninfoEndpoint, 'foo');
         })
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           expect(token).to.deep.equal(validAuthToken);
         });
@@ -167,7 +167,7 @@ describe('mock tooling', () => {
 
       // when
       let promise = getAccessToken(options)
-        .then((token: any) => {
+        .then((token : TokenInfo) => {
 
           return getTokenInfo(tokeninfoEndpoint, token.access_token);
         });
