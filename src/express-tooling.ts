@@ -119,5 +119,5 @@ function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 export {
   IPrecedenceFunction,
   requireScopesMiddleware,
-  handleOAuthRequestMiddleware,
-}
+  handleOAuthRequestMiddleware
+};
