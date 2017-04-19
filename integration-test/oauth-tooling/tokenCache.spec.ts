@@ -308,7 +308,9 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
+      .post('/access_token?realm=/services', function (body: any) {
+        return body.scope === 'nucleus.write nucleus.read';
+      })
       .reply(HttpStatus.OK, {
         access_token: firstAccessToken
       })
@@ -322,7 +324,9 @@ describe('tokenCache', () => {
         'uid': 'uid',
         'access_token': firstAccessToken
       })
-      .post('/access_token?realm=/services')
+      .post('/access_token?realm=/services', function (body : any) {
+          return body.scope === 'all';
+        })
       .reply(HttpStatus.OK, {
         access_token: secondAccessToken
       })
