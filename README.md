@@ -30,7 +30,7 @@ import {
 } from 'lib-oauth-tooling';
 ```
 
-#### TokenCache(tokenConfig: { [key : string]: string[] }, oauthConfig: OAuthConfig)
+#### TokenCache(tokenConfig: { [key: string]: string[] }, oauthConfig: OAuthConfig)
 
 Class to request and cache tokens on client-side.
 

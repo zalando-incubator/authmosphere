@@ -77,7 +77,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
   return function(req: any, res: any, next: Function) {
 
     // Skip OAuth validation for paths marked as public
-if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndpoints))) {
+    if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndpoints))) {
       return next();
     }
 

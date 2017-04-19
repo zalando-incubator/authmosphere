@@ -36,7 +36,7 @@ class TokenCache {
    * @param tokenConfig
    * @param oauthConfig
    */
-  constructor(private tokenConfig : { [key : string]: string[] }, private oauthConfig : OAuthConfig) {
+  constructor(private tokenConfig: { [key: string]: string[] }, private oauthConfig: OAuthConfig) {
 
     validateOAuthConfig(oauthConfig);
 
@@ -52,8 +52,8 @@ class TokenCache {
    * @param {string} The key configured on the tokenCache instance
    * @return {Promise<string>} the resolved access_token
    */
-  public resolveAccessTokenFactory(key : string) : () => Promise < string > {
-    return() => this
+  public resolveAccessTokenFactory(key: string): () => Promise<string> {
+    return () => this
       .get(key)
       .then(tokenInfo => tokenInfo.access_token);
   }
@@ -65,7 +65,7 @@ class TokenCache {
    * @param tokenName
    * @returns {Promise<T>}
    */
-  get(tokenName : string) : Promise <TokenInfo> {
+  get(tokenName: string): Promise<TokenInfo> {
 
     const promise = new Promise((resolve, reject) => {
 
@@ -83,7 +83,7 @@ class TokenCache {
           .then((token: Token) => {
 
             return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token);
-          }).then((tokenInfo : TokenInfo) => {
+          }).then((tokenInfo: TokenInfo) => {
 
             tokenInfo.local_expiry = Date.now() + tokenInfo.expires_in * 1000 - EXPIRE_THRESHOLD;
             this._tokens[tokenName] = tokenInfo;
@@ -106,7 +106,7 @@ class TokenCache {
    * @param tokenName
    * @returns {Promise<TokenInfo>}
    */
-  refreshToken(tokenName : string) : Promise <TokenInfo> {
+  refreshToken(tokenName: string): Promise<TokenInfo> {
 
     this._tokens[tokenName] = undefined;
 
@@ -120,7 +120,7 @@ class TokenCache {
    *
    * @returns {Promise<T>}
    */
-  refreshAllTokens() : Promise <{ [key : string]: TokenInfo }> {
+  refreshAllTokens(): Promise<{ [key: string]: TokenInfo }> {
 
     const refreshPromises = Object
       .keys(this.tokenConfig)
@@ -141,7 +141,7 @@ class TokenCache {
    * @param tokenName
    * @returns {Promise<T>}
    */
-  private validateToken(tokenName : string) : Promise <TokenInfo> {
+  private validateToken(tokenName: string): Promise<TokenInfo> {
 
     if (!this.tokenConfig[tokenName]) {
       throw Error(`Token ${tokenName} does not exist.`);
@@ -166,4 +166,4 @@ class TokenCache {
   }
 }
 
-export {TokenCache};
+export { TokenCache };

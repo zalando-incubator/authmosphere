@@ -46,7 +46,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
           .status(HttpStatus.UNAUTHORIZED)
           .send({
             error: 'internal_error',
-            error_description : 'Request method GET not supported'
+            error_description: 'Request method GET not supported'
           });
       }
     }
@@ -59,7 +59,7 @@ describe('getAccessToken', () => {
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
 
-  let getAccessTokenOptions : OAuthConfig;
+  let getAccessTokenOptions: OAuthConfig;
 
   // Setup AuthServer
   beforeEach(() => {

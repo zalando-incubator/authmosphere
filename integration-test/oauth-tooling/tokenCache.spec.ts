@@ -14,7 +14,7 @@ const expect = chai.expect;
 
 describe('tokenCache', () => {
 
-  let oauthConfig : OAuthConfig;
+  let oauthConfig: OAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
 
   before(() => {
@@ -324,7 +324,7 @@ describe('tokenCache', () => {
       'uid': 'uid',
       'access_token': firstAccessToken
     })
-    .post('/access_token?realm=/services', function (body : any) {
+    .post('/access_token?realm=/services', function (body: any) {
       return body.scope === 'all';
     })
     .reply(HttpStatus.OK, {

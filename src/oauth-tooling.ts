@@ -165,7 +165,7 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
     const userData = JSON.parse(credentials[0]);
     const clientData = JSON.parse(credentials[1]);
 
-    let bodyParameters: any;
+    let bodyParameters: BodyParameters;
 
     if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
       bodyParameters = {
