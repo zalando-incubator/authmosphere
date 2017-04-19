@@ -8,14 +8,14 @@ const EXPIRE_THRESHOLD = 60 * 1000;
  * Class to request and cache tokens on client-side.
  *
  * Usage:
- *  let tokenCache = new TokenCache({
+ *  const tokenCache = new TokenCache({
  *    'nucleus': ['write.all', 'read.all']
  *  }, oAuthConfig);
  *
  *  tokenCache.get('nucleus')
- *    .then((tokeninfo) => {
- *      console.log(tokeninfo.access_token);
- *    });
+ *  .then((tokeninfo) => {
+ *    console.log(tokeninfo.access_token);
+ *  });
  *
  */
 class TokenCache {
@@ -36,7 +36,7 @@ class TokenCache {
    * @param tokenConfig
    * @param oauthConfig
    */
-constructor(private tokenConfig : { [key : string]: string[] }, private oauthConfig : OAuthConfig) {
+  constructor(private tokenConfig : { [key : string]: string[] }, private oauthConfig : OAuthConfig) {
 
     validateOAuthConfig(oauthConfig);
 
@@ -70,16 +70,17 @@ constructor(private tokenConfig : { [key : string]: string[] }, private oauthCon
     const promise = new Promise((resolve, reject) => {
 
       this
-        .validateToken(tokenName)
-        .then((token) => {
+      .validateToken(tokenName)
+      .then((token) => {
 
-          return resolve(token);
-        })
-        .catch(() => {
+        return resolve(token);
+      })
+      .catch(() => {
 
-          const config = Object.assign({}, this.oauthConfig, {scopes: this.tokenConfig[tokenName]});
+        const config = Object.assign({}, this.oauthConfig, {scopes: this.tokenConfig[tokenName]});
 
-          return getAccessToken(config).then((token : Token) => {
+        return getAccessToken(config)
+          .then((token: Token) => {
 
             return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token);
           }).then((tokenInfo : TokenInfo) => {
@@ -89,9 +90,9 @@ constructor(private tokenConfig : { [key : string]: string[] }, private oauthCon
             resolve(tokenInfo);
           }).catch((err) => {
 
-            return reject(err);
-          });
+          return reject(err);
         });
+      });
     });
 
     return promise;
@@ -108,6 +109,7 @@ constructor(private tokenConfig : { [key : string]: string[] }, private oauthCon
   refreshToken(tokenName : string) : Promise <TokenInfo> {
 
     this._tokens[tokenName] = undefined;
+
     return this.get(tokenName);
   }
 
@@ -118,9 +120,9 @@ constructor(private tokenConfig : { [key : string]: string[] }, private oauthCon
    *
    * @returns {Promise<T>}
    */
-refreshAllTokens() : Promise <{ [key : string]: TokenInfo }> {
+  refreshAllTokens() : Promise <{ [key : string]: TokenInfo }> {
 
-    let refreshPromises = Object
+    const refreshPromises = Object
       .keys(this.tokenConfig)
       .map(tokenName => this.refreshToken(tokenName));
 
@@ -154,11 +156,13 @@ refreshAllTokens() : Promise <{ [key : string]: TokenInfo }> {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
 
-    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token).then(validatedToken => {
-      return Promise.resolve(validatedToken);
-    }).catch(() => {
-      return Promise.reject(`Token ${tokenName} is invalid.`);
-    });
+    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
+      .then(validatedToken => {
+        return Promise.resolve(validatedToken);
+      })
+      .catch(() => {
+        return Promise.reject(`Token ${tokenName} is invalid.`);
+      });
   }
 }
 

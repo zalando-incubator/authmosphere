@@ -86,13 +86,13 @@ if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndp
       rejectRequest(res);
     } else {
       getTokenInfo(options.tokenInfoEndpoint, accessToken)
-        .then(setTokeninfo(req))
-        .then(() => {
-          next();
-        })
-        .catch((err) => {
-          rejectRequest(res, err.status);
-        });
+      .then(setTokeninfo(req))
+      .then(() => {
+        next();
+      })
+      .catch((err) => {
+        rejectRequest(res, err.status);
+      });
     }
   };
 }
@@ -103,9 +103,9 @@ function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 
   const userScopes = new Set<String>(requestScopes || []);
 
-  let scopesCopy = new Set<String>(scopes || []);
+  const scopesCopy = new Set<String>(scopes || []);
 
-  for (let scope of userScopes) {
+  for (const scope of userScopes) {
     scopesCopy.delete(scope);
   }
 

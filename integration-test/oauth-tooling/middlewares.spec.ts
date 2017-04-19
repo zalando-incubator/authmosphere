@@ -22,7 +22,7 @@ describe('middlewares', () => {
 
   // Setup API server
   beforeEach(() => {
-    let app = Express();
+    const app = Express();
 
     app.use(handleOAuthRequestMiddleware({
       publicEndpoints: [ '/public', '/healthcheck' ],
@@ -54,7 +54,7 @@ describe('middlewares', () => {
   function addStandardAuthenticationEndpoint() {
 
     authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+      const valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
       if (valid) {
         res
@@ -82,7 +82,7 @@ describe('middlewares', () => {
   function addAuthenticationEndpointWithoutRequiredScopes() {
 
     authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+      const valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
       if (valid) {
         res
@@ -123,6 +123,7 @@ describe('middlewares', () => {
     // when
     const promise = fetch('http://127.0.0.1:30002/resource/user')
     .then((res) => {
+
       return res.status;
     });
 
@@ -133,17 +134,18 @@ describe('middlewares', () => {
   it('should return 401 if server response is != 200 ', function() {
 
     // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     add500Endpoint();
 
     // when
-    let promise = fetch('http://127.0.0.1:30002/resource/user', {
+    const promise = fetch('http://127.0.0.1:30002/resource/user', {
       method: 'GET',
       headers: {
         authorization: authHeader
       }
     })
     .then((res) => {
+
       return res.status;
     });
 
@@ -154,17 +156,18 @@ describe('middlewares', () => {
   it('should return 403 if scope is not granted', () => {
 
     // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addAuthenticationEndpointWithoutRequiredScopes();
 
     // when
-    let promise = fetch('http://127.0.0.1:30002/resource/user', {
+    const promise = fetch('http://127.0.0.1:30002/resource/user', {
       method: 'GET',
       headers: {
         authorization: authHeader
       }
     })
     .then((res) => {
+
       return res.status;
     });
 
@@ -175,20 +178,22 @@ describe('middlewares', () => {
   it('should return the resource if token is valid, _all_ scopes are  granted and resource belongs to the service user', function() {
 
     // given
-    let authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addStandardAuthenticationEndpoint();
 
     // when
-    let promise = fetch('http://127.0.0.1:30002/resource/user', {
+    const promise = fetch('http://127.0.0.1:30002/resource/user', {
       method: 'GET',
       headers: {
         authorization: authHeader
       }
     })
     .then((res: any) => {
+
       return res.json();
     })
     .then((jsonData) => {
+
       return jsonData;
     });
 

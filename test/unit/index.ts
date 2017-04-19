@@ -13,13 +13,13 @@ import {
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
-let expect = chai.expect;
+const expect = chai.expect;
 
 describe('oauth tooling', () => {
 
   describe('getAccessToken should throw TypeError', () => {
 
-    let config = {
+    const config = {
       realm: SERVICES_REALM,
       accessTokenEndpoint: '/oauth2/access_token',
       credentialsDir: 'credentials',
@@ -113,7 +113,7 @@ describe('oauth tooling', () => {
 
     it('should throw an error if it tries to request a token with an invalid name', () => {
 
-      let tokenCache = new TokenCache({
+      const tokenCache = new TokenCache({
         'foo': ['uid']
       }, {
         realm: SERVICES_REALM,
@@ -122,6 +122,7 @@ describe('oauth tooling', () => {
         credentialsDir: '/credentials',
         grantType: PASSWORD_CREDENTIALS_GRANT
       });
+
       return expect(tokenCache.get('bar')).to.be.rejected;
     });
   });

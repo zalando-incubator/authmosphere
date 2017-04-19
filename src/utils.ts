@@ -130,7 +130,7 @@ export function setTokeninfo(req: express.Request) {
  */
 export function rejectRequest(res: express.Response, status?: number) {
 
-  let _status = status ? status : HttpStatus.UNAUTHORIZED;
+  const _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
 }
 

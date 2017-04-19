@@ -60,27 +60,27 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
-      .then((response) => {
+    .then((response) => {
 
-        const status = response.status;
+      const status = response.status;
 
-        return response
-          .json()
-          .then((data) => {
+      return response
+        .json()
+        .then((data) => {
 
-            if (response.status !== HttpStatus.OK) {
-              throw { status, data };
-            } else {
-              return resolve(data);
-            }
-        });
-      })
-      .catch((err) => {
-        return reject({
-          msg: `Error requesting access token from ${accessTokenEndpoint}`,
-          err
-        });
+          if (response.status !== HttpStatus.OK) {
+            throw { status, data };
+          } else {
+            return resolve(data);
+          }
       });
+    })
+    .catch((err) => {
+      return reject({
+        msg: `Error requesting access token from ${accessTokenEndpoint}`,
+        err
+      });
+    });
   });
 
   return promise;
@@ -100,27 +100,27 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenI
   const promise = new Promise(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
-      .then((response) => {
+    .then((response) => {
 
-        const status = response.status;
+      const status = response.status;
 
-        return response
-          .json()
-          .then((data) => {
+      return response
+      .json()
+      .then((data) => {
 
-            if (response.status !== HttpStatus.OK) {
-              throw { status, data };
-            } else {
-              return resolve(data);
-            }
-          });
-      })
-      .catch( err => {
-        return reject({
-          msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-          err
-        });
+        if (response.status !== HttpStatus.OK) {
+          throw { status, data };
+        } else {
+          return resolve(data);
+        }
       });
+    })
+    .catch( err => {
+      return reject({
+        msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
+        err
+      });
+    });
   });
 
   return promise;
@@ -160,45 +160,45 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
     getFileData(options.credentialsDir, USER_JSON),
     getFileData(options.credentialsDir, CLIENT_JSON)
   ])
-    .then((credentials) => {
+  .then((credentials) => {
 
-      const userData = JSON.parse(credentials[0]);
-      const clientData = JSON.parse(credentials[1]);
+    const userData = JSON.parse(credentials[0]);
+    const clientData = JSON.parse(credentials[1]);
 
-      let bodyParameters;
+    let bodyParameters: any;
 
-      if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'username': userData.application_username,
-          'password': userData.application_password
-        };
-      } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'code': options.code,
-          'redirect_uri': options.redirectUri
-        };
-      } else if (options.grantType === REFRESH_TOKEN_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'refresh_token': options.refreshToken
-        };
-      } else {
-        throw TypeError('invalid grantType');
-      }
+    if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'username': userData.application_username,
+        'password': userData.application_password
+      };
+    } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'code': options.code,
+        'redirect_uri': options.redirectUri
+      };
+    } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'refresh_token': options.refreshToken
+      };
+    } else {
+      throw TypeError('invalid grantType');
+    }
 
-      if (options.scopes) {
-        Object.assign(bodyParameters, {
-          scope: options.scopes.join(' ')
-        });
-      }
+    if (options.scopes) {
+      Object.assign(bodyParameters, {
+        scope: options.scopes.join(' ')
+      });
+    }
 
-      const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
+    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
-      return requestAccessToken(bodyParameters, authorizationHeaderValue,
-        options.accessTokenEndpoint, options.realm);
-    });
+    return requestAccessToken(bodyParameters, authorizationHeaderValue,
+      options.accessTokenEndpoint, options.realm);
+  });
 }
 
 export {

@@ -35,15 +35,15 @@ import {
 Class to request and cache tokens on client-side.
 
 ```typescript
-let tokenCache = new TokenCache({
+const tokenCache = new TokenCache({
   'service-foo': ['foo.read', 'foo.write'],
   'service-bar': ['bar.read']
 }, oAuthConfig);
 
 tokenCache.get('service-foo')
-  .then((tokeninfo) => {
-    console.log(tokeninfo.access_token);
-  });
+.then((tokeninfo) => {
+  console.log(tokeninfo.access_token);
+});
 ```
 
 `oauthConfig`:
@@ -90,12 +90,12 @@ Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
 ```typescript
 getTokenInfo(tokenInfoEndpoint, accessToken)
-  .then((tokeninfo) => {
-    console.log(tokeninfo.access_token);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+.then((tokeninfo) => {
+  console.log(tokeninfo.access_token);
+})
+.catch((err) => {
+  console.log(err);
+});
 ```
 
 #### getAccessToken(options: OAuthConfig)
@@ -104,12 +104,12 @@ Helper function to get an access token for the specified scopes.
 
 ```typescript
 getAccessToken(options)
-  .then((accessToken) => {
-    console.log(accessToken);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+.then((accessToken) => {
+  console.log(accessToken);
+})
+.catch((err) => {
+  console.log(err);
+});
 ```
 
 `options`:
