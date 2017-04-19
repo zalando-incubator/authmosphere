@@ -68,7 +68,7 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns {function(any, any, any): undefined} express middleware
  */
-function handleOAuthRequestMiddleware(options: any) {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
 
   if (!options.tokenInfoEndpoint) {
     throw TypeError('tokenInfoEndpoint must be defined');
@@ -77,7 +77,7 @@ function handleOAuthRequestMiddleware(options: any) {
   return function(req: any, res: any, next: Function) {
 
     // Skip OAuth validation for paths marked as public
-    if (options.publicEndpoints && match(req.originalUrl, options.publicEndpoints)) {
+if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndpoints))) {
       return next();
     }
 

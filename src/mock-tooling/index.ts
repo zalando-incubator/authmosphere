@@ -20,11 +20,7 @@ function generateToken(): TokenInfo {
  * @param options
  * @returns {Scope}
  */
-export function mockAccessTokenEndpoint(
-  options: {
-   url: string;
-   times?: number;
-  }) {
+export function mockAccessTokenEndpoint(options: MockOptions) {
 
   const parsedUrl = url.parse(options.url);
 
@@ -48,12 +44,7 @@ export function mockAccessTokenEndpoint(
  * @param options
  * @returns {Scope}
  */
-export function mockTokeninfoEndpoint(
-  options: {
-    url: string;
-    tokens?: TokenInfo[];
-    times?: number;
-  }) {
+export function mockTokeninfoEndpoint(options: MockOptions) {
 
   const parsedUrl = url.parse(options.url);
 

@@ -100,20 +100,20 @@ export function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 export function setTokeninfo(req: express.Request) {
-  return function(data: any) {
+  return function(data: TokenInfo) {
 
     const {
       uid,
       scope,
       cn,
-      expires_in, // tslint:disable-line
+      expires_in // tslint:disable-line
     } = data;
 
     const tokeninfo = {
       uid,
       scope,
       cn,
-      expires_in, // tslint:disable-line
+      expires_in // tslint:disable-line
     };
 
     Object.assign(req, {

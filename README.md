@@ -50,13 +50,13 @@ tokenCache.get('service-foo')
 * `credentialsDir` string
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
-* `tokenInfoEndpoint` string
+* `tokenInfoEndpoint` string - mandatory for TokenCache
 * `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 
-#### handleOAuthRequestMiddleware(options: any)
+#### handleOAuthRequestMiddleware(options: MiddlewareOptions)
 
 Express middleware to extract and validate an access token. It attaches the scopes matched by the token to the request (`request.scopes`) for further usage.
 If the token is not valid the request is rejected (with 401 Unauthorized).
@@ -98,7 +98,7 @@ getTokenInfo(tokenInfoEndpoint, accessToken)
   });
 ```
 
-#### getAccessToken(options: any)
+#### getAccessToken(options: OAuthConfig)
 
 Helper function to get an access token for the specified scopes.
 
@@ -147,7 +147,7 @@ String constant specifying the employees realm.
 
 If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
 
-#### mockTokenInfoEndpoint(options: any)
+#### mockTokenInfoEndpoint(options: MockOptions)
 
 Mocks a `tokeninfo` endpoint.
 
@@ -167,7 +167,7 @@ mockTokeninfoEndpoint({
 * `tokens` any optional (list of valid tokens)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
-#### mockAccessTokenEndpoint(options: any)
+#### mockAccessTokenEndpoint(options: MockOptions)
 
 Mocks a `access_token` endpoint.
 
