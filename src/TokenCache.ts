@@ -1,6 +1,6 @@
-import {getAccessToken, getTokenInfo} from './oauth-tooling';
+import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
-import {validateOAuthConfig} from './utils';
+import { validateOAuthConfig } from './utils';
 
 const EXPIRE_THRESHOLD = 60 * 1000;
 
@@ -83,15 +83,17 @@ class TokenCache {
           .then((token: Token) => {
 
             return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token);
-          }).then((tokenInfo: TokenInfo) => {
+          })
+          .then((tokenInfo: TokenInfo) => {
 
             tokenInfo.local_expiry = Date.now() + tokenInfo.expires_in * 1000 - EXPIRE_THRESHOLD;
             this._tokens[tokenName] = tokenInfo;
             resolve(tokenInfo);
-          }).catch((err) => {
+          })
+          .catch((err) => {
 
-          return reject(err);
-        });
+            return reject(err);
+          });
       });
     });
 
