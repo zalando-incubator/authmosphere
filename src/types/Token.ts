@@ -1,6 +1,5 @@
 interface Token {
   access_token: string;
-
   expires_in: number;
   id_token: string;
   realm: string;

@@ -48,7 +48,7 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @returns {Promise<T>|Q.Promise<U>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string): Promise<any> {
+                            accessTokenEndpoint: string, realm: string): Promise<Token> {
 
   const promise = new Promise(function(resolve, reject) {
 
@@ -95,7 +95,7 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
  * @param accessToken
  * @returns {Promise<T>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenInfo> {
 
   const promise = new Promise(function(resolve, reject) {
 
@@ -152,7 +152,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  * @param options
  * @returns {Promise<T>}
  */
-function getAccessToken(options: any): Promise<any> {
+function getAccessToken(options: OAuthConfig): Promise<Token> {
 
   validateOAuthConfig(options);
 

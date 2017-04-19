@@ -59,7 +59,7 @@ describe('getAccessToken', () => {
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
 
-  let getAccessTokenOptions: any;
+  let getAccessTokenOptions : OAuthConfig;
 
   // Setup AuthServer
   beforeEach(() => {
@@ -127,7 +127,7 @@ describe('getAccessToken', () => {
 
   describe('authorization code grant', () => {
 
-    let getAccessTokenOptionsAuthorization: any;
+    let getAccessTokenOptionsAuthorization: OAuthConfig​​ ;
 
     before(() => {
       getAccessTokenOptionsAuthorization = {

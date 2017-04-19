@@ -17,19 +17,6 @@ let expect = chai.expect;
 
 describe('oauth tooling', () => {
 
-  let requestMock: any;
-  let responseMock: any;
-
-  before(() => {
-
-    requestMock = {};
-
-    responseMock = {};
-    responseMock.sendStatus = function(status: string) {
-      this.status = status;
-    };
-  });
-
   describe('getAccessToken should throw TypeError', () => {
 
     let config = {

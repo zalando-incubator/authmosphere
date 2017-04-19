@@ -106,9 +106,7 @@ export function setTokeninfo(req: express.Request) {
       uid,
       scope,
       cn,
-      /* tslint:disable */
-      expires_in,
-      /* tslint:enable */
+      expires_in, // tslint:disable-line
     } = data;
 
     const tokeninfo = {
@@ -141,7 +139,7 @@ export function rejectRequest(res: express.Response, status?: number) {
  *
  * @param options
  */
-export function validateOAuthConfig(options: any) {
+export function validateOAuthConfig(options: OAuthConfig) {
 
   if (!options.credentialsDir) {
     throw TypeError('credentialsDir must be defined');

@@ -167,7 +167,7 @@ describe('mock tooling', () => {
 
       // when
       let promise = getAccessToken(options)
-        .then((token : TokenInfo) => {
+        .then((token : Token) => {
 
           return getTokenInfo(tokeninfoEndpoint, token.access_token);
         });

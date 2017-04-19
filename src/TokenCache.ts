@@ -20,7 +20,7 @@ const EXPIRE_THRESHOLD = 60 * 1000;
  */
 class TokenCache {
 
-  private _tokens : any = {};
+  private _tokens: { [key: string]: TokenInfo } = {};
 
   /**
    * `oauthConfig`:
@@ -36,7 +36,7 @@ class TokenCache {
    * @param tokenConfig
    * @param oauthConfig
    */
-constructor(private tokenConfig : any, private oauthConfig : OAuthConfig) {
+constructor(private tokenConfig : { [key : string]: string[] }, private oauthConfig : OAuthConfig) {
 
     validateOAuthConfig(oauthConfig);
 
@@ -65,7 +65,7 @@ constructor(private tokenConfig : any, private oauthConfig : OAuthConfig) {
    * @param tokenName
    * @returns {Promise<T>}
    */
-  get(tokenName : string) : Promise < any > {
+  get(tokenName : string) : Promise <TokenInfo> {
 
     const promise = new Promise((resolve, reject) => {
 
@@ -103,9 +103,9 @@ constructor(private tokenConfig : any, private oauthConfig : OAuthConfig) {
    * Otherwise, rejects.
    *
    * @param tokenName
-   * @returns {Promise<any>}
+   * @returns {Promise<TokenInfo>}
    */
-  refreshToken(tokenName : string) : Promise < any > {
+  refreshToken(tokenName : string) : Promise <TokenInfo> {
 
     this._tokens[tokenName] = undefined;
     return this.get(tokenName);
@@ -118,7 +118,7 @@ constructor(private tokenConfig : any, private oauthConfig : OAuthConfig) {
    *
    * @returns {Promise<T>}
    */
-  refreshAllTokens() : Promise < any > {
+refreshAllTokens() : Promise <{ [key : string]: TokenInfo }> {
 
     let refreshPromises = Object
       .keys(this.tokenConfig)
@@ -139,7 +139,7 @@ constructor(private tokenConfig : any, private oauthConfig : OAuthConfig) {
    * @param tokenName
    * @returns {Promise<T>}
    */
-  private validateToken(tokenName : string) : Promise < any > {
+  private validateToken(tokenName : string) : Promise <TokenInfo> {
 
     if (!this.tokenConfig[tokenName]) {
       throw Error(`Token ${tokenName} does not exist.`);

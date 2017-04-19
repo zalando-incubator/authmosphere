@@ -30,7 +30,7 @@ import {
 } from 'lib-oauth-tooling';
 ```
 
-#### TokenCache(tokenConfig: any, oauthConfig: OAuthConfig)
+#### TokenCache(tokenConfig: { [key : string]: string[] }, oauthConfig: OAuthConfig)
 
 Class to request and cache tokens on client-side.
 
@@ -84,7 +84,7 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 })
 ```
 
-#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<any>
+#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<TokenInfo>
 
 Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
