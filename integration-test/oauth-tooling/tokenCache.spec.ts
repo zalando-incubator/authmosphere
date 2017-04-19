@@ -14,7 +14,7 @@ const expect = chai.expect;
 
 describe('tokenCache', () => {
 
-  let oauthConfig = {};
+  let oauthConfig: OAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
 
   before(() => {
@@ -35,8 +35,8 @@ describe('tokenCache', () => {
 
     // given
     nock(oauthHost)
-      .post('/access_token?realm=services')
-      .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+    .post('/access_token?realm=services')
+    .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
     // when
     const tokenCache = new TokenCache({
@@ -54,20 +54,20 @@ describe('tokenCache', () => {
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: accessToken
-      })
-      .get('/tokeninfo?access_token=' + accessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': accessToken
-      });
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: accessToken
+    })
+    .get('/tokeninfo?access_token=' + accessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': accessToken
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -75,10 +75,10 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.get('nucleus')
-      .then((tokeninfo) => {
+    const promise = tokenService.get('nucleus')
+    .then((tokeninfo) => {
 
-        return tokeninfo.access_token;
+      return tokeninfo.access_token;
     });
 
     // then
@@ -100,13 +100,13 @@ describe('tokenCache', () => {
     };
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: accessToken
-      })
-      .get('/tokeninfo?access_token=' + accessToken)
-      .times(2)
-      .reply(HttpStatus.OK, tokeninfo);
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: accessToken
+    })
+    .get('/tokeninfo?access_token=' + accessToken)
+    .times(2)
+    .reply(HttpStatus.OK, tokeninfo);
 
     // when
     const tokenService = new TokenCache({
@@ -114,15 +114,15 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.get('nucleus')
-      .then(() => {
+    const promise = tokenService.get('nucleus')
+    .then(() => {
 
-        return tokenService.get('nucleus')
-          .then((data) => {
+      return tokenService.get('nucleus')
+        .then((data) => {
 
-            return data.access_token;
-          });
-      });
+          return data.access_token;
+        });
+    });
 
     // then
     return expect(promise).to.become(accessToken);
@@ -135,35 +135,35 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: firstAccessToken
-      })
-      .get('/tokeninfo?access_token=' + firstAccessToken)
-      .reply(HttpStatus.OK, {
-        // make the first access token expire immediately
-        'expires_in': 1,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': firstAccessToken
-      })
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: secondAccessToken
-      })
-      .get('/tokeninfo?access_token=' + secondAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': secondAccessToken
-      });
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: firstAccessToken
+    })
+    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .reply(HttpStatus.OK, {
+      // make the first access token expire immediately
+      'expires_in': 1,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': firstAccessToken
+    })
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: secondAccessToken
+    })
+    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': secondAccessToken
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -171,15 +171,15 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.get('nucleus')
-      .then(() => {
+    const promise = tokenService.get('nucleus')
+    .then(() => {
 
-        return tokenService.get('nucleus')
-          .then((tokeninfo) => {
+      return tokenService.get('nucleus')
+        .then((tokeninfo) => {
 
-            return tokeninfo.access_token;
-          });
-      });
+          return tokeninfo.access_token;
+        });
+    });
 
     // then
     return expect(promise).to.become(secondAccessToken);
@@ -192,39 +192,39 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: firstAccessToken
-      })
-      .get('/tokeninfo?access_token=' + firstAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': firstAccessToken
-      })
-      .get('/tokeninfo?access_token=' + firstAccessToken)
-      .reply(HttpStatus.BAD_REQUEST, {
-        error: 'invalid_request',
-        error_description: 'Access token not valid'
-      })
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: secondAccessToken
-      })
-      .get('/tokeninfo?access_token=' + secondAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': secondAccessToken
-      });
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: firstAccessToken
+    })
+    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': firstAccessToken
+    })
+    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .reply(HttpStatus.BAD_REQUEST, {
+      error: 'invalid_request',
+      error_description: 'Access token not valid'
+    })
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: secondAccessToken
+    })
+    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': secondAccessToken
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -232,14 +232,14 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.get('nucleus')
-      .then(() => {
-        return tokenService.get('nucleus')
-          .then((tokeninfo) => {
+    const promise = tokenService.get('nucleus')
+    .then(() => {
+      return tokenService.get('nucleus')
+        .then((tokeninfo) => {
 
-            return tokeninfo.access_token;
-          });
-      });
+          return tokeninfo.access_token;
+        });
+    });
 
     // then
     return expect(promise).to.become(secondAccessToken);
@@ -252,34 +252,34 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: firstAccessToken
-      })
-      .get('/tokeninfo?access_token=' + firstAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': firstAccessToken
-      })
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: secondAccessToken
-      })
-      .get('/tokeninfo?access_token=' + secondAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': secondAccessToken
-      });
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: firstAccessToken
+    })
+    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': firstAccessToken
+    })
+    .post('/access_token?realm=/services')
+    .reply(HttpStatus.OK, {
+      access_token: secondAccessToken
+    })
+    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': secondAccessToken
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -287,15 +287,15 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    let promise = tokenService.get('nucleus')
-      .then(() => {
+    const promise = tokenService.get('nucleus')
+    .then(() => {
 
-        return tokenService.refreshToken('nucleus')
-          .then((tokeninfo) => {
+      return tokenService.refreshToken('nucleus')
+      .then((tokeninfo) => {
 
-            return tokeninfo.access_token;
-          });
+        return tokeninfo.access_token;
       });
+    });
 
     // then
     return expect(promise).to.become(secondAccessToken);
@@ -308,34 +308,38 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: firstAccessToken
-      })
-      .get('/tokeninfo?access_token=' + firstAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['nucleus.write', 'nucleus.read'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': firstAccessToken
-      })
-      .post('/access_token?realm=/services')
-      .reply(HttpStatus.OK, {
-        access_token: secondAccessToken
-      })
-      .get('/tokeninfo?access_token=' + secondAccessToken)
-      .reply(HttpStatus.OK, {
-        'expires_in': 3600,
-        'token_type': 'Bearer',
-        'realm': 'employees',
-        'scope': ['all'],
-        'grant_type': PASSWORD_CREDENTIALS_GRANT,
-        'uid': 'uid',
-        'access_token': secondAccessToken
-      });
+    .post('/access_token?realm=/services', function (body: any) {
+      return body.scope === 'nucleus.write nucleus.read';
+    })
+    .reply(HttpStatus.OK, {
+      access_token: firstAccessToken
+    })
+    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['nucleus.write', 'nucleus.read'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': firstAccessToken
+    })
+    .post('/access_token?realm=/services', function (body: any) {
+      return body.scope === 'all';
+    })
+    .reply(HttpStatus.OK, {
+      access_token: secondAccessToken
+    })
+    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .reply(HttpStatus.OK, {
+      'expires_in': 3600,
+      'token_type': 'Bearer',
+      'realm': 'employees',
+      'scope': ['all'],
+      'grant_type': PASSWORD_CREDENTIALS_GRANT,
+      'uid': 'uid',
+      'access_token': secondAccessToken
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -343,9 +347,10 @@ describe('tokenCache', () => {
       'halo': ['all']
     }, oauthConfig);
 
-    return tokenService.refreshAllTokens().then(tokens => {
-      expect(tokens['nucleus'].access_token).to.equal(firstAccessToken);
-      expect(tokens['halo'].access_token).to.equal(secondAccessToken);
-    });
+    return tokenService.refreshAllTokens()
+      .then(tokens => {
+        expect(tokens['nucleus'].access_token).to.equal(firstAccessToken);
+        expect(tokens['halo'].access_token).to.equal(secondAccessToken);
+      });
   });
 });

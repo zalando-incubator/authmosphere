@@ -38,7 +38,7 @@ describe('mock tooling', () => {
       });
 
       // when
-      let promise = getTokenInfo(tokeninfoEndpoint, 'invalid');
+      const promise = getTokenInfo(tokeninfoEndpoint, 'invalid');
 
       // then
       return expect(promise).to.rejected;
@@ -60,7 +60,7 @@ describe('mock tooling', () => {
       });
 
       // when
-      let promise = getTokenInfo(tokeninfoEndpoint, 'foo');
+      const promise = getTokenInfo(tokeninfoEndpoint, 'foo');
 
       // then
       return expect(promise).to.become(validAuthToken);
@@ -82,22 +82,22 @@ describe('mock tooling', () => {
       });
 
       // when
-      let promise = getTokenInfo(tokeninfoEndpoint, 'foo')
-        .then((token: any) => {
+      const promise = getTokenInfo(tokeninfoEndpoint, 'foo')
+      .then((token: TokenInfo) => {
 
-          expect(token).to.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        })
-        .then((token: any) => {
+        expect(token).to.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      })
+      .then((token: TokenInfo) => {
 
-          expect(token).to.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        })
-        .then((token: any) => {
+        expect(token).to.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      })
+      .then((token: TokenInfo) => {
 
-          expect(token).to.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        });
+        expect(token).to.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      });
 
       // then
       return expect(promise).to.rejected;
@@ -119,25 +119,25 @@ describe('mock tooling', () => {
 
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
-        .then((token: any) => {
+      .then((token: TokenInfo) => {
 
-          expect(token).to.deep.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        })
-        .then((token: any) => {
+        expect(token).to.deep.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      })
+      .then((token: TokenInfo) => {
 
-          expect(token).to.deep.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        })
-        .then((token: any) => {
+        expect(token).to.deep.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      })
+      .then((token: TokenInfo) => {
 
-          expect(token).to.deep.equal(validAuthToken);
-          return getTokenInfo(tokeninfoEndpoint, 'foo');
-        })
-        .then((token: any) => {
+        expect(token).to.deep.equal(validAuthToken);
+        return getTokenInfo(tokeninfoEndpoint, 'foo');
+      })
+      .then((token: TokenInfo) => {
 
-          expect(token).to.deep.equal(validAuthToken);
-        });
+        expect(token).to.deep.equal(validAuthToken);
+      });
     });
 
   });
@@ -166,11 +166,11 @@ describe('mock tooling', () => {
       });
 
       // when
-      let promise = getAccessToken(options)
-        .then((token: any) => {
+      const promise = getAccessToken(options)
+      .then((token: Token) => {
 
-          return getTokenInfo(tokeninfoEndpoint, token.access_token);
-        });
+        return getTokenInfo(tokeninfoEndpoint, token.access_token);
+      });
 
       // then
       return expect(promise).to.eventually.haveOwnProperty('access_token');

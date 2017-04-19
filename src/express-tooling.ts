@@ -68,7 +68,7 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns {function(any, any, any): undefined} express middleware
  */
-function handleOAuthRequestMiddleware(options: any) {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
 
   if (!options.tokenInfoEndpoint) {
     throw TypeError('tokenInfoEndpoint must be defined');
@@ -77,7 +77,7 @@ function handleOAuthRequestMiddleware(options: any) {
   return function(req: any, res: any, next: Function) {
 
     // Skip OAuth validation for paths marked as public
-    if (options.publicEndpoints && match(req.originalUrl, options.publicEndpoints)) {
+    if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndpoints))) {
       return next();
     }
 
@@ -86,26 +86,26 @@ function handleOAuthRequestMiddleware(options: any) {
       rejectRequest(res);
     } else {
       getTokenInfo(options.tokenInfoEndpoint, accessToken)
-        .then(setTokeninfo(req))
-        .then(() => {
-          next();
-        })
-        .catch((err) => {
-          rejectRequest(res, err.status);
-        });
+      .then(setTokeninfo(req))
+      .then(() => {
+        next();
+      })
+      .catch((err) => {
+        rejectRequest(res, err.status);
+      });
     }
   };
 }
 
-function validateScopes(req, res, next, scopes) {
+function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
 
   const userScopes = new Set<String>(requestScopes || []);
 
-  let scopesCopy = new Set<String>(scopes || []);
+  const scopesCopy = new Set<String>(scopes || []);
 
-  for (let scope of userScopes) {
+  for (const scope of userScopes) {
     scopesCopy.delete(scope);
   }
 

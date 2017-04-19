@@ -30,7 +30,7 @@ describe('getTokenInfo', () => {
   function addStandardAuthenticationEndpoint() {
 
     authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      let valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+      const valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
       if (valid) {
         res
@@ -61,16 +61,16 @@ describe('getTokenInfo', () => {
   it('should return error if token is not valid', () => {
 
     // given
-    let authToken = 'invalid';
+    const authToken = 'invalid';
     addStandardAuthenticationEndpoint();
 
     // when
     const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    let promise = getTokenInfo(url, authToken)
-      .then((jsonData) => {
+    const promise = getTokenInfo(url, authToken)
+    .then((jsonData) => {
 
-        return jsonData;
-      });
+      return jsonData;
+    });
 
     // then
     return expect(promise).be.rejected;
@@ -79,15 +79,16 @@ describe('getTokenInfo', () => {
   it('should return the token info if token is valid', function() {
 
     // given
-    let authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    const authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
     addStandardAuthenticationEndpoint();
 
     // when
     const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    let promise = getTokenInfo(url, authToken)
-      .then((jsonData) => {
-        return jsonData;
-      });
+    const promise = getTokenInfo(url, authToken)
+    .then((jsonData) => {
+
+      return jsonData;
+    });
 
     // then
     return expect(promise).to.become({

@@ -23,7 +23,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
   authServerApp.use(bodyParser.urlencoded({extended: true}));
   authServerApp.post('/oauth2/access_token', function(req, res) {
     if (req.body.grant_type === PASSWORD_CREDENTIALS_GRANT) {
-      let valid = req.headers['authorization'] === authHeader;
+      const valid = req.headers['authorization'] === authHeader;
       if (valid) {
         res
           .status(HttpStatus.OK)
@@ -46,7 +46,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
           .status(HttpStatus.UNAUTHORIZED)
           .send({
             error: 'internal_error',
-            error_description : 'Request method GET not supported'
+            error_description: 'Request method GET not supported'
           });
       }
     }
@@ -59,7 +59,7 @@ describe('getAccessToken', () => {
   let authenticationServer: Http.Server;
   let authServerApp: Express.Application;
 
-  let getAccessTokenOptions;
+  let getAccessTokenOptions: OAuthConfig;
 
   // Setup AuthServer
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('getAccessToken', () => {
       setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
 
       //when
-      let promise = getAccessToken(getAccessTokenOptions);
+      const promise = getAccessToken(getAccessTokenOptions);
 
       //then
       return expect(promise).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
@@ -103,7 +103,7 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      let promise = getAccessToken(getAccessTokenOptions);
+      const promise = getAccessToken(getAccessTokenOptions);
 
       //then
       return expect(promise).to.be.rejected;
@@ -115,7 +115,7 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      let promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
+      const promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
         credentialsDir: 'integration-test/data/not-existing'
       }));
 
@@ -127,7 +127,7 @@ describe('getAccessToken', () => {
 
   describe('authorization code grant', () => {
 
-    let getAccessTokenOptionsAuthorization;
+    let getAccessTokenOptionsAuthorization: OAuthConfig​​ ;
 
     before(() => {
       getAccessTokenOptionsAuthorization = {
@@ -147,10 +147,10 @@ describe('getAccessToken', () => {
       setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
 
       //when
-      let bearer = getAccessToken(getAccessTokenOptionsAuthorization)
-        .then((data) => {
-          return data;
-        });
+      const bearer = getAccessToken(getAccessTokenOptionsAuthorization)
+      .then((data) => {
+        return data;
+      });
 
       //then
       return expect(bearer).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
@@ -162,7 +162,7 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      let promise = getAccessToken(getAccessTokenOptionsAuthorization);
+      const promise = getAccessToken(getAccessTokenOptionsAuthorization);
 
       //then
       return expect(promise).to.be.rejected;
@@ -174,7 +174,7 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      let promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
+      const promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
         credentialsDir: 'integration-test/data/not-existing'
       }));
 
@@ -199,30 +199,30 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-        .post('/access_token?realm=/services', (body) => {
+      .post('/access_token?realm=/services', (body: any) => {
 
-          if (body.grant_type !== options.grantType) {
-            return false;
-          }
+        if (body.grant_type !== options.grantType) {
+          return false;
+        }
 
-          if (body.scope !== options.scopes.join(' ')) {
-            return false;
-          }
+        if (body.scope !== options.scopes.join(' ')) {
+          return false;
+        }
 
-          if (body.redirect_uri !== options.redirectUri) {
-            return false;
-          }
+        if (body.redirect_uri !== options.redirectUri) {
+          return false;
+        }
 
-          if (body.code !== options.code) {
-            return false;
-          }
+        if (body.code !== options.code) {
+          return false;
+        }
 
-          return true;
-        })
-        .reply(HttpStatus.OK, responseObject);
+        return true;
+      })
+      .reply(HttpStatus.OK, responseObject);
 
       // when
-      let promise = getAccessToken(options);
+      const promise = getAccessToken(options);
 
       // then
       return expect(promise).to.become(responseObject);
@@ -246,22 +246,22 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-        .post('/access_token?realm=/employees', (body) => {
+      .post('/access_token?realm=/employees', (body: any) => {
 
-          if (body.grant_type !== options.grantType) {
-            return false;
-          }
+        if (body.grant_type !== options.grantType) {
+          return false;
+        }
 
-          if (body.refresh_token !== options.refreshToken) {
-            return false;
-          }
+        if (body.refresh_token !== options.refreshToken) {
+          return false;
+        }
 
-          return true;
-        })
-        .reply(HttpStatus.OK, responseObject);
+        return true;
+      })
+      .reply(HttpStatus.OK, responseObject);
 
       // when
-      let promise = getAccessToken(options);
+      const promise = getAccessToken(options);
 
       // then
       return expect(promise).to.become(responseObject);

@@ -30,33 +30,33 @@ import {
 } from 'lib-oauth-tooling';
 ```
 
-#### TokenCache(tokenConfig: any, oauthConfig: any)
+#### TokenCache(tokenConfig: { [key: string]: string[] }, oauthConfig: OAuthConfig)
 
 Class to request and cache tokens on client-side.
 
 ```typescript
-let tokenCache = new TokenCache({
+const tokenCache = new TokenCache({
   'service-foo': ['foo.read', 'foo.write'],
   'service-bar': ['bar.read']
 }, oAuthConfig);
 
 tokenCache.get('service-foo')
-  .then((tokeninfo) => {
-    console.log(tokeninfo.access_token);
-  });
+.then((tokeninfo) => {
+  console.log(tokeninfo.access_token);
+});
 ```
 
 `oauthConfig`:
 * `credentialsDir` string
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
-* `tokenInfoEndpoint` string
+* `tokenInfoEndpoint` string - mandatory for TokenCache
 * `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 
-#### handleOAuthRequestMiddleware(options: any)
+#### handleOAuthRequestMiddleware(options: MiddlewareOptions)
 
 Express middleware to extract and validate an access token. It attaches the scopes matched by the token to the request (`request.scopes`) for further usage.
 If the token is not valid the request is rejected (with 401 Unauthorized).
@@ -84,32 +84,32 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 })
 ```
 
-#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<any>
+#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<TokenInfo>
 
 Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
 ```typescript
 getTokenInfo(tokenInfoEndpoint, accessToken)
-  .then((tokeninfo) => {
-    console.log(tokeninfo.access_token);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+.then((tokeninfo) => {
+  console.log(tokeninfo.access_token);
+})
+.catch((err) => {
+  console.log(err);
+});
 ```
 
-#### getAccessToken(options: any)
+#### getAccessToken(options: OAuthConfig)
 
 Helper function to get an access token for the specified scopes.
 
 ```typescript
 getAccessToken(options)
-  .then((accessToken) => {
-    console.log(accessToken);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+.then((accessToken) => {
+  console.log(accessToken);
+})
+.catch((err) => {
+  console.log(err);
+});
 ```
 
 `options`:
@@ -147,7 +147,7 @@ String constant specifying the employees realm.
 
 If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
 
-#### mockTokenInfoEndpoint(options: any)
+#### mockTokenInfoEndpoint(options: MockOptions)
 
 Mocks a `tokeninfo` endpoint.
 
@@ -167,7 +167,7 @@ mockTokeninfoEndpoint({
 * `tokens` any optional (list of valid tokens)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
-#### mockAccessTokenEndpoint(options: any)
+#### mockAccessTokenEndpoint(options: MockOptions)
 
 Mocks a `access_token` endpoint.
 

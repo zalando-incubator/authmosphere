@@ -1,5 +1,5 @@
 import * as HttpStatus from 'http-status';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
 
 import {
@@ -48,7 +48,7 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @returns {Promise<T>|Q.Promise<U>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string): Promise<any> {
+                            accessTokenEndpoint: string, realm: string): Promise<Token> {
 
   const promise = new Promise(function(resolve, reject) {
 
@@ -60,27 +60,27 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
-      .then((response) => {
+    .then((response) => {
 
-        const status = response.status;
+      const status = response.status;
 
-        return response
-          .json()
-          .then((data) => {
+      return response
+        .json()
+        .then((data) => {
 
-            if (response.status !== HttpStatus.OK) {
-              throw { status, data };
-            } else {
-              return resolve(data);
-            }
-        });
-      })
-      .catch((err) => {
-        return reject({
-          msg: `Error requesting access token from ${accessTokenEndpoint}`,
-          err
-        });
+          if (response.status !== HttpStatus.OK) {
+            throw { status, data };
+          } else {
+            return resolve(data);
+          }
       });
+    })
+    .catch((err) => {
+      return reject({
+        msg: `Error requesting access token from ${accessTokenEndpoint}`,
+        err
+      });
+    });
   });
 
   return promise;
@@ -95,32 +95,32 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
  * @param accessToken
  * @returns {Promise<T>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenInfo> {
 
   const promise = new Promise(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
-      .then((response) => {
+    .then((response) => {
 
-        const status = response.status;
+      const status = response.status;
 
-        return response
-          .json()
-          .then((data) => {
+      return response
+      .json()
+      .then((data) => {
 
-            if (response.status !== HttpStatus.OK) {
-              throw { status, data };
-            } else {
-              return resolve(data);
-            }
-          });
-      })
-      .catch( err => {
-        return reject({
-          msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-          err
-        });
+        if (response.status !== HttpStatus.OK) {
+          throw { status, data };
+        } else {
+          return resolve(data);
+        }
       });
+    })
+    .catch( err => {
+      return reject({
+        msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
+        err
+      });
+    });
   });
 
   return promise;
@@ -152,7 +152,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<any> {
  * @param options
  * @returns {Promise<T>}
  */
-function getAccessToken(options: any): Promise<any> {
+function getAccessToken(options: OAuthConfig): Promise<Token> {
 
   validateOAuthConfig(options);
 
@@ -160,45 +160,45 @@ function getAccessToken(options: any): Promise<any> {
     getFileData(options.credentialsDir, USER_JSON),
     getFileData(options.credentialsDir, CLIENT_JSON)
   ])
-    .then((credentials) => {
+  .then((credentials) => {
 
-      const userData = JSON.parse(credentials[0]);
-      const clientData = JSON.parse(credentials[1]);
+    const userData = JSON.parse(credentials[0]);
+    const clientData = JSON.parse(credentials[1]);
 
-      let bodyParameters;
+    let bodyParameters: BodyParameters;
 
-      if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'username': userData.application_username,
-          'password': userData.application_password
-        };
-      } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'code': options.code,
-          'redirect_uri': options.redirectUri
-        };
-      } else if (options.grantType === REFRESH_TOKEN_GRANT) {
-        bodyParameters = {
-          'grant_type': options.grantType,
-          'refresh_token': options.refreshToken
-        };
-      } else {
-        throw TypeError('invalid grantType');
-      }
+    if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'username': userData.application_username,
+        'password': userData.application_password
+      };
+    } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'code': options.code,
+        'redirect_uri': options.redirectUri
+      };
+    } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType,
+        'refresh_token': options.refreshToken
+      };
+    } else {
+      throw TypeError('invalid grantType');
+    }
 
-      if (options.scopes) {
-        Object.assign(bodyParameters, {
-          scope: options.scopes.join(' ')
-        });
-      }
+    if (options.scopes) {
+      Object.assign(bodyParameters, {
+        scope: options.scopes.join(' ')
+      });
+    }
 
-      const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
+    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
-      return requestAccessToken(bodyParameters, authorizationHeaderValue,
-        options.accessTokenEndpoint, options.realm);
-    });
+    return requestAccessToken(bodyParameters, authorizationHeaderValue,
+      options.accessTokenEndpoint, options.realm);
+  });
 }
 
 export {

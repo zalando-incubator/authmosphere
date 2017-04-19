@@ -56,7 +56,7 @@ export function match(url: string, patterns: Set<string>): boolean {
  * @param field The name of the field to return
  * @returns {string} The value of the header field
  */
-export function getHeaderValue(req: express.Request, field: string) {
+export function getHeaderValue(req: express.Request, field: string): string {
   if (req && field && req.headers.hasOwnProperty(field)) {
     return req.headers[field];
   } else {
@@ -71,7 +71,7 @@ export function getHeaderValue(req: express.Request, field: string) {
  * @param client_secret
  * @returns {string}
  */
-export function getBasicAuthHeaderValue(clientId: string, clientSecret: string) {
+export function getBasicAuthHeaderValue(clientId: string, clientSecret: string): string {
   return AUTHORIZATION_BASIC_PREFIX + ' ' + btoa(clientId + ':' + clientSecret);
 }
 
@@ -100,22 +100,20 @@ export function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 export function setTokeninfo(req: express.Request) {
-  return function(data: any) {
+  return function(data: TokenInfo) {
 
     const {
       uid,
       scope,
       cn,
-      /* tslint:disable */
-      expires_in,
-      /* tslint:enable */
+      expires_in // tslint:disable-line
     } = data;
 
     const tokeninfo = {
       uid,
       scope,
       cn,
-      expires_in, // tslint:disable-line
+      expires_in // tslint:disable-line
     };
 
     Object.assign(req, {
@@ -132,7 +130,7 @@ export function setTokeninfo(req: express.Request) {
  */
 export function rejectRequest(res: express.Response, status?: number) {
 
-  let _status = status ? status : HttpStatus.UNAUTHORIZED;
+  const _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
 }
 
@@ -141,7 +139,7 @@ export function rejectRequest(res: express.Response, status?: number) {
  *
  * @param options
  */
-export function validateOAuthConfig(options: any) {
+export function validateOAuthConfig(options: OAuthConfig) {
 
   if (!options.credentialsDir) {
     throw TypeError('credentialsDir must be defined');
