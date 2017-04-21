@@ -205,4 +205,4 @@ export {
   getTokenInfo,
   getAccessToken,
   createAuthCodeRequestUri
-}
+};

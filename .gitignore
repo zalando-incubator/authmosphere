@@ -4,3 +4,5 @@ lib/
 .vscode
 .idea
 **/npm-debug.log
+coverage
+.nyc_output

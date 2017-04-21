@@ -42,8 +42,26 @@ describe('oauth tooling', () => {
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
         // then
-        expect(called).to.be.false;
-        expect(responseMock.status).to.equal(403);
+        return expect(responseMock.status).to.equal(403);
+      });
+
+    it('should not call next() if required scopes are not met', () => {
+
+        // given
+        requestMock.$$tokeninfo = {
+          scope: ['uid', 'test']
+        };
+        const requiredScopes = ['uid', 'test', 'additional'];
+        let called = false;
+        let next = () => {
+          called = true;
+        };
+
+        // when
+        requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+
+        // then
+        return expect(called).to.be.false;
       });
 
     it('should call #next if required scopes are met', () => {
@@ -62,7 +80,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
       // then
-      expect(called).to.be.true;
+      return expect(called).to.be.true;
     });
 
     it('should call #next also if user has a superset of the required scopes', () => {
@@ -81,7 +99,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
       // then
-      expect(called).to.be.true;
+      return expect(called).to.be.true;
     });
 
     it('should call #next if precedence function returns true', (done) => {
@@ -126,7 +144,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
 
       // then
-      expect(called).to.be.false;
+      return expect(called).to.be.false;
     });
 
     it('should not call #next if precedence function returns false and scopes matches', () => {
@@ -149,7 +167,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
 
       // then
-      expect(called).to.be.false;
+      return expect(called).to.be.false;
     });
   });
 
@@ -170,7 +188,7 @@ describe('oauth tooling', () => {
       })({ 'originalUrl': '/healthcheck' }, responseMock, next);
 
       // then
-      expect(called).to.be.true;
+      return expect(called).to.be.true;
     });
 
     it('should not call #next when non-public endpoint', () => {
@@ -188,7 +206,7 @@ describe('oauth tooling', () => {
       })({ 'originalUrl': '/privateAPI', headers: {} }, responseMock, next);
 
       // then
-      expect(called).to.be.false;
+      return expect(called).to.be.false;
     });
   });
 });
