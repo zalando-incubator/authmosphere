@@ -3,7 +3,8 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware
+  requireScopesMiddleware,
+  ILogger​​
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -13,6 +14,14 @@ describe('oauth tooling', () => {
 
   let requestMock: any;
   let responseMock: any;
+  const loggerMock = {
+    info:  (p: any): void => { return; },
+    debug: (p: any): void => { return; },
+    error: (p: any): void => { return; },
+    fatal: (p: any): void => { return; },
+    trace: (p: any): void => { return; },
+    warn:  (p: any): void => { return; }
+  };
 
   before(() => {
 
@@ -34,7 +43,7 @@ describe('oauth tooling', () => {
         };
         const requiredScopes = ['uid', 'test', 'additional'];
         let called = false;
-        let next = () => {
+        const next = () => {
           called = true;
         };
 
@@ -53,7 +62,7 @@ describe('oauth tooling', () => {
         };
         const requiredScopes = ['uid', 'test', 'additional'];
         let called = false;
-        let next = () => {
+        const next = () => {
           called = true;
         };
 
@@ -72,7 +81,7 @@ describe('oauth tooling', () => {
       };
       const requiredScopes = ['uid', 'test'];
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 
@@ -113,12 +122,16 @@ describe('oauth tooling', () => {
         done();
       };
 
-      const preFun = () => {
-        return Promise.resolve(true);
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.resolve(true);
+        },
+        precedenceErrorHandler: () => { return; },
+        logger: loggerMock
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
 
       // then
       // We wait for the done call here this we get no async handler back on that we can wait
@@ -132,16 +145,20 @@ describe('oauth tooling', () => {
       };
       const requiredScopes = ['test'];
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 
-      const preFun = () => {
-        return Promise.resolve(false);
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.resolve(false);
+        },
+        precedenceErrorHandler: () => { return; },
+        logger: loggerMock
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;
@@ -155,19 +172,48 @@ describe('oauth tooling', () => {
       };
       const requiredScopes = ['test'];
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 
-      const preFun = () => {
-        return Promise.resolve(false);
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.resolve(false);
+        },
+        precedenceErrorHandler: () => { return; },
+        logger: loggerMock
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preFun)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;
+    });
+
+    it('should call error handler', (done) => {
+
+      // given
+      const requiredScopes = ['test'];
+      const next = () => {
+        return;
+      };
+      const customErrorhandler = (e: any, logger: ILogger​​): void => {
+        // then
+        expect(e).to.equal('Error happened');
+        done();
+      };
+
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.reject('Error happened');
+        },
+        precedenceErrorHandler: customErrorhandler,
+        logger: loggerMock
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
     });
   });
 
@@ -177,7 +223,7 @@ describe('oauth tooling', () => {
 
       // given
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 
@@ -195,7 +241,7 @@ describe('oauth tooling', () => {
 
       // given
       let called = false;
-      let next = () => {
+      const next = () => {
         called = true;
       };
 

@@ -206,6 +206,9 @@ cleanMock();
 * `npm run unit-test` - runs unit tests
 * `npm run integration-test` - runs integration tests
 
+## Changelog
+
+`1.0.0` - **BREAKING** The signatur of requireScopesMiddleware is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ## License
 

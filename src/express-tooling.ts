@@ -8,18 +8,34 @@ import {
   setTokeninfo
 } from './utils';
 
-import {
-  getTokenInfo
-} from './oauth-tooling';
+import { getTokenInfo } from './oauth-tooling';
+
+import { ILogger } from './ILogger';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
+/**
+ * Must return a promise that return true or false. If the result is true the scope checking will be skipped and next is called
+ */
 interface IPrecedenceFunction {
   (req: any, res: any, next: Function): Promise<boolean>;
 }
 
 /**
- * Returns a function (middleware) that validates the scopes against the user scopes
+ * Will be called when IPrecedenceFunction throws an error. Should be side effect free, returned Promises are ignored.
+ */
+interface IPrecedenceErrorHandler {
+  (err: any, logger: ILogger): any;
+}
+
+interface IPrecedenceOptions {
+  precedenceFunction: IPrecedenceFunction;
+  precedenceErrorHandler: IPrecedenceErrorHandler;
+  logger: ILogger;
+}
+
+/**
+ * Returns a function (express middleware) that validates the scopes against the user scopes
  * attached to the request (for example by `handleOAuthRequestMiddleware`).
  * If the the requested scopes are not matched request is rejected (with 403 Forbidden).
  *
@@ -27,23 +43,31 @@ interface IPrecedenceFunction {
  *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
  *
  * @param scopes - array of scopes that are needed to access the endpoint
- * @param precedenceFunction - must return a promise that return true or false.
- *                             If the result is true the scope checking will be skipped
- *                             and next is called
- * @returns {function(any, any, any): undefined}
+ * @param precedenceOptions - This options let consumers define a way to over rule scope checking. The parameter is optional.
+ *
+ * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
-                                 precedenceFunction?: IPrecedenceFunction) {
+                                 precedenceOptions?: IPrecedenceOptions) {
 
   return function(req: any, res: any, next: Function) {
 
-    if (precedenceFunction) {
+    if (precedenceOptions && precedenceOptions.precedenceFunction) {
+      const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
+
       precedenceFunction(req, res, next)
       .then(result => {
         if (result) {
           next();
         } else {
           validateScopes(req, res, next, scopes);
+        }
+      })
+      .catch(err => {
+        try {
+          precedenceErrorHandler(err, logger);
+        } catch (err) {
+          logger.error('Error while executing precedenceErrorHandler: ', err);
         }
       });
       return; // skip normal scope validation
@@ -102,7 +126,6 @@ function validateScopes(req: any, res: any, next: any, scopes: string[]) {
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
 
   const userScopes = new Set<String>(requestScopes || []);
-
   const scopesCopy = new Set<String>(scopes || []);
 
   for (const scope of userScopes) {
@@ -118,6 +141,8 @@ function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 
 export {
   IPrecedenceFunction,
+  IPrecedenceErrorHandler,
+  IPrecedenceOptions,
   requireScopesMiddleware,
   handleOAuthRequestMiddleware
 };
