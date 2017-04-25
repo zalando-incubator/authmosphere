@@ -53,6 +53,7 @@ tokenCache.get('service-foo')
 * `tokenInfoEndpoint` string - mandatory for TokenCache
 * `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
+* `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 
@@ -118,6 +119,7 @@ getAccessToken(options)
 * `accessTokenEndpoint` string
 * `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
+* `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `refreshToken` string optional (required with REFRESH_TOKEN_GRANT)

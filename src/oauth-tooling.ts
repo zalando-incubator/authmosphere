@@ -1,3 +1,4 @@
+import * as qs from 'querystring';
 import * as HttpStatus from 'http-status';
 import fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
@@ -22,18 +23,27 @@ const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 /**
  * Returns URI to request authorization code with the given parameters.
  *
- * @param authorizationEndpoint
- * @param clientId
- * @param redirectUri
+ * @param authorizationEndpoint string
+ * @param clientId string
+ * @param redirectUri string
+ * @param queryParams {} optional
  * @returns {string}
  */
 function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: string,
-                                  redirectUri: string) {
-  return authorizationEndpoint +
-    '?client_id=' + clientId +
-    '&redirect_uri=' + redirectUri +
-    '&response_type=code' +
-    '&realm=' + EMPLOYEES_REALM;
+                                  redirectUri: string, queryParams?: {}) {
+
+  const _queryParams = Object.assign({
+    'client_id': clientId,
+    'redirect_uri': redirectUri,
+    'response_type': 'code',
+    'realm': EMPLOYEES_REALM
+  }, queryParams);
+
+  const queryString = qs.stringify(_queryParams);
+  // we are unescaping again since we did not escape before using querystring and we do not want to break anything
+  const unescapedQueryString = qs.unescape(queryString);
+
+  return `${authorizationEndpoint}?${unescapedQueryString}`;
 }
 
 /**
@@ -45,14 +55,21 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
  * @param realm
+ * @param queryParams optional
  * @returns {Promise<T>|Q.Promise<U>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string): Promise<Token> {
+                            accessTokenEndpoint: string, realm: string,
+                            queryParams?: {}): Promise<Token> {
 
   const promise = new Promise(function(resolve, reject) {
 
-    fetch(accessTokenEndpoint + '?realm=' + realm, {
+    const queryString = qs.stringify(Object.assign({ realm: realm }, queryParams));
+
+    // we are unescaping again since we did not escape before using querystring and we do not want to break anything
+    const unescapedQueryString = qs.unescape(queryString);
+
+    fetch(`${accessTokenEndpoint}?${unescapedQueryString}`, {
       method: 'POST',
       body: formurlencoded(bodyObject),
       headers: {
@@ -145,6 +162,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenI
  *  - accessTokenEndpoint string
  *  - realm string
  *  - scopes string optional
+ *  - queryParams {} optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
@@ -197,7 +215,7 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
     const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, options.realm);
+      options.accessTokenEndpoint, options.realm, options.queryParams);
   });
 }
 

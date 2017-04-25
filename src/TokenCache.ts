@@ -30,6 +30,7 @@ class TokenCache {
    * `tokenInfoEndpoint` string
    * `realm` string
    * `scopes` string optional
+   * `queryParams` {} optional
    * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    *

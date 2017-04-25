@@ -93,6 +93,31 @@ describe('oauth tooling', () => {
 
       expect(result).to.equal(expected);
     });
+
+    it('should return the correct uri as string with queryParams specified', () => {
+
+      // given
+      const authorizationEndpoint = '/oauth2/authorize';
+      const clientId = 'clientID';
+      const redirectUri = '/redirect';
+      const queryParams = {
+        foo: 'bar'
+      };
+
+      // when
+      const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
+        redirectUri, queryParams);
+
+      // then
+      const expected = authorizationEndpoint +
+        '?client_id=' + clientId +
+        '&redirect_uri=' + redirectUri +
+        '&response_type=code' +
+        '&realm=' + EMPLOYEES_REALM +
+        '&foo=bar';
+
+      expect(result).to.equal(expected);
+    });
   });
 
   describe('TokenCache', () => {

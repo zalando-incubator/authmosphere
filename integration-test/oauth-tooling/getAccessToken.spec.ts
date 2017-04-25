@@ -22,6 +22,7 @@ function setupTestEnvironment(authHeader: string, authServerApp: Express.Applica
 
   authServerApp.use(bodyParser.urlencoded({extended: true}));
   authServerApp.post('/oauth2/access_token', function(req, res) {
+
     if (req.body.grant_type === PASSWORD_CREDENTIALS_GRANT) {
       const valid = req.headers['authorization'] === authHeader;
       if (valid) {
@@ -71,6 +72,33 @@ describe('getAccessToken', () => {
   afterEach(() => {
     authenticationServer.close();
     nock.cleanAll();
+  });
+
+  it('should add optional query parameters to the request', () => {
+
+    //given
+    const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
+
+    nock('http://127.0.0.1:30001/oauth2/')
+      .post('/access_token')
+      .query({
+        realm: SERVICES_REALM,
+        foo: 'bar'
+      })
+      .reply(HttpStatus.OK, responseObject);
+
+    //when
+    const promise = getAccessToken({
+      realm: SERVICES_REALM,
+      scopes: ['campaing.edit_all', 'campaign.read_all'],
+      accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
+      credentialsDir: 'integration-test/data/credentials',
+      grantType: PASSWORD_CREDENTIALS_GRANT,
+      queryParams: { foo: 'bar' }
+    });
+
+    //then
+    return expect(promise).to.be.fulfilled;
   });
 
   describe('password credentials grant', () => {
