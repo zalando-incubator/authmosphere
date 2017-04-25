@@ -11,7 +11,7 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 const port = '30001';
-const host = `http://127.0.0.1:${30001}`;
+const host = `http://127.0.0.1:${port}`;
 const tokenInfoEndpoint = '/oauth2/tokeninfo';
 
 const validToken = 'valid-token';

@@ -85,11 +85,11 @@ describe('oauth tooling', () => {
         redirectUri);
 
       // then
-      const expected = authorizationEndpoint +
-        '?client_id=' + clientId +
-        '&redirect_uri=' + redirectUri +
-        '&response_type=code' +
-        '&realm=' + EMPLOYEES_REALM;
+      const expected = `${authorizationEndpoint}` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
+        `&realm=${EMPLOYEES_REALM}`;
 
       expect(result).to.equal(expected);
     });
@@ -109,12 +109,12 @@ describe('oauth tooling', () => {
         redirectUri, queryParams);
 
       // then
-      const expected = authorizationEndpoint +
-        '?client_id=' + clientId +
-        '&redirect_uri=' + redirectUri +
-        '&response_type=code' +
-        '&realm=' + EMPLOYEES_REALM +
-        '&foo=bar';
+      const expected = `${authorizationEndpoint}` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
+        `&realm=${EMPLOYEES_REALM}` +
+        `&foo=bar`;
 
       expect(result).to.equal(expected);
     });
