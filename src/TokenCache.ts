@@ -78,7 +78,10 @@ class TokenCache {
       })
       .catch(() => {
 
-        const config = Object.assign({}, this.oauthConfig, {scopes: this.tokenConfig[tokenName]});
+        const config = {
+          ...this.oauthConfig,
+          scopes: this.tokenConfig[tokenName]
+        };
 
         return getAccessToken(config)
           .then((token: Token) => {

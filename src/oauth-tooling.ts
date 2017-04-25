@@ -32,12 +32,13 @@ const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: string,
                                   redirectUri: string, queryParams?: {}) {
 
-  const _queryParams = Object.assign({
+  const _queryParams = {
     'client_id': clientId,
     'redirect_uri': redirectUri,
     'response_type': 'code',
-    'realm': EMPLOYEES_REALM
-  }, queryParams);
+    'realm': EMPLOYEES_REALM,
+    ...queryParams
+  };
 
   const queryString = qs.stringify(_queryParams);
   // we are unescaping again since we did not escape before using querystring and we do not want to break anything
@@ -64,7 +65,7 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
 
   const promise = new Promise(function(resolve, reject) {
 
-    const queryString = qs.stringify(Object.assign({ realm: realm }, queryParams));
+    const queryString = qs.stringify({ realm, ...queryParams });
 
     // we are unescaping again since we did not escape before using querystring and we do not want to break anything
     const unescapedQueryString = qs.unescape(queryString);

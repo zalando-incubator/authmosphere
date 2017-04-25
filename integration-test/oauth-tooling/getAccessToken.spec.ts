@@ -143,9 +143,10 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      const promise = getAccessToken(Object.assign({}, getAccessTokenOptions, {
+      const promise = getAccessToken({
+        ...getAccessTokenOptions,
         credentialsDir: 'integration-test/data/not-existing'
-      }));
+      });
 
       //then
       return expect(promise).to.be.rejected;
@@ -202,9 +203,10 @@ describe('getAccessToken', () => {
       setupTestEnvironment('invalid', authServerApp);
 
       //when
-      const promise = getAccessToken(Object.assign({}, getAccessTokenOptionsAuthorization, {
+      const promise = getAccessToken({
+        ...getAccessTokenOptionsAuthorization,
         credentialsDir: 'integration-test/data/not-existing'
-      }));
+      });
 
       //then
       return expect(promise).to.be.rejected;
