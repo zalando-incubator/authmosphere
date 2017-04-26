@@ -10,6 +10,8 @@ import {
   mockAccessTokenEndpoint,
   cleanMock
 } from '../../src/index';
+import { TokenInfo } from '../../src/types/TokenInfo';
+import { Token } from '../../src/types/Token';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

@@ -11,6 +11,7 @@ import {
 import { getTokenInfo } from './oauth-tooling';
 
 import { ILogger } from './ILogger';
+import { MiddlewareOptions } from './types/MiddlewareOptions';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 

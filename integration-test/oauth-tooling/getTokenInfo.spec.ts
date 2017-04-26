@@ -17,9 +17,9 @@ const tokenInfoEndpoint = '/oauth2/tokeninfo';
 const validToken = 'valid-token';
 const invalidToken = 'invalid-token';
 
-function addStandardAuthenticationEndpoint(app, _validToken) {
+function addStandardAuthenticationEndpoint(app: Express.Application, _validToken: string) {
 
-  app.get(tokenInfoEndpoint, function(req, res) {
+  app.get(tokenInfoEndpoint, function(req: any, res: any) {
 
     const valid = req.query.access_token === _validToken;
 

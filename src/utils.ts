@@ -8,6 +8,8 @@ import {
   AUTHORIZATION_CODE_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
+import { OAuthConfig } from './types/OAuthConfig';
+import { TokenInfo } from './types/TokenInfo';
 
 const fsReadFile = q.denodeify<any>(fs.readFile);
 

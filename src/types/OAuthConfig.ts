@@ -11,3 +11,5 @@ interface OAuthConfig {
   refreshToken?: string;
   queryParams?: {};
 }
+
+export { OAuthConfig };

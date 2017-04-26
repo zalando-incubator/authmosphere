@@ -8,6 +8,7 @@ import {
   PASSWORD_CREDENTIALS_GRANT,
   SERVICES_REALM
 } from '../../src/index';
+import { OAuthConfig } from '../../src/types/OAuthConfig';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

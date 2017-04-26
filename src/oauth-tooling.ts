@@ -15,6 +15,10 @@ import {
   PASSWORD_CREDENTIALS_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
+import { OAuthConfig } from './types/OAuthConfig';
+import { Token } from './types/Token';
+import { TokenInfo } from './types/TokenInfo';
+import { BodyParameters } from './types/BodyParameters';
 
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';

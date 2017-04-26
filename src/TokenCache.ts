@@ -1,6 +1,9 @@
 import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
 import { validateOAuthConfig } from './utils';
+import { OAuthConfig } from './types/OAuthConfig';
+import { TokenInfo } from './types/TokenInfo';
+import { Token } from './types/Token';
 
 const EXPIRE_THRESHOLD = 60 * 1000;
 
