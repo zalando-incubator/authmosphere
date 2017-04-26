@@ -10,4 +10,5 @@ interface TokenInfo {
   uid?: string;
   local_expiry?: number;
 }
+
 export { TokenInfo };

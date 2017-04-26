@@ -5,4 +5,5 @@ interface MockOptions {
   tokens?: TokenInfo[];
   times?: number;
 }
+
 export { MockOptions };
