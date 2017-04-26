@@ -30,6 +30,7 @@ class TokenCache {
    * `tokenInfoEndpoint` string
    * `realm` string
    * `scopes` string optional
+   * `queryParams` {} optional
    * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    *
@@ -77,7 +78,10 @@ class TokenCache {
       })
       .catch(() => {
 
-        const config = Object.assign({}, this.oauthConfig, {scopes: this.tokenConfig[tokenName]});
+        const config = {
+          ...this.oauthConfig,
+          scopes: this.tokenConfig[tokenName]
+        };
 
         return getAccessToken(config)
           .then((token: Token) => {

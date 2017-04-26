@@ -9,4 +9,5 @@ interface OAuthConfig {
   code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
   redirectUri?: string;
   refreshToken?: string;
+  queryParams?: {};
 }

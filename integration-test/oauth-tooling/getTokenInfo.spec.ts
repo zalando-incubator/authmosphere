@@ -4,12 +4,38 @@ import * as Express from 'express';
 import * as Http from 'http';
 
 import {
-  PASSWORD_CREDENTIALS_GRANT,
   getTokenInfo
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
+
+const port = '30001';
+const host = `http://127.0.0.1:${port}`;
+const tokenInfoEndpoint = '/oauth2/tokeninfo';
+
+const validToken = 'valid-token';
+const invalidToken = 'invalid-token';
+
+function addStandardAuthenticationEndpoint(app, _validToken) {
+
+  app.get(tokenInfoEndpoint, function(req, res) {
+
+    const valid = req.query.access_token === _validToken;
+
+    if (valid) {
+      res
+        .status(200)
+        .send({
+          'access_token': _validToken
+        });
+    } else {
+      res
+        .status(401)
+        .send();
+    }
+  });
+}
 
 describe('getTokenInfo', () => {
 
@@ -19,7 +45,7 @@ describe('getTokenInfo', () => {
   // Setup AuthServer
   beforeEach(() => {
     authServerApp = Express();
-    authenticationServer = authServerApp.listen(30001);
+    authenticationServer = authServerApp.listen(port);
   });
 
   // stop server after test
@@ -27,50 +53,14 @@ describe('getTokenInfo', () => {
     authenticationServer.close();
   });
 
-  function addStandardAuthenticationEndpoint() {
-
-    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
-      const valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
-      if (valid) {
-        res
-          .status(200)
-          .send({
-            'expires_in': 3515,
-            'token_type': 'Bearer',
-            'realm': 'employees',
-            'scope': [
-              'campaign.editall',
-              'campaign.readall'
-            ],
-            'grant_type': PASSWORD_CREDENTIALS_GRANT,
-            'uid': 'services',
-            'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
-          });
-      } else {
-        res
-          .status(401)
-          .send({
-            'error': 'invalid_request',
-            'error_description': 'Access Token not valid'
-          });
-      }
-    });
-  }
-
   it('should return error if token is not valid', () => {
 
     // given
-    const authToken = 'invalid';
-    addStandardAuthenticationEndpoint();
+    addStandardAuthenticationEndpoint(authServerApp, validToken);
 
     // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    const promise = getTokenInfo(url, authToken)
-    .then((jsonData) => {
-
-      return jsonData;
-    });
+    const url = `${host}${tokenInfoEndpoint}`;
+    const promise = getTokenInfo(url, invalidToken);
 
     // then
     return expect(promise).be.rejected;
@@ -79,29 +69,15 @@ describe('getTokenInfo', () => {
   it('should return the token info if token is valid', function() {
 
     // given
-    const authToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    addStandardAuthenticationEndpoint();
+    addStandardAuthenticationEndpoint(authServerApp, validToken);
 
     // when
-    const url = 'http://127.0.0.1:30001/oauth2/tokeninfo';
-    const promise = getTokenInfo(url, authToken)
-    .then((jsonData) => {
-
-      return jsonData;
-    });
+    const url = `${host}${tokenInfoEndpoint}`;
+    const promise = getTokenInfo(url, validToken);
 
     // then
     return expect(promise).to.become({
-      'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41',
-      'expires_in': 3515,
-      'grant_type': 'password',
-      'realm': 'employees',
-      'scope': [
-        'campaign.editall',
-        'campaign.readall'
-      ],
-      'token_type': 'Bearer',
-      'uid': 'services'
+      'access_token': validToken
     });
   });
 });

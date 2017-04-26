@@ -29,45 +29,52 @@ describe('oauth tooling', () => {
     };
 
     it('if credentialsDir is not defined', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         credentialsDir: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if accessTokenEndpoint is not defined', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         accessTokenEndpoint: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if grantType is not defined', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         grantType: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if realm is not defined', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         realm: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if redirectUri is not defined (in case of Authorization Code Grant)', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         redirectUri: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if code is not defined (in case of Authorization Code Grant)', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         code: undefined
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
 
     it('if refreshToken is not defined (in case of Refresh Token Grant)', () => {
-      expect(getAccessToken.bind(undefined, Object.assign({}, config, {
+      expect(getAccessToken.bind(undefined, {
+        ...config,
         grantType: REFRESH_TOKEN_GRANT
-      }))).to.throw(TypeError);
+      })).to.throw(TypeError);
     });
   });
 
@@ -85,11 +92,36 @@ describe('oauth tooling', () => {
         redirectUri);
 
       // then
-      const expected = authorizationEndpoint +
-        '?client_id=' + clientId +
-        '&redirect_uri=' + redirectUri +
-        '&response_type=code' +
-        '&realm=' + EMPLOYEES_REALM;
+      const expected = `${authorizationEndpoint}` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
+        `&realm=${EMPLOYEES_REALM}`;
+
+      expect(result).to.equal(expected);
+    });
+
+    it('should return the correct uri as string with queryParams specified', () => {
+
+      // given
+      const authorizationEndpoint = '/oauth2/authorize';
+      const clientId = 'clientID';
+      const redirectUri = '/redirect';
+      const queryParams = {
+        foo: 'bar'
+      };
+
+      // when
+      const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
+        redirectUri, queryParams);
+
+      // then
+      const expected = `${authorizationEndpoint}` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
+        `&realm=${EMPLOYEES_REALM}` +
+        `&foo=bar`;
 
       expect(result).to.equal(expected);
     });
