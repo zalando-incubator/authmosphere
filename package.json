@@ -52,7 +52,7 @@
     "typescript": "2.2.2"
   },
   "scripts": {
-    "test": "tsc && mocha lib/test lib/integration-test --recursive",
+    "test": "npm run build && mocha lib/test lib/integration-test --recursive",
     "unit-test": "npm run build && mocha lib/test --recursive",
     "integration-test": "npm run build && mocha lib/integration-test --recursive",
     "test:coverage": "nyc npm run test",
