@@ -14,6 +14,7 @@ import {
   SERVICES_REALM,
   EMPLOYEES_REALM
 } from '../../src/index';
+import { OAuthConfig } from '../../src/types/OAuthConfig';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

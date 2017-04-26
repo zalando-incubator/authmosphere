@@ -6,3 +6,4 @@ interface Token {
   scope: string;
   token_type: string;
 }
+export { Token };

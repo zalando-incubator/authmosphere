@@ -6,3 +6,4 @@ interface BodyParameters {
   redirect_uri?: string;
   refresh_token?: string;
 }
+export { BodyParameters };

@@ -2,6 +2,8 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
+import { MockOptions } from '../types/MockOptions';
+import { TokenInfo } from '../types/TokenInfo';
 
 let tokens: TokenInfo[] = [];
 
