@@ -5,8 +5,6 @@ import {
   TokenCache,
   getAccessToken,
   createAuthCodeRequestUri,
-  SERVICES_REALM,
-  EMPLOYEES_REALM,
   AUTHORIZATION_CODE_GRANT,
   PASSWORD_CREDENTIALS_GRANT,
   REFRESH_TOKEN_GRANT
@@ -20,7 +18,6 @@ describe('oauth tooling', () => {
   describe('getAccessToken should throw TypeError', () => {
 
     const config = {
-      realm: SERVICES_REALM,
       accessTokenEndpoint: '/oauth2/access_token',
       credentialsDir: 'credentials',
       grantType: AUTHORIZATION_CODE_GRANT,
@@ -46,13 +43,6 @@ describe('oauth tooling', () => {
       expect(getAccessToken.bind(undefined, {
         ...config,
         grantType: undefined
-      })).to.throw(TypeError);
-    });
-
-    it('if realm is not defined', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        realm: undefined
       })).to.throw(TypeError);
     });
 
@@ -95,8 +85,7 @@ describe('oauth tooling', () => {
       const expected = `${authorizationEndpoint}` +
         `?client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
-        `&response_type=code` +
-        `&realm=${EMPLOYEES_REALM}`;
+        `&response_type=code`;
 
       expect(result).to.equal(expected);
     });
@@ -120,7 +109,6 @@ describe('oauth tooling', () => {
         `?client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
         `&response_type=code` +
-        `&realm=${EMPLOYEES_REALM}` +
         `&foo=bar`;
 
       expect(result).to.equal(expected);
@@ -135,7 +123,6 @@ describe('oauth tooling', () => {
         return new TokenCache({
           'foo': ['uid']
         }, {
-          realm: SERVICES_REALM,
           accessTokenEndpoint: '/access_token',
           credentialsDir: '/credentials',
           grantType: PASSWORD_CREDENTIALS_GRANT
@@ -148,7 +135,6 @@ describe('oauth tooling', () => {
       const tokenCache = new TokenCache({
         'foo': ['uid']
       }, {
-        realm: SERVICES_REALM,
         accessTokenEndpoint: '/access_token',
         tokenInfoEndpoint: '/tokeninfo',
         credentialsDir: '/credentials',

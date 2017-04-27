@@ -4,12 +4,12 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   getTokenInfo,
   getAccessToken,
-  SERVICES_REALM,
   PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
   cleanMock
 } from '../../src/index';
+
 import { TokenInfo } from '../../src/types/TokenInfo';
 import { Token } from '../../src/types/Token';
 
@@ -51,7 +51,6 @@ describe('mock tooling', () => {
       // given
       const validAuthToken = {
         'expires_in': 3600,
-        'realm': 'services',
         'scope': ['uid'],
         'access_token': 'foo'
       };
@@ -73,7 +72,6 @@ describe('mock tooling', () => {
       // given
       const validAuthToken = {
         'expires_in': 3600,
-        'realm': 'services',
         'scope': ['uid'],
         'access_token': 'foo'
       };
@@ -110,7 +108,6 @@ describe('mock tooling', () => {
       // given
       const validAuthToken = {
         'expires_in': 3600,
-        'realm': 'services',
         'scope': ['uid'],
         'access_token': 'foo'
       };
@@ -154,7 +151,6 @@ describe('mock tooling', () => {
 
       // given
       const options = {
-        realm: SERVICES_REALM,
         scopes: ['uid'],
         accessTokenEndpoint: accessTokenEndpoint,
         credentialsDir: 'integration-test/data/credentials',
