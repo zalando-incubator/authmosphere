@@ -15,27 +15,29 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 ## Migrating to 2.x.x
 
 If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
+
 ```typescript
 // will NOT work anymore:
 getAccessToken({
   // all the other config
   // ...
   realm: EMPLOYEES_REALM,
-  })
-  .then(token => {
-    // ...
-  });
+})
+.then(token => {
+  // ...
+});
 
 // instead use this:
 getAccessToken({
   // all the other config
   // ...
   queryParams: { realm: '/employees' }
-  })
-  .then(token => {
-    // ...
-  });
+})
+.then(token => {
+  // ...
+});
 ```
+
 See the [changelog](#changelog) for more information.
 
 ## Usage
@@ -226,9 +228,11 @@ cleanMock();
 ## Changelog
 
 #### `2.0.0` - **BREAKING**
+
 The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
 
 #### `1.0.0` - **BREAKING**
+
 The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ## License

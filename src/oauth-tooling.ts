@@ -105,8 +105,8 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
 /**
  * Build url string to request access token, optionally with given query parameters.
  *
- * @param accessTokenEndpoint
- * @param queryParams
+ * @param accessTokenEndpoint string
+ * @param queryParams Object key value paris which will be added as query parameters
  * @returns {string}
  */
 function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: Object): string {
