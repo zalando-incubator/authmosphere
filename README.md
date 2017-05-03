@@ -12,6 +12,34 @@ Currently the following flows are supported:
 See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
 
 
+## Migrating to 2.x.x
+
+If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
+
+```typescript
+// will NOT work anymore:
+getAccessToken({
+  // all the other config
+  // ...
+  realm: EMPLOYEES_REALM,
+})
+.then(token => {
+  // ...
+});
+
+// instead use this:
+getAccessToken({
+  // all the other config
+  // ...
+  queryParams: { realm: '/employees' }
+})
+.then(token => {
+  // ...
+});
+```
+
+See the [changelog](#changelog) for more information.
+
 ## Usage
 
 Note: `node >= 6.0.0` required to consume this library.
@@ -51,7 +79,6 @@ tokenCache.get('service-foo')
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
 * `tokenInfoEndpoint` string - mandatory for TokenCache
-* `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
@@ -117,7 +144,6 @@ getAccessToken(options)
 * `credentialsDir` string
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT` | `REFRESH_TOKEN_GRANT`)
 * `accessTokenEndpoint` string
-* `realm` string (`SERVICES_REALM` | `EMPLOYEES_REALM`)
 * `scopes` string optional
 * `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
@@ -135,15 +161,6 @@ String constant specifying the Resource Owner Password Credentials Grant type.
 #### REFRESH_TOKEN_GRANT
 
 String constant specifying the Refresh Token Grant type.
-
-#### SERVICES_REALM
-
-String constant specifying the services realm.
-
-#### EMPLOYEES_REALM
-
-String constant specifying the employees realm.
-
 
 ## Mock tooling
 
@@ -210,7 +227,13 @@ cleanMock();
 
 ## Changelog
 
-`1.0.0` - **BREAKING** The signatur of requireScopesMiddleware is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
+#### `2.0.0` - **BREAKING**
+
+The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
+
+#### `1.0.0` - **BREAKING**
+
+The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ## License
 

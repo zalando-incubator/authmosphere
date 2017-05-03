@@ -151,10 +151,6 @@ export function validateOAuthConfig(options: OAuthConfig) {
     throw TypeError('accessTokenEndpoint must be defined');
   }
 
-  if (!options.realm) {
-    throw TypeError('realm must be defined');
-  }
-
   if (!options.grantType) {
     throw TypeError('grantType must be defined');
   }

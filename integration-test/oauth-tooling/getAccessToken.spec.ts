@@ -10,9 +10,7 @@ import {
   getAccessToken,
   PASSWORD_CREDENTIALS_GRANT,
   AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT,
-  SERVICES_REALM,
-  EMPLOYEES_REALM
+  REFRESH_TOKEN_GRANT
 } from '../../src/index';
 import { OAuthConfig } from '../../src/types/OAuthConfig';
 
@@ -83,19 +81,17 @@ describe('getAccessToken', () => {
     nock('http://127.0.0.1:30001/oauth2/')
       .post('/access_token')
       .query({
-        realm: SERVICES_REALM,
-        foo: 'bar'
+        realm: '/services'
       })
       .reply(HttpStatus.OK, responseObject);
 
     //when
     const promise = getAccessToken({
-      realm: SERVICES_REALM,
-      scopes: ['campaing.edit_all', 'campaign.read_all'],
+      scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
       credentialsDir: 'integration-test/data/credentials',
       grantType: PASSWORD_CREDENTIALS_GRANT,
-      queryParams: { foo: 'bar' }
+      queryParams: { realm: '/services' }
     });
 
     //then
@@ -106,8 +102,7 @@ describe('getAccessToken', () => {
 
     before(() => {
       getAccessTokenOptions = {
-        realm: SERVICES_REALM,
-        scopes: ['campaing.edit_all', 'campaign.read_all'],
+        scopes: ['campaign.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
         credentialsDir: 'integration-test/data/credentials',
         grantType: PASSWORD_CREDENTIALS_GRANT
@@ -161,8 +156,7 @@ describe('getAccessToken', () => {
 
     before(() => {
       getAccessTokenOptionsAuthorization = {
-        realm: SERVICES_REALM,
-        scopes: ['campaing.edit_all', 'campaign.read_all'],
+        scopes: ['campaign.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: 'http://127.0.0.1:30001/oauth2/access_token',
         credentialsDir: 'integration-test/data/credentials',
         code: 'foo',
@@ -218,8 +212,7 @@ describe('getAccessToken', () => {
       // given
       const host = 'http://127.0.0.1:30001/oauth2';
       const options = {
-        realm: SERVICES_REALM,
-        scopes: ['campaing.edit_all', 'campaign.read_all'],
+        scopes: ['campaign.edit_all', 'campaign.read_all'],
         accessTokenEndpoint: `${host}/access_token`,
         credentialsDir: 'integration-test/data/credentials',
         grantType: AUTHORIZATION_CODE_GRANT,
@@ -230,7 +223,7 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-      .post('/access_token?realm=/services', (body: any) => {
+      .post('/access_token', (body: any) => {
 
         if (body.grant_type !== options.grantType) {
           return false;
@@ -267,7 +260,6 @@ describe('getAccessToken', () => {
       // given
       const host = 'http://127.0.0.1:30001/oauth2';
       const options =  {
-        realm: EMPLOYEES_REALM,
         accessTokenEndpoint: `${host}/access_token`,
         credentialsDir: 'integration-test/data/credentials',
         grantType: REFRESH_TOKEN_GRANT,
@@ -277,7 +269,7 @@ describe('getAccessToken', () => {
       const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
 
       nock(host)
-      .post('/access_token?realm=/employees', (body: any) => {
+      .post('/access_token', (body: any) => {
 
         if (body.grant_type !== options.grantType) {
           return false;

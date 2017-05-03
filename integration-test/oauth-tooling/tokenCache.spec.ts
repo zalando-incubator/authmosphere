@@ -5,9 +5,9 @@ import * as nock from 'nock';
 
 import {
   TokenCache,
-  PASSWORD_CREDENTIALS_GRANT,
-  SERVICES_REALM
+  PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
+
 import { OAuthConfig } from '../../src/types/OAuthConfig';
 
 chai.use(chaiAsPromised);
@@ -20,7 +20,6 @@ describe('tokenCache', () => {
 
   before(() => {
     oauthConfig = {
-      realm: SERVICES_REALM,
       accessTokenEndpoint: oauthHost + '/access_token',
       tokenInfoEndpoint: oauthHost + '/tokeninfo',
       credentialsDir: 'integration-test/data/credentials',
@@ -36,7 +35,7 @@ describe('tokenCache', () => {
 
     // given
     nock(oauthHost)
-    .post('/access_token?realm=services')
+    .post('/access_token')
     .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
     // when
@@ -55,7 +54,7 @@ describe('tokenCache', () => {
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
 
     nock(oauthHost)
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: accessToken
     })
@@ -63,7 +62,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -93,7 +91,6 @@ describe('tokenCache', () => {
     const tokeninfo = {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -101,7 +98,7 @@ describe('tokenCache', () => {
     };
 
     nock(oauthHost)
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: accessToken
     })
@@ -136,7 +133,7 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: firstAccessToken
     })
@@ -145,13 +142,12 @@ describe('tokenCache', () => {
       // make the first access token expire immediately
       'expires_in': 1,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
       'access_token': firstAccessToken
     })
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: secondAccessToken
     })
@@ -159,7 +155,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -193,7 +188,7 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: firstAccessToken
     })
@@ -201,7 +196,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -212,7 +206,7 @@ describe('tokenCache', () => {
       error: 'invalid_request',
       error_description: 'Access token not valid'
     })
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: secondAccessToken
     })
@@ -220,7 +214,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -253,7 +246,7 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: firstAccessToken
     })
@@ -261,13 +254,12 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
       'access_token': firstAccessToken
     })
-    .post('/access_token?realm=/services')
+    .post('/access_token')
     .reply(HttpStatus.OK, {
       access_token: secondAccessToken
     })
@@ -275,7 +267,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
@@ -309,7 +300,7 @@ describe('tokenCache', () => {
     const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
 
     nock(oauthHost)
-    .post('/access_token?realm=/services', function (body: any) {
+    .post('/access_token', function (body: any) {
       return body.scope === 'nucleus.write nucleus.read';
     })
     .reply(HttpStatus.OK, {
@@ -319,13 +310,12 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
       'access_token': firstAccessToken
     })
-    .post('/access_token?realm=/services', function (body: any) {
+    .post('/access_token', function (body: any) {
       return body.scope === 'all';
     })
     .reply(HttpStatus.OK, {
@@ -335,7 +325,6 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       'expires_in': 3600,
       'token_type': 'Bearer',
-      'realm': 'employees',
       'scope': ['all'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',

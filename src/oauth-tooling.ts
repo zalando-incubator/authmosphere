@@ -10,11 +10,11 @@ import {
 } from './utils';
 
 import {
-  EMPLOYEES_REALM,
   AUTHORIZATION_CODE_GRANT,
   PASSWORD_CREDENTIALS_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
+
 import { OAuthConfig } from './types/OAuthConfig';
 import { Token } from './types/Token';
 import { TokenInfo } from './types/TokenInfo';
@@ -40,7 +40,6 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
     'client_id': clientId,
     'redirect_uri': redirectUri,
     'response_type': 'code',
-    'realm': EMPLOYEES_REALM,
     ...queryParams
   };
 
@@ -59,22 +58,17 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @param bodyObject an object of values put in the body
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
- * @param realm
  * @param queryParams optional
  * @returns {Promise<T>|Q.Promise<U>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, realm: string,
-                            queryParams?: {}): Promise<Token> {
+                            accessTokenEndpoint: string, queryParams?: Object): Promise<Token> {
 
   const promise = new Promise(function(resolve, reject) {
 
-    const queryString = qs.stringify({ realm, ...queryParams });
+    const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 
-    // we are unescaping again since we did not escape before using querystring and we do not want to break anything
-    const unescapedQueryString = qs.unescape(queryString);
-
-    fetch(`${accessTokenEndpoint}?${unescapedQueryString}`, {
+    fetch(url, {
       method: 'POST',
       body: formurlencoded(bodyObject),
       headers: {
@@ -106,6 +100,27 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
   });
 
   return promise;
+}
+
+/**
+ * Build url string to request access token, optionally with given query parameters.
+ *
+ * @param accessTokenEndpoint string
+ * @param queryParams Object key value paris which will be added as query parameters
+ * @returns {string}
+ */
+function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: Object): string {
+
+  if (queryParams !== undefined) {
+    const queryString = qs.stringify(queryParams);
+
+    // we are unescaping again since we did not escape before using querystring and we do not want to break anything
+    const unescapedQueryString = qs.unescape(queryString);
+
+    return `${accessTokenEndpoint}?${unescapedQueryString}`;
+  } else {
+    return accessTokenEndpoint;
+  }
 }
 
 /**
@@ -165,7 +180,6 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenI
  *  - credentialsDir string
  *  - grantType string
  *  - accessTokenEndpoint string
- *  - realm string
  *  - scopes string optional
  *  - queryParams {} optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
@@ -220,7 +234,7 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
     const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, options.realm, options.queryParams);
+      options.accessTokenEndpoint, options.queryParams);
   });
 }
 
