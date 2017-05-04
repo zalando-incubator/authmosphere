@@ -1,6 +1,5 @@
 interface TokenInfo {
   access_token: string;
-  cn?: boolean;
   expires_in: number;
   grant_type?: string;
   open_id?: string;
