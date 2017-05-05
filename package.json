@@ -86,7 +86,7 @@
   },
   "maintainers": [
     "Jörg Dotzki <joerg.dotzki@zalando.de>",
-    "Alexander Dellagi <alexander.dellagi@zalando.de>",
+    "Markus Görlich <markus.goerlich@zalando.de>",
     "Bastian Sieker <bastian.sieker@zalando.de>"
   ],
   "contributors": [
@@ -103,6 +103,11 @@
       "name": "Bastian Sieker",
       "email": "bastian.sieker@zalando.de",
       "url": "https://github.com/bzums"
+    },
+    {
+      "name": "Markus Görlich",
+      "email": "markus.goerlich@zalando.de",
+      "url": "https://github.com/retro64"
     },
     {
       "name": "Matthias Achatz",
