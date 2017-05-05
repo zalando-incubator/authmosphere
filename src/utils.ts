@@ -107,14 +107,12 @@ export function setTokeninfo(req: express.Request) {
     const {
       uid,
       scope,
-      cn,
       expires_in // tslint:disable-line
     } = data;
 
     const tokeninfo = {
       uid,
       scope,
-      cn,
       expires_in // tslint:disable-line
     };
 
