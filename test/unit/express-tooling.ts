@@ -226,12 +226,14 @@ describe('oauth tooling', () => {
       const next = () => {
         called = true;
       };
-
-      // when
-      handleOAuthRequestMiddleware({
+      const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
-      })({ 'originalUrl': '/healthcheck' }, responseMock, next);
+      };
+      const _requestMock = { originalUrl: '/healthcheck' };
+
+      // when
+      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.true;
@@ -244,12 +246,14 @@ describe('oauth tooling', () => {
       const next = () => {
         called = true;
       };
-
-      // when
-      handleOAuthRequestMiddleware({
+      const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
-      })({ 'originalUrl': '/privateAPI', headers: {} }, responseMock, next);
+      };
+      const _requestMock = { originalUrl: '/privateAPI', headers: {} };
+
+      // when
+      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;

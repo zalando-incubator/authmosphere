@@ -1,5 +1,5 @@
 interface MiddlewareOptions {
-  publicEndpoints: string[];
+  publicEndpoints?: string[];
   tokenInfoEndpoint: string;
 }
 

@@ -1,7 +1,7 @@
 import * as HttpStatus from 'http-status';
+import * as express from 'express';
 
 import {
-  match,
   getHeaderValue,
   rejectRequest,
   extractAccessToken,
@@ -91,18 +91,25 @@ function requireScopesMiddleware(scopes: string[],
  * app.use(handleOAuthRequestMiddleware(options))
  *
  * @param options
- * @returns {function(any, any, any): undefined} express middleware
+ * @returns express middleware
  */
 function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
 
-  if (!options.tokenInfoEndpoint) {
+  const {
+    tokenInfoEndpoint,
+    publicEndpoints
+  } = options;
+
+  if (!tokenInfoEndpoint) {
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: any, res: any, next: Function) {
+  return function(req: any, res: express.Response, next: express.NextFunction) {
+
+    const originalUrl = req.originalUrl;
 
     // Skip OAuth validation for paths marked as public
-    if (options.publicEndpoints && match(req.originalUrl, new Set(options.publicEndpoints))) {
+    if (publicEndpoints && publicEndpoints.some(pattern => originalUrl.startsWith(pattern))) {
       return next();
     }
 
@@ -110,14 +117,10 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
     if (!accessToken) {
       rejectRequest(res);
     } else {
-      getTokenInfo(options.tokenInfoEndpoint, accessToken)
+      getTokenInfo(tokenInfoEndpoint, accessToken)
       .then(setTokeninfo(req))
-      .then(() => {
-        next();
-      })
-      .catch((err) => {
-        rejectRequest(res, err.status);
-      });
+      .then(next)
+      .catch(err => rejectRequest(res, err.status));
     }
   };
 }
