@@ -8,4 +8,4 @@ export * from './constants';
 
 export * from './mock-tooling/index';
 
-export * from './ILogger';
+export * from './types/Logger';
