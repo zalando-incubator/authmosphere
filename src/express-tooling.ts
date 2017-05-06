@@ -10,30 +10,16 @@ import {
 
 import { getTokenInfo } from './oauth-tooling';
 
-import { ILogger } from './ILogger';
-import { MiddlewareOptions } from './types/MiddlewareOptions';
+import {
+  MiddlewareOptions,
+  ExtendedRequest,
+  Logger,
+  PrecedenceFunction,
+  PrecedenceErrorHandler,
+  PrecedenceOptions
+} from './types';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
-
-/**
- * Must return a promise that return true or false. If the result is true the scope checking will be skipped and next is called
- */
-interface IPrecedenceFunction {
-  (req: any, res: any, next: Function): Promise<boolean>;
-}
-
-/**
- * Will be called when IPrecedenceFunction throws an error. Should be side effect free, returned Promises are ignored.
- */
-interface IPrecedenceErrorHandler {
-  (err: any, logger: ILogger): any;
-}
-
-interface IPrecedenceOptions {
-  precedenceFunction: IPrecedenceFunction;
-  precedenceErrorHandler: IPrecedenceErrorHandler;
-  logger: ILogger;
-}
 
 /**
  * Returns a function (express middleware) that validates the scopes against the user scopes
@@ -49,9 +35,9 @@ interface IPrecedenceOptions {
  * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
-                                 precedenceOptions?: IPrecedenceOptions) {
+                                 precedenceOptions?: PrecedenceOptions) {
 
-  return function(req: any, res: any, next: Function) {
+  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
       const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
@@ -104,7 +90,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: any, res: express.Response, next: express.NextFunction) {
+  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
 
     const originalUrl = req.originalUrl;
 
@@ -125,18 +111,19 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
   };
 }
 
-function validateScopes(req: any, res: any, next: any, scopes: string[]) {
+function validateScopes(req: ExtendedRequest,
+                        res: express.Response,
+                        next: express.NextFunction,
+                        scopes: string[] = []) {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
+  const userScopes = Array.isArray(requestScopes) ? requestScopes : [];
 
-  const userScopes = new Set<String>(requestScopes || []);
-  const scopesCopy = new Set<String>(scopes || []);
+  const filteredScopes = scopes.filter((scope) => {
+    return !userScopes.includes(scope);
+  });
 
-  for (const scope of userScopes) {
-    scopesCopy.delete(scope);
-  }
-
-  if (scopesCopy.size === 0) {
+  if (filteredScopes.length === 0) {
     next();
   } else {
     rejectRequest(res, HttpStatus.FORBIDDEN);
@@ -144,9 +131,9 @@ function validateScopes(req: any, res: any, next: any, scopes: string[]) {
 }
 
 export {
-  IPrecedenceFunction,
-  IPrecedenceErrorHandler,
-  IPrecedenceOptions,
+  PrecedenceFunction,
+  PrecedenceErrorHandler,
+  PrecedenceOptions,
   requireScopesMiddleware,
   handleOAuthRequestMiddleware
 };
