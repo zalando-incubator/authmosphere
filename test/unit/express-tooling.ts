@@ -4,7 +4,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   handleOAuthRequestMiddleware,
   requireScopesMiddleware,
-  ILogger​​
+  Logger​​
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -25,7 +25,9 @@ describe('oauth tooling', () => {
 
   before(() => {
 
-    requestMock = {};
+    requestMock = {
+      get: (name: string) => name
+    };
 
     responseMock = {};
     responseMock.sendStatus = function(status: string) {
@@ -198,7 +200,7 @@ describe('oauth tooling', () => {
       const next = () => {
         return;
       };
-      const customErrorhandler = (e: any, logger: ILogger​​): void => {
+      const customErrorhandler = (e: any, logger: Logger​​): void => {
         // then
         expect(e).to.equal('Error happened');
         done();
@@ -230,7 +232,10 @@ describe('oauth tooling', () => {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
-      const _requestMock = { originalUrl: '/healthcheck' };
+      const _requestMock = Object.assign({}, {
+        originalUrl: '/healthcheck',
+        headers: {}
+       }, requestMock);
 
       // when
       handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
@@ -250,7 +255,10 @@ describe('oauth tooling', () => {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
-      const _requestMock = { originalUrl: '/privateAPI', headers: {} };
+      const _requestMock = Object.assign({}, {
+        originalUrl: '/privateAPI',
+        headers: {}
+       }, requestMock);
 
       // when
       handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
