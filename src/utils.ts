@@ -32,35 +32,16 @@ export function getFileData(filePath: string, fileName: string): q.Promise<any> 
 }
 
 /**
- * Checks whether a given url matches one of a set of given patterns.
- *
- * @param url
- * @param patterns
- * @returns {boolean}
- */
-export function match(url: string, patterns: Set<string>): boolean {
-
-  let isPatternMatch: boolean = false;
-
-  patterns.forEach((pattern) => {
-    if (url.startsWith(pattern)) {
-      isPatternMatch = true;
-    }
-  });
-
-  return isPatternMatch;
-}
-
-/**
  * Returns the value of a specified header field from a request
  *
  * @param req
  * @param field The name of the field to return
  * @returns {string} The value of the header field
  */
-export function getHeaderValue(req: express.Request, field: string): string {
-  if (req && field && req.headers.hasOwnProperty(field)) {
-    return req.headers[field];
+export function getHeaderValue(req: express.Request, fieldName: string): string {
+
+  if (req && fieldName && req.headers.hasOwnProperty(fieldName)) {
+    return req.headers[fieldName];
   } else {
     return '';
   }
@@ -91,7 +72,7 @@ export function extractAccessToken(authHeader: string): string {
   if (parts[0] === AUTHORIZATION_BEARER_PREFIX && parts.length === 2) {
     return parts[1];
   } else {
-    return undefined;
+    return;
   }
 }
 

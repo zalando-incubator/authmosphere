@@ -122,10 +122,7 @@ describe('middlewares', () => {
 
     // when
     const promise = fetch('http://127.0.0.1:30002/resource/user')
-    .then((res) => {
-
-      return res.status;
-    });
+    .then(res => res.status);
 
     // then
     return expect(promise).to.become(HttpStatus.UNAUTHORIZED);
@@ -144,10 +141,7 @@ describe('middlewares', () => {
         authorization: authHeader
       }
     })
-    .then((res) => {
-
-      return res.status;
-    });
+    .then(res => res.status);
 
     // then
     return expect(promise).to.become(HttpStatus.UNAUTHORIZED);
