@@ -37,27 +37,26 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 function requireScopesMiddleware(scopes: string[],
                                  precedenceOptions?: PrecedenceOptions) {
 
-  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
+  return async function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
       const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
 
-      precedenceFunction(req, res, next)
-      .then(result => {
-        if (result) {
-          next();
-        } else {
-          validateScopes(req, res, next, scopes);
-        }
-      })
-      .catch(err => {
+      let isAllowed;
+      try {
+        isAllowed = await precedenceFunction(req, res, next);
+      } catch (err) {
         try {
           precedenceErrorHandler(err, logger);
         } catch (err) {
           logger.error('Error while executing precedenceErrorHandler: ', err);
         }
-      });
-      return; // skip normal scope validation
+      }
+
+      if (isAllowed) {
+        next();
+        return; // skip normal scope validation
+      }
     }
 
     validateScopes(req, res, next, scopes);
