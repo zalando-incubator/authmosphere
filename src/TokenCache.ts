@@ -70,7 +70,6 @@ class TokenCache {
   get(tokenName: string): Promise<Token> {
 
     const promise = this.validateToken(tokenName)
-      .then((token) => Promise.resolve(token))
       .catch(() => {
 
         const config = {
@@ -84,9 +83,9 @@ class TokenCache {
 
             token.local_expiry = Date.now() + token.expires_in * 1000 - EXPIRE_THRESHOLD;
             this._tokens[tokenName] = token;
-            return Promise.resolve(token);
-          })
-          .catch((err) => Promise.reject(err));
+
+            return token;
+          });
     });
 
     return promise;
@@ -151,7 +150,6 @@ class TokenCache {
     }
 
     return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .then(validatedToken => Promise.resolve(validatedToken))
       .catch(() => Promise.reject(`Token ${tokenName} is invalid.`));
   }
 }
