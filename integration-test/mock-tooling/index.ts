@@ -10,8 +10,7 @@ import {
   cleanMock
 } from '../../src/index';
 
-import { TokenInfo } from '../../src/types/TokenInfo';
-import { Token } from '../../src/types/Token';
+import { Token } from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -83,17 +82,17 @@ describe('mock tooling', () => {
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, 'foo')
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
       })
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
       })
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
@@ -118,22 +117,22 @@ describe('mock tooling', () => {
 
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.deep.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
       })
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.deep.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
       })
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.deep.equal(validAuthToken);
         return getTokenInfo(tokeninfoEndpoint, 'foo');
       })
-      .then((token: TokenInfo) => {
+      .then((token) => {
 
         expect(token).to.deep.equal(validAuthToken);
       });

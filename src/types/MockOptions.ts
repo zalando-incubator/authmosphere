@@ -1,8 +1,8 @@
-import { TokenInfo } from './TokenInfo';
+import { Token } from '.';
 
 interface MockOptions {
   url: string;
-  tokens?: TokenInfo[];
+  tokens?: Token[];
   times?: number;
 }
 

@@ -23,7 +23,7 @@ getAccessToken({
   // ...
   realm: EMPLOYEES_REALM,
 })
-.then(token => {
+.then(token: Token => {
   // ...
 });
 
@@ -33,7 +33,7 @@ getAccessToken({
   // ...
   queryParams: { realm: '/employees' }
 })
-.then(token => {
+.then(token: Token => {
   // ...
 });
 ```
@@ -69,8 +69,8 @@ const tokenCache = new TokenCache({
 }, oAuthConfig);
 
 tokenCache.get('service-foo')
-.then((tokeninfo) => {
-  console.log(tokeninfo.access_token);
+.then((token: Token) => {
+  console.log(token.access_token);
 });
 ```
 
@@ -79,7 +79,7 @@ tokenCache.get('service-foo')
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
 * `tokenInfoEndpoint` string - mandatory for TokenCache
-* `scopes` string optional
+* `scopes` string[] optional
 * `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
@@ -100,7 +100,6 @@ app.use(handleOAuthRequestMiddleware({
 * `publicEndpoints` string[]
 * `tokenInfoEndpoint` string
 
-
 #### requireScopesMiddleware(scopes: string[])
 
 Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
@@ -112,28 +111,41 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 })
 ```
 
-#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<TokenInfo>
+#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<Token>
 
 Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
 ```typescript
 getTokenInfo(tokenInfoEndpoint, accessToken)
-.then((tokeninfo) => {
-  console.log(tokeninfo.access_token);
+.then((token: Token) => {
+  console.log(token.access_token);
 })
 .catch((err) => {
   console.log(err);
 });
 ```
 
-#### getAccessToken(options: OAuthConfig)
+Type `Token` is defined like:
+
+```typescript
+interface Token {
+  access_token: string;
+  expires_in?: number;
+  scope?: string[];
+  token_type?: string;
+  local_expiry?: number;
+  [key: string]: {};
+}
+```
+
+#### getAccessToken(options: OAuthConfig): Promise<Token>
 
 Helper function to get an access token for the specified scopes.
 
 ```typescript
 getAccessToken(options)
-.then((accessToken) => {
-  console.log(accessToken);
+.then((token: Token) => {
+  console.log(token.access_token);
 })
 .catch((err) => {
   console.log(err);

@@ -16,8 +16,7 @@ import {
 } from './constants';
 
 import { OAuthConfig } from './types/OAuthConfig';
-import { Token } from './types/Token';
-import { TokenInfo } from './types/TokenInfo';
+import { Token } from './types';
 import { BodyParameters } from './types/BodyParameters';
 
 const USER_JSON = 'user.json';
@@ -59,15 +58,14 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
  * @param queryParams optional
- * @returns {Promise<T>|Q.Promise<U>}
+ * @returns {Promise<Token>}
  */
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
                             accessTokenEndpoint: string, queryParams?: Object): Promise<Token> {
 
-  const promise = new Promise(function(resolve, reject) {
+  const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 
-    const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
-
+  const promise =
     fetch(url, {
       method: 'POST',
       body: formurlencoded(bodyObject),
@@ -80,24 +78,19 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
 
       const status = response.status;
 
-      return response
-        .json()
-        .then((data) => {
+      if (status !== HttpStatus.OK) {
+        return Promise.reject(`Response failed with status code ${status}`);
+      }
 
-          if (response.status !== HttpStatus.OK) {
-            throw { status, data };
-          } else {
-            return resolve(data);
-          }
-      });
+      return response.json();
     })
+    .then((data) => Promise.resolve(data))
     .catch((err) => {
-      return reject({
+      return Promise.reject({
         msg: `Error requesting access token from ${accessTokenEndpoint}`,
         err
       });
     });
-  });
 
   return promise;
 }
@@ -130,11 +123,11 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  *
  * @param tokenInfoUrl
  * @param accessToken
- * @returns {Promise<T>}
+ * @returns {Promise<Token>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenInfo> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token> {
 
-  const promise = new Promise(function(resolve, reject) {
+  const promise = new Promise<Token>(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
     .then((response) => {
@@ -180,7 +173,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenI
  *  - credentialsDir string
  *  - grantType string
  *  - accessTokenEndpoint string
- *  - scopes string optional
+ *  - scopes string[] optional
  *  - queryParams {} optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)

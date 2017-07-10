@@ -3,11 +3,11 @@ import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
 import { MockOptions } from '../types/MockOptions';
-import { TokenInfo } from '../types/TokenInfo';
+import { Token } from '../types';
 
-let tokens: TokenInfo[] = [];
+let tokens: Token[] = [];
 
-function generateToken(): TokenInfo {
+function generateToken(): Token {
 
   return {
     expires_in: 3600,
