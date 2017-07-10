@@ -1,6 +1,8 @@
 # lib-oauth-tooling
 
-![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg?branch=master)
+[![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg?branch=master)](https://travis-ci.org/zalando-incubator/lib-oauth-tooling)
+[![npm download](https://img.shields.io/npm/dm/lib-oauth-tooling.svg?style=flat-square)](https://www.npmjs.com/package/lib-oauth-tooling)
+[![npm version](https://img.shields.io/npm/v/lib-oauth-tooling.svg?style=flat)](https://www.npmjs.com/package/lib-oauth-tooling)
 
 A simple typescript based library for supporting OAuth2 flows.
 Currently the following flows are supported:
