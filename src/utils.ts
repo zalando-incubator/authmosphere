@@ -8,8 +8,7 @@ import {
   AUTHORIZATION_CODE_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
-import { OAuthConfig } from './types/OAuthConfig';
-import { TokenInfo } from './types/TokenInfo';
+import { OAuthConfig, Token } from './types';
 
 const fsReadFile = q.denodeify<any>(fs.readFile);
 
@@ -85,7 +84,7 @@ export function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 export function setTokeninfo(req: express.Request) {
-  return function(data: TokenInfo) {
+  return function(data: Token) {
 
     const {
       uid,

@@ -23,7 +23,7 @@ getAccessToken({
   // ...
   realm: EMPLOYEES_REALM,
 })
-.then(token => {
+.then(token: Token => {
   // ...
 });
 
@@ -33,7 +33,7 @@ getAccessToken({
   // ...
   queryParams: { realm: '/employees' }
 })
-.then(token => {
+.then(token: Token => {
   // ...
 });
 ```
@@ -69,8 +69,8 @@ const tokenCache = new TokenCache({
 }, oAuthConfig);
 
 tokenCache.get('service-foo')
-.then((tokeninfo) => {
-  console.log(tokeninfo.access_token);
+.then((token) => {
+  console.log(token.access_token);
 });
 ```
 
@@ -118,8 +118,8 @@ Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
 
 ```typescript
 getTokenInfo(tokenInfoEndpoint, accessToken)
-.then((tokeninfo) => {
-  console.log(tokeninfo.access_token);
+.then((token: Token) => {
+  console.log(token.access_token);
 })
 .catch((err) => {
   console.log(err);
@@ -132,8 +132,8 @@ Helper function to get an access token for the specified scopes.
 
 ```typescript
 getAccessToken(options)
-.then((accessToken) => {
-  console.log(accessToken);
+.then((token: Token) => {
+  console.log(token.access_token);
 })
 .catch((err) => {
   console.log(err);
