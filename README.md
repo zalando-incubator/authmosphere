@@ -1,5 +1,7 @@
 # lib-oauth-tooling
 
+![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg?branch=master)
+
 A simple typescript based library for supporting OAuth2 flows.
 Currently the following flows are supported:
 
