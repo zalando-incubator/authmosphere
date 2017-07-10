@@ -84,7 +84,7 @@ export function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 export function setTokeninfo(req: express.Request) {
-  return function(data: Token) {
+  return (data: Token) => {
 
     const {
       uid,

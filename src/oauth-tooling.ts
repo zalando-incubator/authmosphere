@@ -63,10 +63,9 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
                             accessTokenEndpoint: string, queryParams?: Object): Promise<Token> {
 
-  const promise = new Promise<Token>(function(resolve, reject) {
+  const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 
-    const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
-
+  const promise =
     fetch(url, {
       method: 'POST',
       body: formurlencoded(bodyObject),
@@ -79,24 +78,19 @@ function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
 
       const status = response.status;
 
-      return response
-        .json()
-        .then((data) => {
+      if (status !== HttpStatus.OK) {
+        return Promise.reject(`Response failed with status code ${status}`);
+      }
 
-          if (response.status !== HttpStatus.OK) {
-            throw { status, data };
-          } else {
-            return resolve(data);
-          }
-      });
+      return response.json();
     })
+    .then((data) => Promise.resolve(data))
     .catch((err) => {
-      return reject({
+      return Promise.reject({
         msg: `Error requesting access token from ${accessTokenEndpoint}`,
         err
       });
     });
-  });
 
   return promise;
 }
