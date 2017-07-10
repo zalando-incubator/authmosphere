@@ -1,6 +1,6 @@
 {
   "name": "lib-oauth-tooling",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -49,6 +49,7 @@
     "@types/uuid": "2.0.29",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
+    "coveralls": "2.13.1",
     "express": "4.15.3",
     "mocha": "3.4.2",
     "nyc": "10.3.2",
@@ -60,6 +61,7 @@
     "unit-test": "npm run build && mocha lib/test --recursive",
     "integration-test": "npm run build && mocha lib/integration-test --recursive",
     "test:coverage": "nyc npm run test",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "tslint": "tslint --type-check --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
     "build": "rm -rf lib && tsc"
   },
