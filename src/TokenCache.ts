@@ -32,7 +32,7 @@ class TokenCache {
    * `accessTokenEndpoint` string
    * `tokenInfoEndpoint` string
    * `realm` string
-   * `scopes` string optional
+   * `scopes` string[] optional
    * `queryParams` {} optional
    * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
@@ -71,37 +71,27 @@ class TokenCache {
    */
   get(tokenName: string): Promise<TokenInfo> {
 
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<TokenInfo>((resolve, reject) => {
 
-      this
-      .validateToken(tokenName)
-      .then((token) => {
+      this.validateToken(tokenName)
+        .then((token) => resolve(token))
+        .catch(() => {
 
-        return resolve(token);
-      })
-      .catch(() => {
+          const config = {
+            ...this.oauthConfig,
+            scopes: this.tokenConfig[tokenName]
+          };
 
-        const config = {
-          ...this.oauthConfig,
-          scopes: this.tokenConfig[tokenName]
-        };
+          return getAccessToken(config);
+        })
+        .then((token: Token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token))
+        .then((tokenInfo: TokenInfo) => {
 
-        return getAccessToken(config)
-          .then((token: Token) => {
-
-            return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token);
-          })
-          .then((tokenInfo: TokenInfo) => {
-
-            tokenInfo.local_expiry = Date.now() + tokenInfo.expires_in * 1000 - EXPIRE_THRESHOLD;
-            this._tokens[tokenName] = tokenInfo;
-            resolve(tokenInfo);
-          })
-          .catch((err) => {
-
-            return reject(err);
-          });
-      });
+          tokenInfo.local_expiry = Date.now() + tokenInfo.expires_in * 1000 - EXPIRE_THRESHOLD;
+          this._tokens[tokenName] = tokenInfo;
+          resolve(tokenInfo);
+        })
+        .catch((err) => reject(err));
     });
 
     return promise;
@@ -166,12 +156,8 @@ class TokenCache {
     }
 
     return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .then(validatedToken => {
-        return Promise.resolve(validatedToken);
-      })
-      .catch(() => {
-        return Promise.reject(`Token ${tokenName} is invalid.`);
-      });
+      .then(validatedToken => Promise.resolve(validatedToken))
+      .catch(() => Promise.reject(`Token ${tokenName} is invalid.`));
   }
 }
 

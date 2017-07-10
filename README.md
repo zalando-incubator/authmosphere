@@ -79,7 +79,7 @@ tokenCache.get('service-foo')
 * `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
 * `accessTokenEndpoint` string
 * `tokenInfoEndpoint` string - mandatory for TokenCache
-* `scopes` string optional
+* `scopes` string[] optional
 * `queryParams` {} optional
 * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
 * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)

@@ -64,7 +64,7 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
 function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
                             accessTokenEndpoint: string, queryParams?: Object): Promise<Token> {
 
-  const promise = new Promise(function(resolve, reject) {
+  const promise = new Promise<Token>(function(resolve, reject) {
 
     const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 
@@ -134,7 +134,7 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  */
 function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenInfo> {
 
-  const promise = new Promise(function(resolve, reject) {
+  const promise = new Promise<TokenInfo>(function(resolve, reject) {
 
     fetch(tokenInfoUrl + '?access_token=' + accessToken)
     .then((response) => {
@@ -180,7 +180,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<TokenI
  *  - credentialsDir string
  *  - grantType string
  *  - accessTokenEndpoint string
- *  - scopes string optional
+ *  - scopes string[] optional
  *  - queryParams {} optional
  *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)

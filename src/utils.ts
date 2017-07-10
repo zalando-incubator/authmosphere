@@ -41,10 +41,12 @@ export function getFileData(filePath: string, fileName: string): q.Promise<any> 
 export function getHeaderValue(req: express.Request, fieldName: string): string {
 
   if (req && fieldName && req.headers.hasOwnProperty(fieldName)) {
-    return req.headers[fieldName];
-  } else {
-    return '';
+    const headerValue = req.headers[fieldName];
+    // make sure to return a string
+    return (Array.isArray(headerValue)) ? headerValue.join(' ') : headerValue;
   }
+
+  return '';
 }
 
 /**
