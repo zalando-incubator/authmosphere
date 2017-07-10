@@ -1,6 +1,7 @@
 # lib-oauth-tooling
 
 [![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg?branch=master)](https://travis-ci.org/zalando-incubator/lib-oauth-tooling)
+[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/lib-oauth-tooling/badge.svg?branch=master)](https://coveralls.io/github/zalando-incubator/lib-oauth-tooling?branch=master)
 [![npm download](https://img.shields.io/npm/dm/lib-oauth-tooling.svg?style=flat-square)](https://www.npmjs.com/package/lib-oauth-tooling)
 [![npm version](https://img.shields.io/npm/v/lib-oauth-tooling.svg?style=flat)](https://www.npmjs.com/package/lib-oauth-tooling)
 
