@@ -3,7 +3,7 @@ import { getAccessToken, getTokenInfo } from './oauth-tooling';
 import { validateOAuthConfig } from './utils';
 import { OAuthConfig, Token } from './types';
 
-const EXPIRE_THRESHOLD = 60 * 1000;
+const DEFAULT_PERCENTAGE_LEFT = 0.75;
 
 /**
  * Class to request and cache tokens on client-side.
@@ -78,14 +78,17 @@ class TokenCache {
         };
 
         return getAccessToken(config)
-          .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token))
           .then((token) => {
 
-            token.local_expiry = Date.now() + token.expires_in * 1000 - EXPIRE_THRESHOLD;
-            this._tokens[tokenName] = token;
+            const localExpiry = Date.now() + (token.expires_in * 1000 * DEFAULT_PERCENTAGE_LEFT);
+            this._tokens[tokenName] = {
+              ...token,
+              local_expiry: localExpiry
+            };
 
             return token;
-          });
+          })
+          .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token));
     });
 
     return promise;
@@ -154,4 +157,7 @@ class TokenCache {
   }
 }
 
-export { TokenCache };
+export {
+  TokenCache,
+  DEFAULT_PERCENTAGE_LEFT
+};

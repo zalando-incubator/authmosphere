@@ -2,9 +2,11 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
+import * as lolex from 'lolex';
 
 import {
   TokenCache,
+  DEFAULT_PERCENTAGE_LEFT,
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
 
@@ -86,25 +88,30 @@ describe('tokenCache', () => {
 
   it('#get should resolve with the cached token if there is a valid one', () => {
 
+    const clock = lolex.install();
+    const initialLifetime = 3600;
+    const timeBeforeExpiry = initialLifetime * DEFAULT_PERCENTAGE_LEFT * 1000 - 1;
+
     // given
     const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const tokeninfo = {
-      'expires_in': 3600,
+
+    nock(oauthHost)
+    .post('/access_token')
+    .reply(HttpStatus.OK, {
+      access_token: accessToken,
+      expires_in: initialLifetime
+    })
+    .get('/tokeninfo')
+    .query({ access_token: accessToken })
+    .times(2)
+    .reply(HttpStatus.OK, {
+      'expires_in': initialLifetime, // will be ignored => does not matter for the test
       'token_type': 'Bearer',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
       'uid': 'uid',
       'access_token': accessToken
-    };
-
-    nock(oauthHost)
-    .post('/access_token')
-    .reply(HttpStatus.OK, {
-      access_token: accessToken
-    })
-    .get('/tokeninfo?access_token=' + accessToken)
-    .times(2)
-    .reply(HttpStatus.OK, tokeninfo);
+    });
 
     // when
     const tokenService = new TokenCache({
@@ -113,20 +120,22 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then(() => {
-
-      return tokenService.get('nucleus')
-        .then((data) => {
-
-          return data.access_token;
-        });
-    });
+      .then(() => clock.tick(timeBeforeExpiry))
+      .then(() => tokenService.get('nucleus'))
+      .then((token) => {
+        clock.uninstall();
+        return token.access_token;
+      });
 
     // then
     return expect(promise).to.become(accessToken);
   });
 
   it('#get should resolve with a new token if the cached one is expired', () => {
+
+    const clock = lolex.install();
+    const initialLifetime = 3600;
+    const timeUntilExpiry = initialLifetime * DEFAULT_PERCENTAGE_LEFT * 1000 + 1;
 
     // given
     const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
@@ -135,12 +144,13 @@ describe('tokenCache', () => {
     nock(oauthHost)
     .post('/access_token')
     .reply(HttpStatus.OK, {
-      access_token: firstAccessToken
+      access_token: firstAccessToken,
+      expires_in: initialLifetime
     })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
+    .get('/tokeninfo')
+    .query({ access_token: firstAccessToken })
     .reply(HttpStatus.OK, {
-      // make the first access token expire immediately
-      'expires_in': 1,
+      'expires_in': initialLifetime, // will be ignored => does not matter for the test
       'token_type': 'Bearer',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
@@ -151,9 +161,10 @@ describe('tokenCache', () => {
     .reply(HttpStatus.OK, {
       access_token: secondAccessToken
     })
-    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .get('/tokeninfo')
+    .query({ access_token: secondAccessToken })
     .reply(HttpStatus.OK, {
-      'expires_in': 3600,
+      'expires_in': initialLifetime, // will be ignored => does not matter for the test
       'token_type': 'Bearer',
       'scope': ['nucleus.write', 'nucleus.read'],
       'grant_type': PASSWORD_CREDENTIALS_GRANT,
@@ -168,14 +179,12 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then(() => {
-
-      return tokenService.get('nucleus')
-        .then((tokeninfo) => {
-
-          return tokeninfo.access_token;
-        });
-    });
+      .then(() => clock.tick(timeUntilExpiry))
+      .then(() => tokenService.get('nucleus'))
+      .then((token) => {
+        clock.uninstall();
+        return token.access_token;
+      });
 
     // then
     return expect(promise).to.become(secondAccessToken);
