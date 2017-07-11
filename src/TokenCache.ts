@@ -3,6 +3,11 @@ import { getAccessToken, getTokenInfo } from './oauth-tooling';
 import { validateOAuthConfig } from './utils';
 import { OAuthConfig, Token } from './types';
 
+/**
+ * Default value to determine when a token is expired locally (means
+ * when to issue a new token): if the token exists for
+ * ((1 - 0.75) * lifetime) then issue a new one.
+ */
 const DEFAULT_PERCENTAGE_LEFT = 0.75;
 
 /**
