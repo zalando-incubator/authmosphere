@@ -70,7 +70,7 @@ class TokenCache {
    * Rejects if there is no token present and is not able to request a new one.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   get(tokenName: string): Promise<Token> {
 
@@ -119,7 +119,7 @@ class TokenCache {
    * Will resolve with an hashmap of the newly requested tokens if the request was successful.
    * Otherwise, rejects.
    *
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   refreshAllTokens(): Promise<{ [key: string]: Token }> {
 
@@ -140,7 +140,7 @@ class TokenCache {
    * Rejects otherwise.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   private validateToken(tokenName: string): Promise<Token> {
 
@@ -157,8 +157,7 @@ class TokenCache {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
 
-    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .catch(() => Promise.reject(`Token ${tokenName} is invalid.`));
+    return Promise.resolve(token);
   }
 }
 

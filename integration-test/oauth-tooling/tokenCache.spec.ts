@@ -100,7 +100,6 @@ describe('tokenCache', () => {
     })
     .get('/tokeninfo')
     .query({ access_token: defaultAccessTokenValue })
-    .times(2)
     .reply(HttpStatus.OK, defaultTokenInfoResponse);
 
     // when
@@ -163,50 +162,6 @@ describe('tokenCache', () => {
         clock.uninstall();
         return token.access_token;
       });
-
-    // then
-    return expect(promise).to.become(otherAccessTokenValue);
-  });
-
-  it('#get should resolve with a new token if the cached one is invalid (but not expired)', () => {
-
-    // given
-    const otherAccessTokenValue = 'bar';
-
-    nock(oauthHost)
-      .post('/access_token')
-      .reply(HttpStatus.OK, {
-        access_token: defaultAccessTokenValue
-      })
-      .get('/tokeninfo')
-      .query({ access_token: defaultAccessTokenValue })
-      .reply(HttpStatus.OK, defaultTokenInfoResponse)
-      .get('/tokeninfo')
-      .query({ access_token: defaultAccessTokenValue })
-      .reply(HttpStatus.BAD_REQUEST, {
-        error: 'invalid_request',
-        error_description: 'Access token not valid'
-      })
-      .post('/access_token')
-      .reply(HttpStatus.OK, {
-        access_token: otherAccessTokenValue
-      })
-      .get('/tokeninfo')
-      .query({ access_token: otherAccessTokenValue })
-      .reply(HttpStatus.OK, {
-        ...defaultTokenInfoResponse,
-        access_token: otherAccessTokenValue
-      });
-
-    // when
-    const tokenService = new TokenCache({
-      'nucleus': ['nucleus.write', 'nucleus.read'],
-      'halo': ['all']
-    }, oauthConfig);
-
-    const promise = tokenService.get('nucleus')
-      .then(() => tokenService.get('nucleus'))
-      .then((token) => token.access_token);
 
     // then
     return expect(promise).to.become(otherAccessTokenValue);
