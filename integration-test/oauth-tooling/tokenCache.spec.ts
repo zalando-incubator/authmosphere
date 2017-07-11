@@ -90,7 +90,7 @@ describe('tokenCache', () => {
     // given
     const clock = lolex.install();
     const initialLifetime = 3600;
-    const timeBeforeExpiry = initialLifetime * DEFAULT_PERCENTAGE_LEFT * 1000 - 1;
+    const timeBeforeExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 - 1;
 
     nock(oauthHost)
     .post('/access_token')
@@ -125,7 +125,7 @@ describe('tokenCache', () => {
     // given
     const clock = lolex.install();
     const initialLifetime = 3600;
-    const timeUntilExpiry = initialLifetime * DEFAULT_PERCENTAGE_LEFT * 1000 + 1;
+    const timeUntilExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 + 1;
 
     const otherAccessTokenValue = 'bar';
 

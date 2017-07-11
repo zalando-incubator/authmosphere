@@ -6,7 +6,7 @@ import { OAuthConfig, Token } from './types';
 /**
  * Default value to determine when a token is expired locally (means
  * when to issue a new token): if the token exists for
- * ((1 - 0.75) * lifetime) then issue a new one.
+ * ((1 - DEFAULT_PERCENTAGE_LEFT) * lifetime) then issue a new one.
  */
 const DEFAULT_PERCENTAGE_LEFT = 0.75;
 
@@ -85,7 +85,7 @@ class TokenCache {
         return getAccessToken(config)
           .then((token) => {
 
-            const localExpiry = Date.now() + (token.expires_in * 1000 * DEFAULT_PERCENTAGE_LEFT);
+            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - DEFAULT_PERCENTAGE_LEFT));
             this._tokens[tokenName] = {
               ...token,
               local_expiry: localExpiry
