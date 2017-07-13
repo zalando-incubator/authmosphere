@@ -43,6 +43,23 @@ describe('tokenCache', () => {
     nock.cleanAll();
   });
 
+  it('#get should reject if there is no token configuration for given name', () => {
+
+    // given
+    nock(oauthHost)
+      .post('/access_token')
+      .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+
+    // when
+    const tokenCache = new TokenCache({
+      'nucleus': ['nucleus.write', 'nucleus.read'],
+      'halo': ['all']
+    }, oauthConfig);
+
+    // then
+    return expect(tokenCache.get('foo')).to.be.rejected;
+  });
+
   it('#get should reject if there is no token and is not able to request a new one', () => {
 
     // given

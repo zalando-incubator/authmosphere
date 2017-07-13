@@ -144,15 +144,16 @@ class TokenCache {
    */
   private validateToken(tokenName: string): Promise<Token> {
 
-    if (!this.tokenConfig[tokenName]) {
+    if (this.tokenConfig[tokenName] === undefined) {
       return Promise.reject(`Token ${tokenName} does not exist.`);
     }
 
-    if (!this._tokens[tokenName]) {
+    const token = this._tokens[tokenName];
+
+    if (token === undefined) {
       return Promise.reject(`No token available for ${tokenName}`);
     }
 
-    const token = this._tokens[tokenName];
     if (token.local_expiry < Date.now()) {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
