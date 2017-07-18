@@ -2,9 +2,11 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
+import * as lolex from 'lolex';
 
 import {
   TokenCache,
+  DEFAULT_PERCENTAGE_LEFT,
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
 
@@ -17,6 +19,16 @@ describe('tokenCache', () => {
 
   let oauthConfig: OAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
+
+  const defaultAccessTokenValue = 'foo';
+  const defaultTokenInfoResponse = {
+      expires_in: 3600,
+      token_type: 'Bearer',
+      scope: ['nucleus.write', 'nucleus.read'],
+      grant_type: PASSWORD_CREDENTIALS_GRANT,
+      uid: 'uid',
+      access_token: defaultAccessTokenValue
+    };
 
   before(() => {
     oauthConfig = {
@@ -31,12 +43,29 @@ describe('tokenCache', () => {
     nock.cleanAll();
   });
 
+  it('#get should reject if there is no token configuration for given name', () => {
+
+    // given
+    nock(oauthHost)
+      .post('/access_token')
+      .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+
+    // when
+    const tokenCache = new TokenCache({
+      'nucleus': ['nucleus.write', 'nucleus.read'],
+      'halo': ['all']
+    }, oauthConfig);
+
+    // then
+    return expect(tokenCache.get('foo')).to.be.rejected;
+  });
+
   it('#get should reject if there is no token and is not able to request a new one', () => {
 
     // given
     nock(oauthHost)
-    .post('/access_token')
-    .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+      .post('/access_token')
+      .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
     // when
     const tokenCache = new TokenCache({
@@ -51,22 +80,14 @@ describe('tokenCache', () => {
   it('#get should resolve with a new token if there is none yet', () => {
 
     // given
-    const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-
     nock(oauthHost)
     .post('/access_token')
     .reply(HttpStatus.OK, {
-      access_token: accessToken
+      access_token: defaultAccessTokenValue
     })
-    .get('/tokeninfo?access_token=' + accessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': accessToken
-    });
+    .get('/tokeninfo')
+    .query({ access_token: defaultAccessTokenValue })
+    .reply(HttpStatus.OK, defaultTokenInfoResponse);
 
     // when
     const tokenService = new TokenCache({
@@ -75,36 +96,28 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then((tokeninfo) => {
-
-      return tokeninfo.access_token;
-    });
+      .then((token) => token.access_token);
 
     // then
-    return expect(promise).to.become(accessToken);
+    return expect(promise).to.become(defaultAccessTokenValue);
   });
 
   it('#get should resolve with the cached token if there is a valid one', () => {
 
     // given
-    const accessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const tokeninfo = {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': accessToken
-    };
+    const clock = lolex.install();
+    const initialLifetime = 3600;
+    const timeBeforeExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 - 1;
 
     nock(oauthHost)
     .post('/access_token')
     .reply(HttpStatus.OK, {
-      access_token: accessToken
+      access_token: defaultAccessTokenValue,
+      expires_in: initialLifetime
     })
-    .get('/tokeninfo?access_token=' + accessToken)
-    .times(2)
-    .reply(HttpStatus.OK, tokeninfo);
+    .get('/tokeninfo')
+    .query({ access_token: defaultAccessTokenValue })
+    .reply(HttpStatus.OK, defaultTokenInfoResponse);
 
     // when
     const tokenService = new TokenCache({
@@ -113,52 +126,44 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then(() => {
-
-      return tokenService.get('nucleus')
-        .then((data) => {
-
-          return data.access_token;
-        });
-    });
+      .then(() => clock.tick(timeBeforeExpiry))
+      .then(() => tokenService.get('nucleus'))
+      .then((token) => {
+        clock.uninstall();
+        return token.access_token;
+      });
 
     // then
-    return expect(promise).to.become(accessToken);
+    return expect(promise).to.become(defaultAccessTokenValue);
   });
 
   it('#get should resolve with a new token if the cached one is expired', () => {
 
     // given
-    const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
+    const clock = lolex.install();
+    const initialLifetime = 3600;
+    const timeUntilExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 + 1;
+
+    const otherAccessTokenValue = 'bar';
 
     nock(oauthHost)
     .post('/access_token')
     .reply(HttpStatus.OK, {
-      access_token: firstAccessToken
+      access_token: defaultAccessTokenValue,
+      expires_in: initialLifetime
     })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
-    .reply(HttpStatus.OK, {
-      // make the first access token expire immediately
-      'expires_in': 1,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': firstAccessToken
-    })
+    .get('/tokeninfo')
+    .query({ access_token: defaultAccessTokenValue })
+    .reply(HttpStatus.OK, defaultTokenInfoResponse)
     .post('/access_token')
     .reply(HttpStatus.OK, {
-      access_token: secondAccessToken
+      access_token: otherAccessTokenValue
     })
-    .get('/tokeninfo?access_token=' + secondAccessToken)
+    .get('/tokeninfo')
+    .query({ access_token: otherAccessTokenValue })
     .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': secondAccessToken
+      ...defaultTokenInfoResponse,
+      access_token: otherAccessTokenValue
     });
 
     // when
@@ -168,110 +173,40 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then(() => {
-
-      return tokenService.get('nucleus')
-        .then((tokeninfo) => {
-
-          return tokeninfo.access_token;
-        });
-    });
+      .then(() => clock.tick(timeUntilExpiry))
+      .then(() => tokenService.get('nucleus'))
+      .then((token) => {
+        clock.uninstall();
+        return token.access_token;
+      });
 
     // then
-    return expect(promise).to.become(secondAccessToken);
-  });
-
-  it('#get should resolve with a new token if the cached one is invalid (but not expired)', () => {
-
-    // given
-    const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
-
-    nock(oauthHost)
-    .post('/access_token')
-    .reply(HttpStatus.OK, {
-      access_token: firstAccessToken
-    })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': firstAccessToken
-    })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
-    .reply(HttpStatus.BAD_REQUEST, {
-      error: 'invalid_request',
-      error_description: 'Access token not valid'
-    })
-    .post('/access_token')
-    .reply(HttpStatus.OK, {
-      access_token: secondAccessToken
-    })
-    .get('/tokeninfo?access_token=' + secondAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': secondAccessToken
-    });
-
-    // when
-    const tokenService = new TokenCache({
-      'nucleus': ['nucleus.write', 'nucleus.read'],
-      'halo': ['all']
-    }, oauthConfig);
-
-    const promise = tokenService.get('nucleus')
-    .then(() => {
-      return tokenService.get('nucleus')
-        .then((tokeninfo) => {
-
-          return tokeninfo.access_token;
-        });
-    });
-
-    // then
-    return expect(promise).to.become(secondAccessToken);
+    return expect(promise).to.become(otherAccessTokenValue);
   });
 
   it('#refreshToken should request a new token even if there is a valid one', () => {
 
     // given
-    const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
+    const otherAccessTokenValue = 'bar';
 
     nock(oauthHost)
-    .post('/access_token')
-    .reply(HttpStatus.OK, {
-      access_token: firstAccessToken
-    })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': firstAccessToken
-    })
-    .post('/access_token')
-    .reply(HttpStatus.OK, {
-      access_token: secondAccessToken
-    })
-    .get('/tokeninfo?access_token=' + secondAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': secondAccessToken
-    });
+      .post('/access_token')
+      .reply(HttpStatus.OK, {
+        access_token: defaultAccessTokenValue
+      })
+      .get('/tokeninfo')
+      .query({ access_token: defaultAccessTokenValue })
+      .reply(HttpStatus.OK, defaultTokenInfoResponse)
+      .post('/access_token')
+      .reply(HttpStatus.OK, {
+        access_token: otherAccessTokenValue
+      })
+      .get('/tokeninfo')
+      .query({ access_token: otherAccessTokenValue })
+      .reply(HttpStatus.OK, {
+        ...defaultTokenInfoResponse,
+        access_token: otherAccessTokenValue
+      });
 
     // when
     const tokenService = new TokenCache({
@@ -280,56 +215,40 @@ describe('tokenCache', () => {
     }, oauthConfig);
 
     const promise = tokenService.get('nucleus')
-    .then(() => {
-
-      return tokenService.refreshToken('nucleus')
-      .then((tokeninfo) => {
-
-        return tokeninfo.access_token;
-      });
-    });
+      .then(() => tokenService.refreshToken('nucleus'))
+      .then((tokeninfo) => tokeninfo.access_token);
 
     // then
-    return expect(promise).to.become(secondAccessToken);
+    return expect(promise).to.become(otherAccessTokenValue);
   });
 
   it('#refreshAllTokens should request a new token for every tokenName', () => {
 
     // given
-    const firstAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
-    const secondAccessToken = '9sdf8fd8-be1d-4f0f-b4cb-54nk66n45knk';
+    const otherAccessTokenValue = 'bar';
 
     nock(oauthHost)
-    .post('/access_token', function (body: any) {
-      return body.scope === 'nucleus.write nucleus.read';
-    })
-    .reply(HttpStatus.OK, {
-      access_token: firstAccessToken
-    })
-    .get('/tokeninfo?access_token=' + firstAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['nucleus.write', 'nucleus.read'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': firstAccessToken
-    })
-    .post('/access_token', function (body: any) {
-      return body.scope === 'all';
-    })
-    .reply(HttpStatus.OK, {
-      access_token: secondAccessToken
-    })
-    .get('/tokeninfo?access_token=' + secondAccessToken)
-    .reply(HttpStatus.OK, {
-      'expires_in': 3600,
-      'token_type': 'Bearer',
-      'scope': ['all'],
-      'grant_type': PASSWORD_CREDENTIALS_GRANT,
-      'uid': 'uid',
-      'access_token': secondAccessToken
-    });
+      .post('/access_token', function (body: any) {
+        return body.scope === 'nucleus.write nucleus.read';
+      })
+      .reply(HttpStatus.OK, {
+        access_token: defaultAccessTokenValue
+      })
+      .get('/tokeninfo')
+      .query({ access_token: defaultAccessTokenValue })
+      .reply(HttpStatus.OK, defaultTokenInfoResponse)
+      .post('/access_token', function (body: any) {
+        return body.scope === 'all';
+      })
+      .reply(HttpStatus.OK, {
+        access_token: otherAccessTokenValue
+      })
+      .get('/tokeninfo')
+      .query({ access_token: otherAccessTokenValue })
+      .reply(HttpStatus.OK, {
+        ...defaultTokenInfoResponse,
+        access_token: otherAccessTokenValue
+      });
 
     // when
     const tokenService = new TokenCache({
@@ -339,8 +258,8 @@ describe('tokenCache', () => {
 
     return tokenService.refreshAllTokens()
       .then(tokens => {
-        expect(tokens['nucleus'].access_token).to.equal(firstAccessToken);
-        expect(tokens['halo'].access_token).to.equal(secondAccessToken);
+        expect(tokens['nucleus'].access_token).to.equal(defaultAccessTokenValue);
+        expect(tokens['halo'].access_token).to.equal(otherAccessTokenValue);
       });
   });
 });

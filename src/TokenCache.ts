@@ -3,7 +3,12 @@ import { getAccessToken, getTokenInfo } from './oauth-tooling';
 import { validateOAuthConfig } from './utils';
 import { OAuthConfig, Token } from './types';
 
-const EXPIRE_THRESHOLD = 60 * 1000;
+/**
+ * Default value to determine when a token is expired locally (means
+ * when to issue a new token): if the token exists for
+ * ((1 - DEFAULT_PERCENTAGE_LEFT) * lifetime) then issue a new one.
+ */
+const DEFAULT_PERCENTAGE_LEFT = 0.75;
 
 /**
  * Class to request and cache tokens on client-side.
@@ -65,7 +70,7 @@ class TokenCache {
    * Rejects if there is no token present and is not able to request a new one.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   get(tokenName: string): Promise<Token> {
 
@@ -78,14 +83,17 @@ class TokenCache {
         };
 
         return getAccessToken(config)
-          .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token))
           .then((token) => {
 
-            token.local_expiry = Date.now() + token.expires_in * 1000 - EXPIRE_THRESHOLD;
-            this._tokens[tokenName] = token;
+            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - DEFAULT_PERCENTAGE_LEFT));
+            this._tokens[tokenName] = {
+              ...token,
+              local_expiry: localExpiry
+            };
 
             return token;
-          });
+          })
+          .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token));
     });
 
     return promise;
@@ -111,7 +119,7 @@ class TokenCache {
    * Will resolve with an hashmap of the newly requested tokens if the request was successful.
    * Otherwise, rejects.
    *
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   refreshAllTokens(): Promise<{ [key: string]: Token }> {
 
@@ -132,26 +140,29 @@ class TokenCache {
    * Rejects otherwise.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
   private validateToken(tokenName: string): Promise<Token> {
 
-    if (!this.tokenConfig[tokenName]) {
+    if (this.tokenConfig[tokenName] === undefined) {
       return Promise.reject(`Token ${tokenName} does not exist.`);
     }
 
-    if (!this._tokens[tokenName]) {
+    const token = this._tokens[tokenName];
+
+    if (token === undefined) {
       return Promise.reject(`No token available for ${tokenName}`);
     }
 
-    const token = this._tokens[tokenName];
     if (token.local_expiry < Date.now()) {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
 
-    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .catch(() => Promise.reject(`Token ${tokenName} is invalid.`));
+    return Promise.resolve(token);
   }
 }
 
-export { TokenCache };
+export {
+  TokenCache,
+  DEFAULT_PERCENTAGE_LEFT
+};
