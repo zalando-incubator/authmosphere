@@ -1,11 +1,14 @@
 import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
 import { validateOAuthConfig } from './utils';
-import { OAuthConfig } from './types/OAuthConfig';
-import { TokenInfo } from './types/TokenInfo';
-import { Token } from './types/Token';
+import { OAuthConfig, Token } from './types';
 
-const EXPIRE_THRESHOLD = 60 * 1000;
+/**
+ * Default value to determine when a token is expired locally (means
+ * when to issue a new token): if the token exists for
+ * ((1 - DEFAULT_PERCENTAGE_LEFT) * lifetime) then issue a new one.
+ */
+const DEFAULT_PERCENTAGE_LEFT = 0.75;
 
 /**
  * Class to request and cache tokens on client-side.
@@ -16,14 +19,14 @@ const EXPIRE_THRESHOLD = 60 * 1000;
  *  }, oAuthConfig);
  *
  *  tokenCache.get('nucleus')
- *  .then((tokeninfo) => {
- *    console.log(tokeninfo.access_token);
+ *  .then((token) => {
+ *    console.log(token.access_token);
  *  });
  *
  */
 class TokenCache {
 
-  private _tokens: { [key: string]: TokenInfo } = {};
+  private _tokens: { [key: string]: Token } = {};
 
   /**
    * `oauthConfig`:
@@ -32,7 +35,7 @@ class TokenCache {
    * `accessTokenEndpoint` string
    * `tokenInfoEndpoint` string
    * `realm` string
-   * `scopes` string optional
+   * `scopes` string[] optional
    * `queryParams` {} optional
    * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
    * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
@@ -59,7 +62,7 @@ class TokenCache {
   public resolveAccessTokenFactory(key: string): () => Promise<string> {
     return () => this
       .get(key)
-      .then(tokenInfo => tokenInfo.access_token);
+      .then(token => token.access_token);
   }
 
   /**
@@ -67,18 +70,11 @@ class TokenCache {
    * Rejects if there is no token present and is not able to request a new one.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
-  get(tokenName: string): Promise<TokenInfo> {
+  get(tokenName: string): Promise<Token> {
 
-    const promise = new Promise((resolve, reject) => {
-
-      this
-      .validateToken(tokenName)
-      .then((token) => {
-
-        return resolve(token);
-      })
+    const promise = this.validateToken(tokenName)
       .catch(() => {
 
         const config = {
@@ -87,21 +83,17 @@ class TokenCache {
         };
 
         return getAccessToken(config)
-          .then((token: Token) => {
+          .then((token) => {
 
-            return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token);
+            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - DEFAULT_PERCENTAGE_LEFT));
+            this._tokens[tokenName] = {
+              ...token,
+              local_expiry: localExpiry
+            };
+
+            return token;
           })
-          .then((tokenInfo: TokenInfo) => {
-
-            tokenInfo.local_expiry = Date.now() + tokenInfo.expires_in * 1000 - EXPIRE_THRESHOLD;
-            this._tokens[tokenName] = tokenInfo;
-            resolve(tokenInfo);
-          })
-          .catch((err) => {
-
-            return reject(err);
-          });
-      });
+          .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token));
     });
 
     return promise;
@@ -113,9 +105,9 @@ class TokenCache {
    * Otherwise, rejects.
    *
    * @param tokenName
-   * @returns {Promise<TokenInfo>}
+   * @returns {Promise<Token>}
    */
-  refreshToken(tokenName: string): Promise<TokenInfo> {
+  refreshToken(tokenName: string): Promise<Token> {
 
     this._tokens[tokenName] = undefined;
 
@@ -127,9 +119,9 @@ class TokenCache {
    * Will resolve with an hashmap of the newly requested tokens if the request was successful.
    * Otherwise, rejects.
    *
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
-  refreshAllTokens(): Promise<{ [key: string]: TokenInfo }> {
+  refreshAllTokens(): Promise<{ [key: string]: Token }> {
 
     const refreshPromises = Object
       .keys(this.tokenConfig)
@@ -148,31 +140,29 @@ class TokenCache {
    * Rejects otherwise.
    *
    * @param tokenName
-   * @returns {Promise<T>}
+   * @returns {Promise<Token>}
    */
-  private validateToken(tokenName: string): Promise<TokenInfo> {
+  private validateToken(tokenName: string): Promise<Token> {
 
-    if (!this.tokenConfig[tokenName]) {
-      throw Error(`Token ${tokenName} does not exist.`);
-    }
-
-    if (!this._tokens[tokenName]) {
-      return Promise.reject(`No token available for ${tokenName}`);
+    if (this.tokenConfig[tokenName] === undefined) {
+      return Promise.reject(`Token ${tokenName} does not exist.`);
     }
 
     const token = this._tokens[tokenName];
+
+    if (token === undefined) {
+      return Promise.reject(`No token available for ${tokenName}`);
+    }
+
     if (token.local_expiry < Date.now()) {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
 
-    return getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token)
-      .then(validatedToken => {
-        return Promise.resolve(validatedToken);
-      })
-      .catch(() => {
-        return Promise.reject(`Token ${tokenName} is invalid.`);
-      });
+    return Promise.resolve(token);
   }
 }
 
-export { TokenCache };
+export {
+  TokenCache,
+  DEFAULT_PERCENTAGE_LEFT
+};

@@ -8,8 +8,7 @@ import {
   AUTHORIZATION_CODE_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
-import { OAuthConfig } from './types/OAuthConfig';
-import { TokenInfo } from './types/TokenInfo';
+import { OAuthConfig, Token } from './types';
 
 const fsReadFile = q.denodeify<any>(fs.readFile);
 
@@ -41,10 +40,12 @@ export function getFileData(filePath: string, fileName: string): q.Promise<any> 
 export function getHeaderValue(req: express.Request, fieldName: string): string {
 
   if (req && fieldName && req.headers.hasOwnProperty(fieldName)) {
-    return req.headers[fieldName];
-  } else {
-    return '';
+    const headerValue = req.headers[fieldName];
+    // make sure to return a string
+    return (Array.isArray(headerValue)) ? headerValue.join(' ') : headerValue;
   }
+
+  return '';
 }
 
 /**
@@ -83,7 +84,7 @@ export function extractAccessToken(authHeader: string): string {
  * @returns {function(any): undefined}
  */
 export function setTokeninfo(req: express.Request) {
-  return function(data: TokenInfo) {
+  return (data: Token) => {
 
     const {
       uid,
