@@ -9,7 +9,7 @@ There are multiple ways of getting involved:
 - [Contribute code](#contribute-code)
 
 Below are a few guidelines we would like you to follow.
-If you need help, please open a github Issue in this project. If you work at Zalando reach out to us at team-graviton
+If you need help, please open a github Issue in this project. If you work at Zalando reach out to us at Team Graviton.
 
 ## Report a bug
 Reporting bugs is one of the best ways to contribute. Before creating a bug report, please check that an
@@ -47,7 +47,7 @@ feat(feature): commit message
 |     |             |
 |     |             +-> Summary
 |     |
-|     +-> feature name
+|     +-> scope
 |
 +-------> Type: chore, docs, feat, fix, refactor, style, or test.
 <optional blank line>
