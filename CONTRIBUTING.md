@@ -9,7 +9,7 @@ There are multiple ways of getting involved:
 - [Contribute code](#contribute-code)
 
 Below are a few guidelines we would like you to follow.
-If you need help, please open a github Issue in this project. If you work at Zalando reach out to us at team-tip
+If you need help, please open a github Issue in this project. If you work at Zalando reach out to us at team-graviton
 
 ## Report a bug
 Reporting bugs is one of the best ways to contribute. Before creating a bug report, please check that an
