@@ -217,9 +217,55 @@ describe('oauth tooling', () => {
       // when
       requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
     });
+
+    it('should call error log, if error handler fails', (done) => {
+
+      // given
+      const requiredScopes = ['test'];
+      const next = () => {
+        return;
+      };
+      const customErrorhandler = (e: any, logger: Logger​​): void => {
+        // then
+        throw Error('Handler failed');
+      };
+
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.reject('Error happened');
+        },
+        precedenceErrorHandler: customErrorhandler,
+        logger: {
+          info:  (p: any): void => { return; },
+          debug: (p: any): void => { return; },
+          error: (p: any): void => {
+            expect(p).to.equal('Error while executing precedenceErrorHandler: ');
+            done();
+          },
+          fatal: (p: any): void => { return; },
+          trace: (p: any): void => { return; },
+          warn:  (p: any): void => { return; }
+        }
+      };
+
+      // when
+      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+    });
   });
 
   describe('handleOAuthRequestMiddleware', () => {
+
+    it('should throw a TypeError, if tokenInfoEndpoint is undefined', () => {
+      // given
+      const config = {
+        publicEndpoints: ['/public', '/healthcheck'],
+        tokenInfoEndpoint: ''
+      };
+
+      // then
+      expect(() => { handleOAuthRequestMiddleware(config); }).to.throw(TypeError);
+
+    });
 
     it('should call #next on public endpoint', () => {
 
