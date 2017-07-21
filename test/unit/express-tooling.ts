@@ -218,7 +218,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
     });
 
-    it('should call error log, if error handler fails', (done) => {
+    it.only('should call error log, if error handler fails', (done) => {
 
       // given
       const requiredScopes = ['test'];
@@ -236,15 +236,11 @@ describe('oauth tooling', () => {
         },
         precedenceErrorHandler: customErrorhandler,
         logger: {
-          info:  (p: any): void => { return; },
-          debug: (p: any): void => { return; },
+          ...loggerMock,
           error: (p: any): void => {
             expect(p).to.equal('Error while executing precedenceErrorHandler: ');
             done();
-          },
-          fatal: (p: any): void => { return; },
-          trace: (p: any): void => { return; },
-          warn:  (p: any): void => { return; }
+          }
         }
       };
 
@@ -264,7 +260,6 @@ describe('oauth tooling', () => {
 
       // then
       expect(() => { handleOAuthRequestMiddleware(config); }).to.throw(TypeError);
-
     });
 
     it('should call #next on public endpoint', () => {
