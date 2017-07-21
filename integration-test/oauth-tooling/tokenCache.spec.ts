@@ -262,4 +262,32 @@ describe('tokenCache', () => {
         expect(tokens['halo'].access_token).to.equal(otherAccessTokenValue);
       });
   });
+
+  describe('resolveAccessTokenFactory', () => {
+
+      it('should return a promise, evaluating the token', () => {
+
+        // given
+        nock(oauthHost)
+        .post('/access_token')
+        .reply(HttpStatus.OK, {
+          access_token: defaultAccessTokenValue
+        })
+        .get('/tokeninfo')
+        .query({ access_token: defaultAccessTokenValue })
+        .reply(HttpStatus.OK, defaultTokenInfoResponse);
+
+        // when
+        const tokenService = new TokenCache({
+          'nucleus': ['nucleus.write', 'nucleus.read'],
+          'halo': ['all']
+        }, oauthConfig);
+
+        const evalFunction = tokenService.resolveAccessTokenFactory('nucleus');
+        const promise = evalFunction();
+
+        // then
+        return expect(promise).to.become(defaultAccessTokenValue);
+      });
+    });
 });
