@@ -218,7 +218,7 @@ describe('oauth tooling', () => {
       requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
     });
 
-    it.only('should call error log, if error handler fails', (done) => {
+    it('should call error log, if error handler fails', (done) => {
 
       // given
       const requiredScopes = ['test'];
