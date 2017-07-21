@@ -17,4 +17,9 @@ const expect = chai.expect;
         });
       return expect(promise).to.become(true);
     });
+
+    it('should ignore tailing / in filepath', () => {
+      const promise = getFileData('test/unit/credentials', 'foo.json');
+      return expect(promise).to.be.rejected;
+    });
   });
