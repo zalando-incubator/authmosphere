@@ -18,7 +18,7 @@ const expect = chai.expect;
       return expect(promise).to.become(true);
     });
 
-    it('should ignore tailing / in filepath', () => {
+    it('should be rejected, if file does not exist', () => {
       const promise = getFileData('test/unit/credentials', 'foo.json');
       return expect(promise).to.be.rejected;
     });

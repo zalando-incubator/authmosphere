@@ -255,6 +255,52 @@ describe('getAccessToken', () => {
 
   describe('refresh token grant', () => {
 
+
+    it('should be rejected, if grant type is unknown', function() {
+
+      // given
+      const host = 'http://127.0.0.1:30001/oauth2';
+      const options = {
+        scopes: ['campaign.edit_all', 'campaign.read_all'],
+        accessTokenEndpoint: `${host}/access_token`,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: 'INVALID_GRANT',
+        code: 'foo-bar',
+        redirectUri: '/redirect/'
+      };
+
+      const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
+
+      nock(host)
+      .post('/access_token', (body: any) => {
+
+        if (body.grant_type !== options.grantType) {
+          return false;
+        }
+
+        if (body.scope !== options.scopes.join(' ')) {
+          return false;
+        }
+
+        if (body.redirect_uri !== options.redirectUri) {
+          return false;
+        }
+
+        if (body.code !== options.code) {
+          return false;
+        }
+
+        return true;
+      })
+      .reply(HttpStatus.OK, responseObject);
+
+      // when
+      const promise = getAccessToken(options);
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
     it('should become the access token', function () {
 
       // given
