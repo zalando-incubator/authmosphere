@@ -112,7 +112,7 @@ describe('getAccessToken', () => {
     it('should become the access token', function() {
 
       //given
-      setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
+      setupTestEnvironment('Basic bnVjbGV1c19jbGllbnQ6bnVjbGV1c19jbGllbnRfc2VjcmV0', authServerApp);
 
       //when
       const promise = getAccessToken(getAccessTokenOptions);
@@ -168,7 +168,7 @@ describe('getAccessToken', () => {
     it('should become the access token', function() {
 
       //given
-      setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
+      setupTestEnvironment('Basic bnVjbGV1c19jbGllbnQ6bnVjbGV1c19jbGllbnRfc2VjcmV0', authServerApp);
 
       //when
       const bearer = getAccessToken(getAccessTokenOptionsAuthorization)

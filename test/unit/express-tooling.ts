@@ -10,7 +10,7 @@ import {
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
-describe('oauth tooling', () => {
+describe('express tooling', () => {
 
   let requestMock: any;
   let responseMock: any;

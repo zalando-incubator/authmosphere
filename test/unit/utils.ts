@@ -6,6 +6,7 @@ import { getFileData } from '../../src/utils';
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
+describe('utils', () => {
   describe('getFileData', () => {
     it('should ignore tailing / in filepath', () => {
       const promise = Promise.all([
@@ -23,3 +24,4 @@ const expect = chai.expect;
       return expect(promise).to.be.rejected;
     });
   });
+});
