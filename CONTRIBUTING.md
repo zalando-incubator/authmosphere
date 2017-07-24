@@ -30,10 +30,12 @@ This is a rough outline of what the workflow for code contributions looks like:
 - Check the list of open [issues](https://github.com/zalando-incubator/lib-oauth-tooling/issues). Either assign an existing issue to
 yourself, or create a new one that you would like work on and discuss your ideas and use cases.
 - Fork the repository
-- Create a topic branch from where you want to base your work. This is usually master. Best practise for naming:
+- Create a feature branch. Best practise for naming:
+
 ```
 <branch name> = <Github issue ticket number>-<component-name>-<whatever-describes-the-ticket>
 ```
+
 - Make commits of logical units.
 - Write good commit messages ([see below](#commit-messages)).
 - Push your changes to a topic branch in your fork of the repository.
