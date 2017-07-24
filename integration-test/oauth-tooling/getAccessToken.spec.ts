@@ -255,7 +255,6 @@ describe('getAccessToken', () => {
 
   describe('refresh token grant', () => {
 
-
     it('should be rejected, if grant type is unknown', function() {
 
       // given
@@ -268,31 +267,6 @@ describe('getAccessToken', () => {
         code: 'foo-bar',
         redirectUri: '/redirect/'
       };
-
-      const responseObject = { 'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41' };
-
-      nock(host)
-      .post('/access_token', (body: any) => {
-
-        if (body.grant_type !== options.grantType) {
-          return false;
-        }
-
-        if (body.scope !== options.scopes.join(' ')) {
-          return false;
-        }
-
-        if (body.redirect_uri !== options.redirectUri) {
-          return false;
-        }
-
-        if (body.code !== options.code) {
-          return false;
-        }
-
-        return true;
-      })
-      .reply(HttpStatus.OK, responseObject);
 
       // when
       const promise = getAccessToken(options);
