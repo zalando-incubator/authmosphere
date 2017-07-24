@@ -5,13 +5,12 @@
 [![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
 [![npm version](https://img.shields.io/npm/v/authmosphere.svg?style=flat)](https://www.npmjs.com/package/authmosphere)
 
-## Project renaming
-
-The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Currently the change is non-breaking from a code perspective. Version `1.0.0` is soon to be released, keep track of the progess in https://github.com/zalando-incubator/lib-oauth-tooling/issues/92, this release will most likely contain breaking changes.
-
 ## Introduction
 
-A simple typescript based library for supporting OAuth2 flows.
+Authmosphere is a JavaScript library to support some common OAuth2 use cases.
+
+It's implemented in TypeScript which give IDEs the ability of better autocompletion support, etc. The library itself is transpiled to JavaScript (ES6) so there is no need of a TypeScript compiler to use authmosphere in JavaScript projects.
+
 Currently the following flows are supported:
 
 * [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-1.3.1)
@@ -22,8 +21,26 @@ Currently the following flows are supported:
 
 See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
 
+## Project renaming
 
-## Migrating from lib-oauth-tooling@1.x.x to lib-oauth-tooling@2.x.x / authmosphere@0.1.0
+The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Version `1.0.0` is soon to be released, keep track of the progess in [#92](https://github.com/zalando-incubator/lib-oauth-tooling/issues/92), this release will contain breaking changes.
+
+## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
+
+* call `npm uninstall --save lib-oauth-tooling`
+* call `npm install --save authmosphere`
+
+The signature of the function `createAuthCodeRequestUri` was changed to be better suitable for partial application. The `authorizationEndpoint` parameter was moved to the first position.
+It's important to manually adjust your code to this change, since the type system is not helpful in this special case.
+
+```typescript
+function createAuthCodeRequestUri(authorizationEndpoint: string,
+                                  redirectUri: string,
+                                  clientId: string,
+                                  queryParams?: {}): string
+```
+
+## Migrating from `lib-oauth-tooling@1.x.` to `lib-oauth-tooling@2.x.x`
 
 If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
 
@@ -62,10 +79,10 @@ Import a member of this lib like so (of course ES5 syntax is working as well...)
 
 ```typescript
 import {
-    TokenCache,
-    handleOAuthRequestMiddleware,
-    requireScopesMiddleware,
-    ...
+  TokenCache,
+  handleOAuthRequestMiddleware,
+  requireScopesMiddleware,
+  ...
 } from 'authmosphere';
 ```
 
@@ -102,8 +119,8 @@ If the token is not valid the request is rejected (with 401 Unauthorized).
 
 ```typescript
 app.use(handleOAuthRequestMiddleware({
-    publicEndpoints: ['/heartbeat', '/status'],
-    tokenInfoEndpoint: 'auth.example.com/tokeninfo'
+  publicEndpoints: ['/heartbeat', '/status'],
+  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
 });
 ```
 
@@ -118,7 +135,7 @@ If the the requested scopes are not matched request is rejected (with 403 Forbid
 
 ```typescript
 app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
-    // do your work...
+  // do your work...
 })
 ```
 
@@ -250,17 +267,20 @@ cleanMock();
 
 ## Changelog
 
-#### `2.0.0` - **BREAKING**
+#### `authmosphere 1.0.0` - **BREAKING**
+
+Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
+
+#### `lib-oauth-tooling 2.0.0` - **BREAKING**
 
 The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
 
-#### `1.0.0` - **BREAKING**
+#### `lib-oauth-tooling 1.0.0` - **BREAKING**
 
 The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ## License
 
-```
 MIT License (MIT)
 
 Copyright (c) 2016 Zalando SE
@@ -270,4 +290,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
