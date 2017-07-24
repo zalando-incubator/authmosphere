@@ -9,6 +9,7 @@ import {
 } from './utils';
 
 import { getTokenInfo } from './oauth-tooling';
+import * as Express from 'express';
 
 import {
   MiddlewareOptions,
@@ -20,8 +21,6 @@ import {
 } from './types';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
-
-export type ExpressMiddleware = (req: ExtendedRequest, res: express.Response, next: express.NextFunction) => any;
 
 /**
  * Returns a function (express middleware) that validates the scopes against the user scopes
@@ -37,7 +36,7 @@ export type ExpressMiddleware = (req: ExtendedRequest, res: express.Response, ne
  * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
-                                 precedenceOptions?: PrecedenceOptions): ExpressMiddleware {
+                                 precedenceOptions?: PrecedenceOptions): Express.RequestHandler {
 
   return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
 
@@ -81,7 +80,7 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns express middleware
  */
-function handleOAuthRequestMiddleware(options: MiddlewareOptions): ExpressMiddleware {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions): Express.RequestHandler {
 
   const {
     tokenInfoEndpoint,
