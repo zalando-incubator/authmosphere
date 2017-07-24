@@ -1,9 +1,9 @@
 # authmosphere
 
-[![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg)](https://travis-ci.org/zalando-incubator/lib-oauth-tooling)
-[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/lib-oauth-tooling/badge.svg)](https://coveralls.io/github/zalando-incubator/lib-oauth-tooling)
-[![npm download](https://img.shields.io/npm/dm/lib-oauth-tooling.svg?style=flat-square)](https://www.npmjs.com/package/lib-oauth-tooling)
-[![npm version](https://img.shields.io/npm/v/lib-oauth-tooling.svg?style=flat)](https://www.npmjs.com/package/lib-oauth-tooling)
+[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere)
+[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg)](https://coveralls.io/github/zalando-incubator/authmosphere)
+[![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
+[![npm version](https://img.shields.io/npm/v/authmosphere.svg?style=flat)](https://www.npmjs.com/package/authmosphere)
 
 ## Project renaming
 
@@ -55,7 +55,7 @@ See the [changelog](#changelog) for more information.
 
 Note: `node >= 6.0.0` required to consume this library.
 
-Run `npm install lib-oauth-tooling`.
+Run `npm install authmosphere`.
 
 Import a member of this lib like so (of course ES5 syntax is working as well...):
 
@@ -66,7 +66,7 @@ import {
     handleOAuthRequestMiddleware,
     requireScopesMiddleware,
     ...
-} from 'lib-oauth-tooling';
+} from 'authmosphere';
 ```
 
 #### TokenCache(tokenConfig: { [key: string]: string[] }, oauthConfig: OAuthConfig)
