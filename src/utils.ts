@@ -96,7 +96,7 @@ export function extractAccessToken(authHeader: string): string {
  * @param req
  * @returns {function(any): undefined}
  */
-export function setTokeninfo(req: express.Request) {
+export function setTokeninfo(req: express.Request): (data: Token) => void {
   return (data: Token) => {
 
     const {
@@ -123,7 +123,7 @@ export function setTokeninfo(req: express.Request) {
  * @param res
  * @param status
  */
-export function rejectRequest(res: express.Response, status?: number) {
+export function rejectRequest(res: express.Response, status?: number): void {
 
   const _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
@@ -134,7 +134,7 @@ export function rejectRequest(res: express.Response, status?: number) {
  *
  * @param options
  */
-export function validateOAuthConfig(options: OAuthConfig) {
+export function validateOAuthConfig(options: OAuthConfig): void {
 
   if (!options.credentialsDir) {
     throw TypeError('credentialsDir must be defined');
