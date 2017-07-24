@@ -106,6 +106,31 @@ describe('middlewares', () => {
     });
   }
 
+  function addAuthenticationEndpointWithBrokenScopes() {
+
+    authServerApp.get('/oauth2/tokeninfo', function(req, res) {
+      const valid = req.query.access_token === '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+
+      if (valid) {
+        res
+        .status(200)
+        .send({
+          'expires_in': 3515,
+          'token_type': 'Bearer',
+          'realm': 'employees',
+          'scope': '',
+          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'uid': 'services',
+          'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
+        });
+      } else {
+        res
+          .status(401)
+          .send('Unauthorized');
+      }
+    });
+  }
+
   function add500Endpoint() {
 
     authServerApp.get('/oauth2/tokeninfo', function(req, res) {
@@ -196,5 +221,26 @@ describe('middlewares', () => {
       'userName': 'JohnDoe',
       'lastLogin': '2015-12-12'
     });
+  });
+
+  it('should return 403 if empty scope is returned', function() {
+
+    // given
+    const authHeader = 'Bearer 4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+    addAuthenticationEndpointWithBrokenScopes();
+
+    // when
+    const promise = fetch('http://127.0.0.1:30002/resource/user', {
+      method: 'GET',
+      headers: {
+        authorization: authHeader
+      }
+    })
+    .then((res: any) => {
+      return res.status;
+    });
+
+    // then
+    return expect(promise).to.become(HttpStatus.FORBIDDEN);
   });
 });

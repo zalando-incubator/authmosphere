@@ -33,7 +33,6 @@
     "http-status": "1.0.1",
     "nock": "9.0.14",
     "node-fetch": "1.7.1",
-    "q": "1.5.0",
     "uuid": "3.1.0"
   },
   "devDependencies": {
@@ -46,7 +45,6 @@
     "@types/mocha": "2.2.41",
     "@types/nock": "8.2.1",
     "@types/node-fetch": "1.6.7",
-    "@types/q": "1.0.2",
     "@types/uuid": "3.4.0",
     "chai": "4.1.0",
     "chai-as-promised": "7.1.1",

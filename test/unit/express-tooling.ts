@@ -10,7 +10,7 @@ import {
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
-describe('oauth tooling', () => {
+describe('express tooling', () => {
 
   let requestMock: any;
   let responseMock: any;
@@ -236,15 +236,11 @@ describe('oauth tooling', () => {
         },
         precedenceErrorHandler: customErrorhandler,
         logger: {
-          info:  (p: any): void => { return; },
-          debug: (p: any): void => { return; },
+          ...loggerMock,
           error: (p: any): void => {
             expect(p).to.equal('Error while executing precedenceErrorHandler: ');
             done();
-          },
-          fatal: (p: any): void => { return; },
-          trace: (p: any): void => { return; },
-          warn:  (p: any): void => { return; }
+          }
         }
       };
 
@@ -264,7 +260,6 @@ describe('oauth tooling', () => {
 
       // then
       expect(() => { handleOAuthRequestMiddleware(config); }).to.throw(TypeError);
-
     });
 
     it('should call #next on public endpoint', () => {
