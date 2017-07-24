@@ -1,9 +1,15 @@
-# lib-oauth-tooling
+# authmosphere
 
 [![Build Status](https://travis-ci.org/zalando-incubator/lib-oauth-tooling.svg)](https://travis-ci.org/zalando-incubator/lib-oauth-tooling)
 [![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/lib-oauth-tooling/badge.svg)](https://coveralls.io/github/zalando-incubator/lib-oauth-tooling)
 [![npm download](https://img.shields.io/npm/dm/lib-oauth-tooling.svg?style=flat-square)](https://www.npmjs.com/package/lib-oauth-tooling)
 [![npm version](https://img.shields.io/npm/v/lib-oauth-tooling.svg?style=flat)](https://www.npmjs.com/package/lib-oauth-tooling)
+
+## Project renaming
+
+The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Currently the change is non-breaking from a code perspective. Version `1.0.0` is soon to be released, keep track of the progess in https://github.com/zalando-incubator/lib-oauth-tooling/issues/92, this release will most likely contain breaking changes.
+
+## Introduction
 
 A simple typescript based library for supporting OAuth2 flows.
 Currently the following flows are supported:
@@ -17,7 +23,7 @@ Currently the following flows are supported:
 See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
 
 
-## Migrating to 2.x.x
+## Migrating from lib-oauth-tooling@1.x.x to lib-oauth-tooling@2.x.x / authmosphere@0.1.0
 
 If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
 

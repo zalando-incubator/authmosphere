@@ -1,6 +1,6 @@
 {
-  "name": "lib-oauth-tooling",
-  "version": "2.4.1",
+  "name": "authmosphere",
+  "version": "0.1.0",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -10,8 +10,6 @@
     "oauth2",
     "express",
     "node",
-    "service",
-    "rest",
     "typescript"
   ],
   "publishConfig": {
