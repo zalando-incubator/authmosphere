@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import * as HttpStatus from 'http-status';
 
 import {
   getTokenInfo,
@@ -42,7 +43,7 @@ describe('mock tooling', () => {
       const promise = getTokenInfo(tokeninfoEndpoint, 'invalid');
 
       // then
-      return expect(promise).to.rejected;
+      return expect(promise).to.be.rejected;
     });
 
     it('should return the tokeninfo if token is valid', function () {

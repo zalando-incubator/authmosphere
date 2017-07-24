@@ -236,9 +236,9 @@ describe('middlewares', () => {
         authorization: authHeader
       }
     })
-      .then((res: any) => {
-        return res.status;
-      });
+    .then((res: any) => {
+      return res.status;
+    });
 
     // then
     return expect(promise).to.become(HttpStatus.FORBIDDEN);
