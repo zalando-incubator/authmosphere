@@ -4,7 +4,7 @@ interface Token {
   scope?: string[];
   token_type?: string;
   local_expiry?: number;
-  [key: string]: any;
+  [key: string]: number | string | string[] | undefined;
 }
 
 export { Token };
