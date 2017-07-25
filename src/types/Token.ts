@@ -1,4 +1,4 @@
-type CustemTokenPart<T> = {
+type CustomTokenPart<T> = {
   [P in keyof T]: T[P]
 };
 
@@ -10,10 +10,10 @@ type StaticTokenPart = {
   local_expiry?: number;
 }
 
-type Token<T = any> = CustemTokenPart<T> & StaticTokenPart;
+type Token<T = any> = CustomTokenPart<T> & StaticTokenPart;
 
 export {
   StaticTokenPart,
-  CustemTokenPart,
+  CustomTokenPart,
   Token,
  };
