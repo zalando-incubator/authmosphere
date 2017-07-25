@@ -1,5 +1,13 @@
 # authmosphere
 
+<div class="auth-logo" style="margin-left: 10px; margin-bottom: 30px; margin-top: 30px; padding-top: 0px; padding-bottom: 0p">
+  <span style="font: 144px arial,sans-serif; color: #4d8cf3">{</span>
+  <span style="font: 96px arial,sans-serif">🌍</span>
+  <span style="font: 144px arial,sans-serif; color: #4d8cf3">}</span>
+</div>
+
+
+
 [![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere)
 [![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg)](https://coveralls.io/github/zalando-incubator/authmosphere)
 [![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
