@@ -10,7 +10,7 @@ type StaticTokenPart = {
   local_expiry?: number;
 }
 
-type Token<T = {}> = CustemTokenPart<T> & StaticTokenPart;
+type Token<T = any> = CustemTokenPart<T> & StaticTokenPart;
 
 export {
   StaticTokenPart,
