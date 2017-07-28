@@ -1,5 +1,9 @@
 import * as HttpStatus from 'http-status';
-import * as express from 'express';
+import {
+  NextFunction,
+  Response,
+  RequestHandler
+} from 'express';
 
 import {
   getHeaderValue,
@@ -9,7 +13,6 @@ import {
 } from './utils';
 
 import { getTokenInfo } from './oauth-tooling';
-import * as Express from 'express';
 
 import {
   MiddlewareOptions,
@@ -36,9 +39,9 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
-                                 precedenceOptions?: PrecedenceOptions): Express.RequestHandler {
+                                 precedenceOptions?: PrecedenceOptions): RequestHandler {
 
-  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
+  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
       const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
@@ -80,7 +83,7 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns express middleware
  */
-function handleOAuthRequestMiddleware(options: MiddlewareOptions): Express.RequestHandler {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandler {
 
   const {
     tokenInfoEndpoint,
@@ -91,7 +94,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): Express.Reque
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
+  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     const originalUrl = req.originalUrl;
 
@@ -113,8 +116,8 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): Express.Reque
 }
 
 function validateScopes(req: ExtendedRequest,
-                        res: express.Response,
-                        next: express.NextFunction,
+                        res: Response,
+                        next: NextFunction,
                         scopes: string[] = []): void {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
