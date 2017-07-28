@@ -130,18 +130,32 @@ getTokenInfo(tokenInfoEndpoint, accessToken)
 });
 ```
 
-Type `Token` is defined like:
+Type `Token` is defined as following:
 
 ```typescript
-interface Token {
+type Token<CustomTokenPart = any> = CustomTokenPart & {
   access_token: string;
   expires_in?: number;
   scope?: string[];
   token_type?: string;
   local_expiry?: number;
-  [key: string]: {};
-}
+};
 ```
+
+The `Token` type is designed to be extensible. By default the generic type parameter `CustomTokenPart` defaults to `any`. One can provide an additional type to extend the known properties for the Token type:
+
+```typescript
+
+  type CustomDataType = {
+    uid: "user",
+    ...
+  };
+
+  const myCustomToken: Token<CustomDataType> = {
+   ...
+  };
+```
+
 
 #### getAccessToken(options: OAuthConfig): Promise<Token>
 
