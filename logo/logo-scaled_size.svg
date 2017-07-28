@@ -1,46 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="364.13086"
-   height="226.11328"
-   viewBox="0 0 364.13086 226.11328"
-   id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="Logo2.svg">
+   id="svg2"
+   viewBox="0 0 364.13086 226.11328"
+   height="226.11328"
+   width="364.13086">
   <defs
      id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="-746.07142"
-     inkscape:cy="-174.93021"
-     inkscape:document-units="px"
-     inkscape:current-layer="g4179"
-     showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1040"
-     inkscape:window-x="0"
-     inkscape:window-y="21"
-     inkscape:window-maximized="1"
-     units="px"
-     fit-margin-top="30"
-     fit-margin-left="30"
-     fit-margin-right="30"
-     fit-margin-bottom="30" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -54,30 +25,26 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-212.5,-137.03296)">
+     transform="translate(-212.5,-137.03296)"
+     id="layer1">
     <g
        id="g4179">
       <text
-         sodipodi:linespacing="125%"
-         id="text3336"
-         y="303.79077"
-         x="220"
+         xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         xml:space="preserve"><tspan
-           style="font-size:180px"
-           y="303.79077"
-           x="220"
+         x="220"
+         y="303.79077"
+         id="text3336"><tspan
            id="tspan3338"
-           sodipodi:role="line"><tspan
-             id="tspan4154"
-             style="fill:#4d8cff;fill-opacity:0.94117647">{</tspan><tspan
-             style="font-size:120px"
-             id="tspan4138">🌍</tspan><tspan
-             id="tspan4158"
-             style="fill:#4d8cff;fill-opacity:0.94117647">}</tspan></tspan></text>
+           x="220"
+           y="303.79077"
+           style="font-size:180px"><tspan
+             style="fill:#4d8cff;fill-opacity:0.94117647"
+             id="tspan4154">{</tspan><tspan
+             id="tspan4138"
+             style="font-size:120px">🌍</tspan><tspan
+             style="fill:#4d8cff;fill-opacity:0.94117647"
+             id="tspan4158">}</tspan></tspan></text>
     </g>
   </g>
 </svg>
