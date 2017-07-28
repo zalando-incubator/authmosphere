@@ -1,14 +1,16 @@
 import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
 import { validateOAuthConfig } from './utils';
-import { OAuthConfig, Token } from './types';
+import { OAuthConfig, Token, TokenCacheConfig } from './types';
 
-/**
- * Default value to determine when a token is expired locally (means
- * when to issue a new token): if the token exists for
- * ((1 - DEFAULT_PERCENTAGE_LEFT) * lifetime) then issue a new one.
- */
-const DEFAULT_PERCENTAGE_LEFT = 0.75;
+const defualtTokenCacheConfig: TokenCacheConfig = {
+  /**
+   * To determine when a token is expired locally (means
+   * when to issue a new token): if the token exists for
+   * ((1 - percentageLeft) * lifetime) then issue a new one.
+   */
+  percentageLeft: 0.75
+};
 
 /**
  * Class to request and cache tokens on client-side.
@@ -43,9 +45,13 @@ class TokenCache {
    * @param tokenConfig
    * @param oauthConfig
    */
-  constructor(private tokenConfig: { [key: string]: string[] }, private oauthConfig: OAuthConfig) {
+  constructor(private tokenConfig: { [key: string]: string[] },
+              private oauthConfig: OAuthConfig,
+              private tokenCacheConfig?: TokenCacheConfig) {
 
     validateOAuthConfig(oauthConfig);
+
+    this.tokenCacheConfig = Object.assign({}, defualtTokenCacheConfig, tokenCacheConfig);
 
     if (!oauthConfig.tokenInfoEndpoint) {
       throw TypeError('tokenInfoEndpoint must be defined');
@@ -85,7 +91,7 @@ class TokenCache {
         return getAccessToken(config)
           .then((token) => {
 
-            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - DEFAULT_PERCENTAGE_LEFT));
+            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - this.tokenCacheConfig.percentageLeft));
             this._tokens[tokenName] = {
               ...token,
               local_expiry: localExpiry
@@ -164,5 +170,5 @@ class TokenCache {
 
 export {
   TokenCache,
-  DEFAULT_PERCENTAGE_LEFT
+  defualtTokenCacheConfig
 };

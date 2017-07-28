@@ -86,7 +86,7 @@ import {
 } from 'authmosphere';
 ```
 
-#### TokenCache(tokenConfig: { [key: string]: string[] }, oauthConfig: OAuthConfig)
+#### TokenCache(tokenConfig: { [key: string]: string[] }, oAuthConfig: OAuthConfig, tokenCacheConfig?: TokenCacheConfig)
 
 Class to request and cache tokens on client-side.
 
@@ -102,15 +102,45 @@ tokenCache.get('service-foo')
 });
 ```
 
-`oauthConfig`:
-* `credentialsDir` string
-* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
-* `accessTokenEndpoint` string
-* `tokenInfoEndpoint` string - mandatory for TokenCache
-* `scopes` string[] optional
-* `queryParams` {} optional
-* `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-* `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
+Where `OAuthConfig` is defined like:
+
+```typescript
+type OAuthConfig = {
+  credentialsDir: string;
+  grantType: string; // (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
+  accessTokenEndpoint: string;
+  tokenInfoEndpoint?: string; // mandatory for TokenCache
+  scopes?: string[];
+  redirect_uri?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
+  code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
+  redirectUri?: string;
+  refreshToken?: string;
+  queryParams?: {};
+};
+```
+
+Optionally, you can pass a third parameter of type `TokenCacheConfig` to the `TokenCache` constructor to configure the cache behaviour.
+
+```typescript
+const tokenCache = new TokenCache({
+  'service-foo': ['foo.read', 'foo.write'],
+  'service-bar': ['bar.read']
+}, oAuthConfig, cacheConfig);
+```
+
+Where`TokenCacheConfig` is defined like:
+
+```typescript
+type TokenCacheConfig = {
+  /**
+   * To determine when a token is expired locally (means
+   * when to issue a new token): if the token exists for
+   * ((1 - percentageLeft) * lifetime) then issue a new one.
+   * Default value: 0.75
+   */
+  percentageLeft: number
+};
+```
 
 #### handleOAuthRequestMiddleware(options: MiddlewareOptions)
 
