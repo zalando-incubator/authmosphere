@@ -78,8 +78,7 @@ describe('oauth tooling', () => {
       const redirectUri = '/redirect';
 
       // when
-      const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
-        redirectUri);
+      const result = createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId);
 
       // then
       const expected = `${authorizationEndpoint}` +
@@ -101,8 +100,7 @@ describe('oauth tooling', () => {
       };
 
       // when
-      const result = createAuthCodeRequestUri(authorizationEndpoint, clientId,
-        redirectUri, queryParams);
+      const result = createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId, queryParams);
 
       // then
       const expected = `${authorizationEndpoint}` +

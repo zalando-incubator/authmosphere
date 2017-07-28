@@ -1,4 +1,4 @@
-# Contributing to lib-oauth-tooling
+# Contributing to authmosphere
 
 **Thank you for your interest in making this project even better and more awesome. Your contributions are highly welcome.**
 
@@ -13,7 +13,7 @@ If you need help, please open a github Issue in this project. If you work at Zal
 
 ## Report a bug
 Reporting bugs is one of the best ways to contribute. Before creating a bug report, please check that an
-[issue](https://github.com/zalando-incubator/lib-oauth-tooling/issues) reporting the same problem does not already exist. If there is an
+[issue](https://github.com/zalando-incubator/authmosphere/issues) reporting the same problem does not already exist. If there is an
 such an issue, you may add your information as a comment.
 
 To report a new bug, open an issue that summarizes the bug and set the label to "bug".
@@ -22,20 +22,25 @@ If you want to provide a fix along with your bug report: That is great! In this 
 described in section [Contribute Code](#contribute-code).
 
 ## Suggest a Feature
-To request a new feature, open an [issue](https://github.com/zalando-incubator/lib-oauth-tooling/issues/new) and summarize the desired
+To request a new feature, open an [issue](https://github.com/zalando-incubator/authmosphere/issues/new) and summarize the desired
 functionality and its use case. Set the issue label to "feature".
 
 ## Contribute code
 This is a rough outline of what the workflow for code contributions looks like:
-- Check the list of open [issues](https://github.com/zalando-incubator/lib-oauth-tooling/issues). Either assign an existing issue to
+- Check the list of open [issues](https://github.com/zalando-incubator/authmosphere/issues). Either assign an existing issue to
 yourself, or create a new one that you would like work on and discuss your ideas and use cases.
 - Fork the repository
-- Create a topic branch from where you want to base your work. This is usually master.
+- Create a feature branch. Best practise for naming:
+
+```
+<branch name> = <Github issue ticket number>-<component-name>-<whatever-describes-the-ticket>
+```
+
 - Make commits of logical units.
 - Write good commit messages ([see below](#commit-messages)).
 - Push your changes to a topic branch in your fork of the repository.
 - Submit a pull request
-- Your pull request must receive a :thumbsup: from two [maintainers](https://github.com/zalando-incubator/lib-oauth-tooling/blob/master/MAINTAINERS).
+- Your pull request must receive a :thumbsup: from two [maintainers](https://github.com/zalando-incubator/authmosphere/blob/master/MAINTAINERS).
 
 Thanks for your contributions!
 

@@ -27,13 +27,15 @@ const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
  * Returns URI to request authorization code with the given parameters.
  *
  * @param authorizationEndpoint string
- * @param clientId string
  * @param redirectUri string
+ * @param clientId string
  * @param queryParams {} optional
  * @returns {string}
  */
-function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: string,
-                                  redirectUri: string, queryParams?: {}) {
+function createAuthCodeRequestUri(authorizationEndpoint: string,
+                                  redirectUri: string,
+                                  clientId: string,
+                                  queryParams?: {}): string {
 
   const _queryParams = {
     'client_id': clientId,
@@ -60,8 +62,10 @@ function createAuthCodeRequestUri(authorizationEndpoint: string, clientId: strin
  * @param queryParams optional
  * @returns {Promise<Token>}
  */
-function requestAccessToken(bodyObject: any, authorizationHeaderValue: string,
-                            accessTokenEndpoint: string, queryParams?: Object): Promise<Token> {
+function requestAccessToken(bodyObject: any,
+                            authorizationHeaderValue: string,
+                            accessTokenEndpoint: string,
+                            queryParams?: Object): Promise<Token> {
 
   const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 

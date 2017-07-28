@@ -22,7 +22,7 @@ function generateToken(): Token {
  * @param options
  * @returns {Scope}
  */
-export function mockAccessTokenEndpoint(options: MockOptions) {
+export function mockAccessTokenEndpoint(options: MockOptions): void {
 
   const parsedUrl = url.parse(options.url);
 
@@ -46,7 +46,7 @@ export function mockAccessTokenEndpoint(options: MockOptions) {
  * @param options
  * @returns {Scope}
  */
-export function mockTokeninfoEndpoint(options: MockOptions) {
+export function mockTokeninfoEndpoint(options: MockOptions): void {
 
   const parsedUrl = url.parse(options.url);
 
@@ -83,7 +83,7 @@ export function mockTokeninfoEndpoint(options: MockOptions) {
 /**
  * Removes generated tokens and mocked endpoints.
  */
-export function cleanMock() {
+export function cleanMock(): void {
 
   nock.cleanAll();
   tokens = [];

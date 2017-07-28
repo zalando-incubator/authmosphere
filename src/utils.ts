@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as q from 'q';
 import * as express from 'express';
 import * as HttpStatus from 'http-status';
 import * as btoa from 'btoa';
@@ -10,7 +9,19 @@ import {
 } from './constants';
 import { OAuthConfig, Token } from './types';
 
-const fsReadFile = q.denodeify<any>(fs.readFile);
+const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
+  const readPromise: Promise<string> = new Promise((resolve, reject) => {
+    fs.readFile(fileName, encoding, (error, data) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(data.toString());
+    });
+  });
+
+  return readPromise;
+};
 
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
 const AUTHORIZATION_BASIC_PREFIX = 'Basic';
@@ -22,12 +33,14 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-export function getFileData(filePath: string, fileName: string): q.Promise<any> {
+export function getFileData(filePath: string, fileName: string): Promise<string> {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
 
-  return fsReadFile(filePath + fileName, 'utf-8');
+  const promise = fsReadFile(filePath + fileName, 'utf-8');
+
+  return promise;
 }
 
 /**
@@ -83,7 +96,7 @@ export function extractAccessToken(authHeader: string): string {
  * @param req
  * @returns {function(any): undefined}
  */
-export function setTokeninfo(req: express.Request) {
+export function setTokeninfo(req: express.Request): (data: Token) => void {
   return (data: Token) => {
 
     const {
@@ -110,7 +123,7 @@ export function setTokeninfo(req: express.Request) {
  * @param res
  * @param status
  */
-export function rejectRequest(res: express.Response, status?: number) {
+export function rejectRequest(res: express.Response, status?: number): void {
 
   const _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
@@ -121,7 +134,7 @@ export function rejectRequest(res: express.Response, status?: number) {
  *
  * @param options
  */
-export function validateOAuthConfig(options: OAuthConfig) {
+export function validateOAuthConfig(options: OAuthConfig): void {
 
   if (!options.credentialsDir) {
     throw TypeError('credentialsDir must be defined');

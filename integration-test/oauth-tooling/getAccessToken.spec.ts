@@ -112,7 +112,7 @@ describe('getAccessToken', () => {
     it('should become the access token', function() {
 
       //given
-      setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
+      setupTestEnvironment('Basic bnVjbGV1c19jbGllbnQ6bnVjbGV1c19jbGllbnRfc2VjcmV0', authServerApp);
 
       //when
       const promise = getAccessToken(getAccessTokenOptions);
@@ -168,7 +168,7 @@ describe('getAccessToken', () => {
     it('should become the access token', function() {
 
       //given
-      setupTestEnvironment('Basic c3R1cHNfY2FtcC1mcm9udGVuZF80NTgxOGFkZC1jNDdkLTQ3MzEtYTQwZC1jZWExZmZkMGUwYzk6Nmk1Z2hCI1MyaUJLKSVidGI3JU14Z3hRWDcxUXIuKSo=', authServerApp);
+      setupTestEnvironment('Basic bnVjbGV1c19jbGllbnQ6bnVjbGV1c19jbGllbnRfc2VjcmV0', authServerApp);
 
       //when
       const bearer = getAccessToken(getAccessTokenOptionsAuthorization)
@@ -254,6 +254,26 @@ describe('getAccessToken', () => {
   });
 
   describe('refresh token grant', () => {
+
+    it('should be rejected, if grant type is unknown', function() {
+
+      // given
+      const host = 'http://127.0.0.1:30001/oauth2';
+      const options = {
+        scopes: ['campaign.edit_all', 'campaign.read_all'],
+        accessTokenEndpoint: `${host}/access_token`,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: 'INVALID_GRANT',
+        code: 'foo-bar',
+        redirectUri: '/redirect/'
+      };
+
+      // when
+      const promise = getAccessToken(options);
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
 
     it('should become the access token', function () {
 

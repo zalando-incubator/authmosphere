@@ -1,5 +1,9 @@
 import * as HttpStatus from 'http-status';
-import * as express from 'express';
+import {
+  NextFunction,
+  Response,
+  RequestHandler
+} from 'express';
 
 import {
   getHeaderValue,
@@ -35,9 +39,9 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
-                                 precedenceOptions?: PrecedenceOptions) {
+                                 precedenceOptions?: PrecedenceOptions): RequestHandler {
 
-  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
+  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
       const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
@@ -79,7 +83,7 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns express middleware
  */
-function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandler {
 
   const {
     tokenInfoEndpoint,
@@ -90,7 +94,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: ExtendedRequest, res: express.Response, next: express.NextFunction) {
+  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     const originalUrl = req.originalUrl;
 
@@ -112,9 +116,9 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions) {
 }
 
 function validateScopes(req: ExtendedRequest,
-                        res: express.Response,
-                        next: express.NextFunction,
-                        scopes: string[] = []) {
+                        res: Response,
+                        next: NextFunction,
+                        scopes: string[] = []): void {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
   const userScopes = Array.isArray(requestScopes) ? requestScopes : [];

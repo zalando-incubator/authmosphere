@@ -1,6 +1,6 @@
 {
-  "name": "lib-oauth-tooling",
-  "version": "2.4.1",
+  "name": "authmosphere",
+  "version": "0.2.1",
   "description": "A simple typescript based oauth tooling library",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -10,8 +10,6 @@
     "oauth2",
     "express",
     "node",
-    "service",
-    "rest",
     "typescript"
   ],
   "publishConfig": {
@@ -33,7 +31,6 @@
     "http-status": "1.0.1",
     "nock": "9.0.14",
     "node-fetch": "1.7.1",
-    "q": "1.5.0",
     "uuid": "3.1.0"
   },
   "devDependencies": {
@@ -46,7 +43,6 @@
     "@types/mocha": "2.2.41",
     "@types/nock": "8.2.1",
     "@types/node-fetch": "1.6.7",
-    "@types/q": "1.0.2",
     "@types/uuid": "3.4.0",
     "chai": "4.1.0",
     "chai-as-promised": "7.1.1",
@@ -91,7 +87,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zalando-incubator/lib-oauth-tooling.git"
+    "url": "https://github.com/zalando-incubator/authmosphere.git"
   },
   "maintainers": [
     "Jörg Dotzki <joerg.dotzki@zalando.de>",
