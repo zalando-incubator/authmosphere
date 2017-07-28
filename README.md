@@ -7,9 +7,9 @@
 
 ## Introduction
 
-Authmosphere is a JavaScript library to support some common OAuth2 use cases.
+`{authmosphere}` is a library to support OAuth2 workflows in JavaScript projects.
 
-It's implemented in TypeScript which give IDEs the ability of better autocompletion support, etc. The library itself is transpiled to JavaScript (ES6) so there is no need of a TypeScript compiler to use authmosphere in JavaScript projects.
+It's implemented in TypeScript which improves the development experience via implicit documentation with types, first-class IDE support and provides mock tooling for local development. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
 
 Currently the following flows are supported:
 
@@ -267,9 +267,12 @@ cleanMock();
 
 ## Changelog
 
+---
 #### `authmosphere 1.0.0` - **BREAKING**
 
 Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
+
+---
 
 #### `lib-oauth-tooling 2.0.0` - **BREAKING**
 
@@ -278,6 +281,8 @@ The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, th
 #### `lib-oauth-tooling 1.0.0` - **BREAKING**
 
 The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
+
+---
 
 ## License
 
