@@ -3,7 +3,7 @@ import { getAccessToken, getTokenInfo } from './oauth-tooling';
 import { validateOAuthConfig } from './utils';
 import { OAuthConfig, Token, TokenCacheConfig } from './types';
 
-const defualtTokenCacheConfig: TokenCacheConfig = {
+const defaultTokenCacheConfig: TokenCacheConfig = {
   /**
    * To determine when a token is expired locally (means
    * when to issue a new token): if the token exists for
@@ -51,7 +51,7 @@ class TokenCache {
 
     validateOAuthConfig(oauthConfig);
 
-    this.tokenCacheConfig = Object.assign({}, defualtTokenCacheConfig, tokenCacheConfig);
+    this.tokenCacheConfig = Object.assign({}, defaultTokenCacheConfig, tokenCacheConfig);
 
     if (!oauthConfig.tokenInfoEndpoint) {
       throw TypeError('tokenInfoEndpoint must be defined');
@@ -170,5 +170,5 @@ class TokenCache {
 
 export {
   TokenCache,
-  defualtTokenCacheConfig
+  defaultTokenCacheConfig
 };
