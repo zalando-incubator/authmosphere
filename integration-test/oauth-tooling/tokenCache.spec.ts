@@ -10,14 +10,14 @@ import {
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
 
-import { OAuthConfig } from '../../src/types/OAuthConfig';
+import { TokenCacheOAuthConfig } from '../../src/types/OAuthConfig';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 describe('tokenCache', () => {
 
-  let oauthConfig: OAuthConfig;
+  let oauthConfig: TokenCacheOAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
 
   const defaultAccessTokenValue = 'foo';

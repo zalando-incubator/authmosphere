@@ -17,7 +17,6 @@ import { getTokenInfo } from './oauth-tooling';
 import {
   MiddlewareOptions,
   ExtendedRequest,
-  Logger,
   PrecedenceFunction,
   PrecedenceErrorHandler,
   PrecedenceOptions
@@ -103,9 +102,17 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandle
       return next();
     }
 
-    const accessToken = extractAccessToken(getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME));
+    const authHeader = getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME);
+
+    if (!authHeader) {
+      rejectRequest(res);
+      return;
+    }
+
+    const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
       rejectRequest(res);
+      return;
     } else {
       getTokenInfo(tokenInfoEndpoint, accessToken)
       .then(setTokeninfo(req))

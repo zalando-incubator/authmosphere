@@ -5,14 +5,17 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "newLine": "LF",
-    "noUnusedLocals": false,
-    "noImplicitAny": false,
     "isolatedModules": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
     "outDir": "./lib",
-    "lib": ["es2015", "dom", "es2017"]
+    "lib": ["es2015", "dom", "es2017"],
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false, // Intentionally false
+    "noFallthroughCasesInSwitch": true,
+    "strict": true
   },
   "include": [
     "src/**/*",
