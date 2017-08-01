@@ -200,7 +200,7 @@ describe('express tooling', () => {
       const next = () => {
         return;
       };
-      const customErrorhandler = (e: any, logger: Logger​​): void => {
+      const customErrorhandler = (e: any​​): void => {
         // then
         expect(e).to.equal('Error happened');
         done();

@@ -1,7 +1,11 @@
 import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
 import { validateOAuthConfig } from './utils';
-import { OAuthConfig, Token, TokenCacheConfig } from './types';
+import {
+  TokenCacheOAuthConfig,
+  Token,
+  TokenCacheConfig
+} from './types';
 
 const defaultTokenCacheConfig: TokenCacheConfig = {
   /**
@@ -46,12 +50,10 @@ class TokenCache {
    * @param oauthConfig
    */
   constructor(private tokenConfig: { [key: string]: string[] },
-              private oauthConfig: OAuthConfig,
-              private tokenCacheConfig?: TokenCacheConfig) {
+              private oauthConfig: TokenCacheOAuthConfig,
+              private tokenCacheConfig: TokenCacheConfig = defaultTokenCacheConfig) {
 
     validateOAuthConfig(oauthConfig);
-
-    this.tokenCacheConfig = Object.assign({}, defaultTokenCacheConfig, tokenCacheConfig);
 
     if (!oauthConfig.tokenInfoEndpoint) {
       throw TypeError('tokenInfoEndpoint must be defined');

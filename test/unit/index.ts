@@ -10,6 +10,8 @@ import {
   REFRESH_TOKEN_GRANT
 } from '../../src/index';
 
+import { TokenCacheOAuthConfig } from '../../src/types';
+
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -124,7 +126,7 @@ describe('oauth tooling', () => {
           accessTokenEndpoint: '/access_token',
           credentialsDir: '/credentials',
           grantType: PASSWORD_CREDENTIALS_GRANT
-        });
+        } as TokenCacheOAuthConfig);
       }).to.throw(TypeError);
     });
 

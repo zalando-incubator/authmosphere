@@ -1,13 +1,16 @@
 import * as fs from 'fs';
-import * as express from 'express';
 import * as HttpStatus from 'http-status';
 import * as btoa from 'btoa';
+import { Request, Response } from 'express';
 
 import {
   AUTHORIZATION_CODE_GRANT,
   REFRESH_TOKEN_GRANT
 } from './constants';
-import { OAuthConfig, Token } from './types';
+import {
+   OAuthConfig,
+   Token
+} from './types';
 
 const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
   const readPromise: Promise<string> = new Promise((resolve, reject) => {
@@ -33,7 +36,7 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-export function getFileData(filePath: string, fileName: string): Promise<string> {
+const getFileData = (filePath: string, fileName: string): Promise<string> => {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
@@ -41,7 +44,7 @@ export function getFileData(filePath: string, fileName: string): Promise<string>
   const promise = fsReadFile(filePath + fileName, 'utf-8');
 
   return promise;
-}
+};
 
 /**
  * Returns the value of a specified header field from a request
@@ -50,16 +53,16 @@ export function getFileData(filePath: string, fileName: string): Promise<string>
  * @param field The name of the field to return
  * @returns {string} The value of the header field
  */
-export function getHeaderValue(req: express.Request, fieldName: string): string {
+const getHeaderValue = (req: Request, fieldName: string): string | undefined => {
 
-  if (req && fieldName && req.headers.hasOwnProperty(fieldName)) {
-    const headerValue = req.headers[fieldName];
-    // make sure to return a string
-    return (Array.isArray(headerValue)) ? headerValue.join(' ') : headerValue;
-  }
+  const headerValue = req && req.headers[fieldName];
 
-  return '';
-}
+  const normalizedHeaderValue = Array.isArray(headerValue) ?
+                                  headerValue.join(' ') :
+                                  headerValue;
+
+  return normalizedHeaderValue;
+};
 
 /**
  * Returns a basic authentication header value with the given credentials
@@ -68,9 +71,9 @@ export function getHeaderValue(req: express.Request, fieldName: string): string 
  * @param client_secret
  * @returns {string}
  */
-export function getBasicAuthHeaderValue(clientId: string, clientSecret: string): string {
+const getBasicAuthHeaderValue = (clientId: string, clientSecret: string): string => {
   return AUTHORIZATION_BASIC_PREFIX + ' ' + btoa(clientId + ':' + clientSecret);
-}
+};
 
 /**
  * Extracts and returns an access_token from an authorization header
@@ -78,7 +81,7 @@ export function getBasicAuthHeaderValue(clientId: string, clientSecret: string):
  * @param authHeader
  * @returns {any}
  */
-export function extractAccessToken(authHeader: string): string {
+const extractAccessToken = (authHeader: string): string | undefined => {
 
   const parts = authHeader.split(' ');
 
@@ -86,17 +89,20 @@ export function extractAccessToken(authHeader: string): string {
   if (parts[0] === AUTHORIZATION_BEARER_PREFIX && parts.length === 2) {
     return parts[1];
   } else {
-    return;
+    return undefined;
   }
-}
+};
 
 /**
- * Attach scopes on the req object for later validation.
+ * Attach scopes on the request object.
+ * The `requireScopesMiddleware` relies on this information attribute.
+ *
+ * ⚠️ This function mutates req.
  *
  * @param req
  * @returns {function(any): undefined}
  */
-export function setTokeninfo(req: express.Request): (data: Token) => void {
+const setTokeninfo = (req: Request): (data: Token) => void => {
   return (data: Token) => {
 
     const {
@@ -115,7 +121,7 @@ export function setTokeninfo(req: express.Request): (data: Token) => void {
       $$tokeninfo: tokeninfo
     });
   };
-}
+};
 
 /**
  * Reject a request with 401 or the given status code.
@@ -123,18 +129,18 @@ export function setTokeninfo(req: express.Request): (data: Token) => void {
  * @param res
  * @param status
  */
-export function rejectRequest(res: express.Response, status?: number): void {
+const rejectRequest = (res: Response, status?: number): void => {
 
   const _status = status ? status : HttpStatus.UNAUTHORIZED;
   res.sendStatus(_status);
-}
+};
 
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.
  *
  * @param options
  */
-export function validateOAuthConfig(options: OAuthConfig): void {
+const validateOAuthConfig = (options: OAuthConfig): void => {
 
   if (!options.credentialsDir) {
     throw TypeError('credentialsDir must be defined');
@@ -159,4 +165,14 @@ export function validateOAuthConfig(options: OAuthConfig): void {
   if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
-}
+};
+
+export {
+  extractAccessToken,
+  getBasicAuthHeaderValue,
+  getFileData,
+  getHeaderValue,
+  rejectRequest,
+  validateOAuthConfig,
+  setTokeninfo
+};
