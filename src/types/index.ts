@@ -3,6 +3,7 @@ export * from './ExtendedRequest';
 export * from './MiddlewareOptions';
 export * from './MockOptions';
 export * from './OAuthConfig';
+export * from './TokenCacheConfig';
 export * from './Token';
 export * from './Logger';
 export * from './Precedence';

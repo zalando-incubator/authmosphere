@@ -1,4 +1,4 @@
-interface OAuthConfig {
+type OAuthConfig = {
   credentialsDir: string;
   grantType: string; // (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
   accessTokenEndpoint: string;
@@ -9,6 +9,6 @@ interface OAuthConfig {
   redirectUri?: string;
   refreshToken?: string;
   queryParams?: {};
-}
+};
 
 export { OAuthConfig };

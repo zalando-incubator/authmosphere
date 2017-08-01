@@ -6,7 +6,7 @@ import * as lolex from 'lolex';
 
 import {
   TokenCache,
-  DEFAULT_PERCENTAGE_LEFT,
+  defaultTokenCacheConfig,
   PASSWORD_CREDENTIALS_GRANT
 } from '../../src/index';
 
@@ -107,7 +107,7 @@ describe('tokenCache', () => {
     // given
     const clock = lolex.install();
     const initialLifetime = 3600;
-    const timeBeforeExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 - 1;
+    const timeBeforeExpiry = initialLifetime * (1 - defaultTokenCacheConfig.percentageLeft) * 1000 - 1;
 
     nock(oauthHost)
     .post('/access_token')
@@ -142,7 +142,7 @@ describe('tokenCache', () => {
     // given
     const clock = lolex.install();
     const initialLifetime = 3600;
-    const timeUntilExpiry = initialLifetime * (1 - DEFAULT_PERCENTAGE_LEFT) * 1000 + 1;
+    const timeUntilExpiry = initialLifetime * (1 - defaultTokenCacheConfig.percentageLeft) * 1000 + 1;
 
     const otherAccessTokenValue = 'bar';
 
