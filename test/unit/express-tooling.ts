@@ -307,5 +307,28 @@ describe('express tooling', () => {
       // then
       return expect(called).to.be.false;
     });
+
+    it('should not call #next when no token is provided', () => {
+
+      // given
+      let called = false;
+      const next = () => {
+        called = true;
+      };
+      const config = {
+        publicEndpoints: [ '/public', '/healthcheck' ],
+        tokenInfoEndpoint: '/oauth2/tokeninfo'
+      };
+      const _requestMock = Object.assign({}, {
+        originalUrl: '/privateAPI',
+        headers: {authorization: ['auth1']}
+       }, requestMock);
+
+      // when
+      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
+
+      // then
+      return expect(called).to.be.false;
+    });
   });
 });
