@@ -12,7 +12,8 @@ import {
 import {
   AUTHORIZATION_CODE_GRANT,
   PASSWORD_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT
+  REFRESH_TOKEN_GRANT,
+  CLIENT_CREDENTIALS_GRANT
 } from './constants';
 
 import { OAuthConfig } from './types/OAuthConfig';
@@ -88,7 +89,6 @@ function requestAccessToken(bodyObject: any,
 
       return response.json();
     })
-    .then((data) => Promise.resolve(data))
     .catch((err) => {
       return Promise.reject({
         msg: `Error requesting access token from ${accessTokenEndpoint}`,
@@ -185,24 +185,32 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
 
   validateOAuthConfig(options);
 
-  return Promise.all([
-    getFileData(options.credentialsDir, USER_JSON),
-    getFileData(options.credentialsDir, CLIENT_JSON)
-  ])
+  const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
+
+  // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
+  if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+    credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
+  }
+
+  return Promise.all(credentialsPromises)
   .then((credentials) => {
 
-    const userData = JSON.parse(credentials[0]);
-    const clientData = JSON.parse(credentials[1]);
+    const clientData = JSON.parse(credentials[0]);
 
     let bodyParameters: BodyParameters;
 
     if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+      const userData = JSON.parse(credentials[1]);
       bodyParameters = {
         'grant_type': options.grantType,
         'username': userData.application_username,
         'password': userData.application_password
       };
-    } else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+    } else if (options.grantType === CLIENT_CREDENTIALS_GRANT) {
+      bodyParameters = {
+        'grant_type': options.grantType
+      };
+    }  else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
         'code': options.code,
