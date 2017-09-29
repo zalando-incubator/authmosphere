@@ -13,9 +13,10 @@ It's implemented in TypeScript which improves the development experience via imp
 
 Currently the following flows are supported:
 
-* [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-1.3.1)
-* [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-1.3.3)
-* [Refresh token Grant](https://tools.ietf.org/html/rfc6749#section-6)
+* [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-4.1)
+* [Client Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.4)
+* [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
+* [Refresh Token Grant](https://tools.ietf.org/html/rfc6749#section-6)
 * Express middlewares to simplify authentication/authorization
 * `TokenCache` service to manage access tokens in your application
 
@@ -107,7 +108,7 @@ Where `OAuthConfig` is defined like:
 ```typescript
 type OAuthConfig = {
   credentialsDir: string;
-  grantType: string; // (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
+  grantType: string;
   accessTokenEndpoint: string;
   tokenInfoEndpoint?: string; // mandatory for TokenCache
   scopes?: string[];
@@ -117,6 +118,22 @@ type OAuthConfig = {
   refreshToken?: string;
   queryParams?: {};
 };
+```
+
+Valid `grantTypes`s are:
+* `'authorization_code'`
+* `'password'`
+* `'client_credentials'`
+* `'refresh_token'`
+
+You can also import the constants from the lib:
+```typescript
+import {
+  AUTHORIZATION_CODE_GRANT,
+  PASSWORD_CREDENTIALS_GRANT,
+  CLIENT_CREDENTIALS_GRANT,
+  REFRESH_TOKEN_GRANT
+} from 'authmosphere';
 ```
 
 Optionally, you can pass a third parameter of type `TokenCacheConfig` to the `TokenCache` constructor to configure the cache behaviour.
@@ -224,16 +241,6 @@ getAccessToken(options)
 });
 ```
 
-`options`:
-* `credentialsDir` string
-* `grantType` string (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT` | `REFRESH_TOKEN_GRANT`)
-* `accessTokenEndpoint` string
-* `scopes` string optional
-* `queryParams` {} optional
-* `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-* `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-* `refreshToken` string optional (required with REFRESH_TOKEN_GRANT)
-
 #### AUTHORIZATION_CODE_GRANT
 
 String constant specifying the Authorization Code Grant type.
@@ -299,7 +306,7 @@ cleanMock();
 
 * clone this repo
 * `npm install`
-* to build: `tsc`
+* to build: `npm run build`
 * to lint: `npm run tslint`
 
 
