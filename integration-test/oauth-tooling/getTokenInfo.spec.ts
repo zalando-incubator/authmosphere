@@ -1,83 +1,57 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as Express from 'express';
-import * as Http from 'http';
+import * as nock from 'nock';
+import * as HttpStatus from 'http-status';
 
 import {
   getTokenInfo
-} from '../../src/index';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-const port = '30001';
-const host = `http://127.0.0.1:${port}`;
+const oAuthServerHost = `http://127.0.0.1:30001`;
+const validAccessToken = '4b70510f-be1d-4f0f-b4cb-edbca2c79d41';
+const invalidAccessToken = 'invalid';
 const tokenInfoEndpoint = '/oauth2/tokeninfo';
-
-const validToken = 'valid-token';
-const invalidToken = 'invalid-token';
-
-function addStandardAuthenticationEndpoint(app: Express.Application, _validToken: string) {
-
-  app.get(tokenInfoEndpoint, function(req: any, res: any) {
-
-    const valid = req.query.access_token === _validToken;
-
-    if (valid) {
-      res
-        .status(200)
-        .send({
-          'access_token': _validToken
-        });
-    } else {
-      res
-        .status(401)
-        .send();
-    }
-  });
-}
 
 describe('getTokenInfo', () => {
 
-  let authenticationServer: Http.Server;
-  let authServerApp: Express.Application;
-
-  // Setup AuthServer
   beforeEach(() => {
-    authServerApp = Express();
-    authenticationServer = authServerApp.listen(port);
+    nock.cleanAll();
   });
 
-  // stop server after test
   afterEach(() => {
-    authenticationServer.close();
+    nock.cleanAll();
   });
 
   it('should return error if token is not valid', () => {
 
     // given
-    addStandardAuthenticationEndpoint(authServerApp, validToken);
+    nock(oAuthServerHost)
+    .get(tokenInfoEndpoint)
+    .query({ access_token: invalidAccessToken })
+    .reply(HttpStatus.UNAUTHORIZED, { error: 'invalid_token' });
 
     // when
-    const url = `${host}${tokenInfoEndpoint}`;
-    const promise = getTokenInfo(url, invalidToken);
+    const promise = getTokenInfo(`${oAuthServerHost}${tokenInfoEndpoint}`, invalidAccessToken);
 
     // then
-    return expect(promise).be.rejected;
+    return expect(promise).to.be.rejected;
   });
 
   it('should return the token info if token is valid', function() {
 
     // given
-    addStandardAuthenticationEndpoint(authServerApp, validToken);
+    nock(oAuthServerHost)
+    .get(tokenInfoEndpoint)
+    .query({ access_token: validAccessToken })
+    .reply(HttpStatus.OK, { access_token: validAccessToken });
 
     // when
-    const url = `${host}${tokenInfoEndpoint}`;
-    const promise = getTokenInfo(url, validToken);
+    const promise = getTokenInfo(`${oAuthServerHost}${tokenInfoEndpoint}`, validAccessToken);
 
     // then
-    return expect(promise).to.become({
-      'access_token': validToken
-    });
+    return expect(promise).to.become({ access_token: validAccessToken });
   });
 });

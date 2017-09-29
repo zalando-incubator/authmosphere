@@ -132,25 +132,24 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
 function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token> {
 
     const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-      .then((response) => {
+    .then((response) => {
 
-        const status = response.status;
+      const status = response.status;
 
-        return response
-          .json()
-          .then((data) => {
+      return response.json()
+      .then((data) => {
 
-            if (response.status === HttpStatus.OK) {
-              return data;
-            } else {
-              return Promise.reject({ status, data });
-            }
-          });
-      })
-      .catch((err) => Promise.reject({
-          msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-          err
-        }));
+        if (response.status === HttpStatus.OK) {
+          return data;
+        } else {
+          return Promise.reject({ status, data });
+        }
+      });
+    })
+    .catch((err) => Promise.reject({
+      msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
+      err
+    }));
 
   return promise;
 }
