@@ -82,7 +82,7 @@ describe('getAccessToken', () => {
       grantType: PASSWORD_CREDENTIALS_GRANT
     };
 
-    it('should become the access token', () => {
+    it('should resolve with access token if valid', () => {
 
       // given
       nock(oAuthServerHost)
@@ -103,7 +103,7 @@ describe('getAccessToken', () => {
       return expect(promise).to.become({ access_token: accessToken });
     });
 
-    it('should be rejected if credentials can not be read', () => {
+    it('should be rejected if credentials cannot be read', () => {
 
       // given
       nock(oAuthServerHost)
@@ -144,7 +144,7 @@ describe('getAccessToken', () => {
       grantType: CLIENT_CREDENTIALS_GRANT
     };
 
-    it('should become the access token', () => {
+    it('should resolve with access token if valid', () => {
 
       // given
       nock(oAuthServerHost)
@@ -163,7 +163,7 @@ describe('getAccessToken', () => {
       return expect(promise).to.become({ access_token: accessToken });
     });
 
-    it('should be rejected if credentials can not be read', () => {
+    it('should be rejected if credentials cannot be read', () => {
 
       // given
       nock(oAuthServerHost)
@@ -209,7 +209,7 @@ describe('getAccessToken', () => {
       redirectUri: validRedirectUri
     };
 
-    it('should become the access token', function() {
+    it('should resolve with access token if valid', function() {
 
       // given
       nock(oAuthServerHost)
@@ -230,7 +230,7 @@ describe('getAccessToken', () => {
       return expect(promise).to.become({access_token: '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'});
     });
 
-    it('should be rejected if credentials can not be read', () => {
+    it('should be rejected if credentials cannot be read', () => {
 
       // given
       nock(oAuthServerHost)
@@ -274,7 +274,7 @@ describe('getAccessToken', () => {
       refreshToken: validRefreshToken
     };
 
-    it('should become the access token', () => {
+    it('should resolve with access token if valid', () => {
 
       // given
       nock(oAuthServerHost)
