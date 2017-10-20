@@ -16,6 +16,8 @@ const defaultTokenCacheConfig: TokenCacheConfig = {
   percentageLeft: 0.75
 };
 
+type TokenMap = { [key: string]: Token | undefined };
+
 /**
  * Class to request and cache tokens on client-side.
  *
@@ -32,7 +34,7 @@ const defaultTokenCacheConfig: TokenCacheConfig = {
  */
 class TokenCache {
 
-  private _tokens: { [key: string]: Token } = {};
+  private _tokens: TokenMap = {};
 
   /**
    * `oauthConfig`:
@@ -93,7 +95,10 @@ class TokenCache {
         return getAccessToken(config)
           .then((token) => {
 
-            const localExpiry = Date.now() + (token.expires_in * 1000 * (1 - this.tokenCacheConfig.percentageLeft));
+            const expiresIn = token.expires_in || 0;
+
+            const localExpiry = Date.now() + (expiresIn * 1000 * (1 - this.tokenCacheConfig.percentageLeft));
+
             this._tokens[tokenName] = {
               ...token,
               local_expiry: localExpiry
@@ -129,7 +134,7 @@ class TokenCache {
    *
    * @returns {Promise<Token>}
    */
-  refreshAllTokens(): Promise<{ [key: string]: Token }> {
+  refreshAllTokens(): Promise<TokenMap> {
 
     const refreshPromises = Object
       .keys(this.tokenConfig)
@@ -162,7 +167,9 @@ class TokenCache {
       return Promise.reject(`No token available for ${tokenName}`);
     }
 
-    if (token.local_expiry < Date.now()) {
+    const localExpiry = token.local_expiry || 0;
+
+    if (localExpiry < Date.now()) {
       return Promise.reject(`Token ${tokenName} expired locally.`);
     }
 
@@ -171,6 +178,7 @@ class TokenCache {
 }
 
 export {
+  TokenMap,
   TokenCache,
   defaultTokenCacheConfig
 };
