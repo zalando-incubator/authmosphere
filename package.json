@@ -1,6 +1,6 @@
 {
   "name": "authmosphere",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "authmosphere is a library to support OAuth2 workflows in JavaScript projects.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -61,7 +61,8 @@
     "test:coverage": "nyc npm run test",
     "coverage": "npm run test:coverage && nyc report --reporter=text-lcov | coveralls",
     "tslint": "tslint --exclude 'src/**/*.d.ts' --type-check --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
-    "build": "rm -rf lib && tsc"
+    "build": "rm -rf lib && tsc",
+    "prepublishOnly": "npm run build && npm run test && npm run tslint"
   },
   "nyc": {
     "lines": 90,
