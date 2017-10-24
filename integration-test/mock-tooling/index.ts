@@ -4,13 +4,15 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   getTokenInfo,
   getAccessToken,
-  PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
   cleanMock
 } from '../../src/index';
 
-import { Token } from '../../src/types';
+import {
+  Token,
+  OAuthGrantType
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -153,7 +155,7 @@ describe('mock tooling', () => {
         scopes: ['uid'],
         accessTokenEndpoint: accessTokenEndpoint,
         credentialsDir: 'integration-test/data/credentials',
-        grantType: PASSWORD_CREDENTIALS_GRANT
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
       };
       mockAccessTokenEndpoint({
         url: accessTokenEndpoint

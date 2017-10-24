@@ -6,9 +6,12 @@ import * as lolex from 'lolex';
 
 import {
   TokenCache,
-  defaultTokenCacheConfig,
-  PASSWORD_CREDENTIALS_GRANT
+  defaultTokenCacheConfig
 } from '../../src/index';
+
+import {
+  OAuthGrantType
+} from '../../src/types';
 
 import { TokenCacheOAuthConfig } from '../../src/types/OAuthConfig';
 
@@ -25,7 +28,7 @@ describe('tokenCache', () => {
       expires_in: 3600,
       token_type: 'Bearer',
       scope: ['nucleus.write', 'nucleus.read'],
-      grant_type: PASSWORD_CREDENTIALS_GRANT,
+      grant_type: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
       uid: 'uid',
       access_token: defaultAccessTokenValue
     };
@@ -35,7 +38,7 @@ describe('tokenCache', () => {
       accessTokenEndpoint: oauthHost + '/access_token',
       tokenInfoEndpoint: oauthHost + '/tokeninfo',
       credentialsDir: 'integration-test/data/credentials',
-      grantType: PASSWORD_CREDENTIALS_GRANT
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
     };
   });
 

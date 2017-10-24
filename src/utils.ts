@@ -4,12 +4,9 @@ import * as btoa from 'btoa';
 import { Request, Response } from 'express';
 
 import {
-  AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT
-} from './constants';
-import {
    OAuthConfig,
-   Token
+   Token,
+   OAuthGrantType
 } from './types';
 
 const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
@@ -154,15 +151,15 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
     throw TypeError('grantType must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.code) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.code) {
     throw TypeError('code must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
     throw TypeError('redirectUri must be defined');
   }
 
-  if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
+  if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
 };

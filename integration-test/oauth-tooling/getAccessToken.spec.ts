@@ -4,12 +4,12 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 
 import {
-  getAccessToken,
-  PASSWORD_CREDENTIALS_GRANT,
-  AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT,
-  CLIENT_CREDENTIALS_GRANT
+  getAccessToken
 } from '../../src/index';
+
+import {
+  OAuthGrantType
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -46,7 +46,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: PASSWORD_CREDENTIALS_GRANT,
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
       queryParams: { realm: '/services' }
     });
 
@@ -79,7 +79,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: PASSWORD_CREDENTIALS_GRANT
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
     };
 
     it('should resolve with access token if valid', () => {
@@ -89,7 +89,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: PASSWORD_CREDENTIALS_GRANT,
+          grant_type: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           username: validUserName,
           password: validUserPassword,
           scope: 'campaign.edit_all campaign.read_all'
@@ -141,7 +141,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: CLIENT_CREDENTIALS_GRANT
+      grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT
     };
 
     it('should resolve with access token if valid', () => {
@@ -151,7 +151,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: CLIENT_CREDENTIALS_GRANT,
+          grant_type: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
           scope: 'campaign.edit_all campaign.read_all'
         })
         .reply(HttpStatus.OK, { access_token: accessToken });
@@ -204,7 +204,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: AUTHORIZATION_CODE_GRANT,
+      grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT,
       code: validCode,
       redirectUri: validRedirectUri
     };
@@ -216,7 +216,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: AUTHORIZATION_CODE_GRANT,
+          grant_type: OAuthGrantType.AUTHORIZATION_CODE_GRANT,
           code: validCode,
           redirect_uri: validRedirectUri,
           scope: 'campaign.edit_all campaign.read_all'
@@ -270,7 +270,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: REFRESH_TOKEN_GRANT,
+      grantType: OAuthGrantType.REFRESH_TOKEN_GRANT,
       refreshToken: validRefreshToken
     };
 
@@ -281,7 +281,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: REFRESH_TOKEN_GRANT,
+          grant_type: OAuthGrantType.REFRESH_TOKEN_GRANT,
           scope: 'campaign.edit_all campaign.read_all',
           refresh_token: validRefreshToken
         })
