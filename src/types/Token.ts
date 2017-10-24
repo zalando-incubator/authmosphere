@@ -1,4 +1,4 @@
-type Token<CustomTokenPart = any> = CustomTokenPart & {
+type Token<CustomTokenPart = {}> = CustomTokenPart & {
   access_token: string;
   expires_in?: number;
   scope?: string[];
