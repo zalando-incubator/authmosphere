@@ -8,7 +8,11 @@ import {
 } from '../../src/index';
 
 import {
-  OAuthGrantType
+  OAuthGrantType,
+  PasswordCredentialsGrantConfig,
+  ClientCredentialsGrantConfig,
+  AuthorizationCodeGrantConfig,
+  RefreshGrantConfig
 } from '../../src/types';
 
 chai.use(chaiAsPromised);
@@ -67,7 +71,7 @@ describe('getAccessToken', () => {
       credentialsDir: 'integration-test/data/credentials',
       grantType: 'INVALID',
       queryParams: { realm: '/services' }
-    });
+    } as any); // deactivate type system in order to test runtime behavior
 
     // then
     return expect(promise).to.be.rejected;
@@ -75,7 +79,7 @@ describe('getAccessToken', () => {
 
   describe('password credentials grant', () => {
 
-    const passwordCredentialsOAuthOptions = {
+    const passwordCredentialsOAuthOptions: PasswordCredentialsGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
@@ -137,7 +141,7 @@ describe('getAccessToken', () => {
 
   describe('client credentials grant', () => {
 
-    const clientCredentialsOAuthOptions = {
+    const clientCredentialsOAuthOptions: ClientCredentialsGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
@@ -200,7 +204,7 @@ describe('getAccessToken', () => {
     const validCode = '1234';
     const validRedirectUri = 'http://redirect.com';
 
-    const authCodeOAuthOptions = {
+    const authCodeOAuthOptions: AuthorizationCodeGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
@@ -266,7 +270,7 @@ describe('getAccessToken', () => {
 
     const validRefreshToken = 'refresh';
 
-    const clientCredentialsOAuthOptions = {
+    const clientCredentialsOAuthOptions: RefreshGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',

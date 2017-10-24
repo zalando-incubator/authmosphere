@@ -137,7 +137,7 @@ describe('oauth tooling', () => {
         tokenInfoEndpoint: '/tokeninfo',
         credentialsDir: '/credentials',
         grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
-      });
+      } as any); // deactivate type system in order to test runtime behavior
 
       return expect(tokenCache.get('bar')).to.be.rejected;
     });

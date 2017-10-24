@@ -169,7 +169,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token>
  *  - accessTokenEndpoint string
  *  - scopes string[] optional
  *  - queryParams {} optional
- *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
+ *  - redirectUri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
  *

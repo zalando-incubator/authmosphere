@@ -11,7 +11,8 @@ import {
 
 import {
   Token,
-  OAuthGrantType
+  OAuthGrantType,
+  PasswordCredentialsGrantConfig
 } from '../../src/types';
 
 chai.use(chaiAsPromised);
@@ -151,7 +152,7 @@ describe('mock tooling', () => {
     it('accessToken endpoint should return valid token', function () {
 
       // given
-      const options = {
+      const options: PasswordCredentialsGrantConfig = {
         scopes: ['uid'],
         accessTokenEndpoint: accessTokenEndpoint,
         credentialsDir: 'integration-test/data/credentials',
