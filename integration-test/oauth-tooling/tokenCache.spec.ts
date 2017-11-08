@@ -187,6 +187,51 @@ describe('tokenCache', () => {
     return expect(promise).to.become(otherAccessTokenValue);
   });
 
+  it('#get should resolve with a token that immediately expires if expires_in is not set', () => {
+
+    // given
+    const clock = lolex.install();
+    const timeUntilExpiry = 1;
+
+    const otherAccessTokenValue = 'bar';
+
+    nock(oauthHost)
+    .post('/access_token')
+    .reply(HttpStatus.OK, {
+      access_token: defaultAccessTokenValue
+    })
+    .get('/tokeninfo')
+    .query({ access_token: defaultAccessTokenValue })
+    .reply(HttpStatus.OK, defaultTokenInfoResponse)
+    .post('/access_token')
+    .reply(HttpStatus.OK, {
+      access_token: otherAccessTokenValue
+    })
+    .get('/tokeninfo')
+    .query({ access_token: otherAccessTokenValue })
+    .reply(HttpStatus.OK, {
+      ...defaultTokenInfoResponse,
+      access_token: otherAccessTokenValue
+    });
+
+    // when
+    const tokenService = new TokenCache({
+      'nucleus': ['nucleus.write', 'nucleus.read'],
+      'halo': ['all']
+    }, oauthConfig);
+
+    const promise = tokenService.get('nucleus')
+      .then(() => clock.tick(timeUntilExpiry))
+      .then(() => tokenService.get('nucleus'))
+      .then((token) => {
+        clock.uninstall();
+        return token.access_token;
+      });
+
+    // then
+    return expect(promise).to.become(otherAccessTokenValue);
+  });
+
   it('#refreshToken should request a new token even if there is a valid one', () => {
 
     // given
@@ -261,8 +306,12 @@ describe('tokenCache', () => {
 
     return tokenService.refreshAllTokens()
       .then(tokens => {
-        expect(tokens['nucleus'].access_token).to.equal(defaultAccessTokenValue);
-        expect(tokens['halo'].access_token).to.equal(otherAccessTokenValue);
+
+        const nucleusToken = tokens['nucleus'] || { access_token: undefined };
+        const haloToken = tokens['halo'] || { access_token: undefined };
+
+        expect(nucleusToken.access_token).to.equal(defaultAccessTokenValue);
+        expect(haloToken.access_token).to.equal(otherAccessTokenValue);
       });
   });
 

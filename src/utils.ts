@@ -94,7 +94,7 @@ const extractAccessToken = (authHeader: string): string | undefined => {
  * Attach scopes on the request object.
  * The `requireScopesMiddleware` relies on this information attribute.
  *
- * ⚠️ This function mutates req.
+ * ⚠️  This function mutates req.
  *
  * @param req
  * @returns {function(any): undefined}
@@ -102,17 +102,10 @@ const extractAccessToken = (authHeader: string): string | undefined => {
 const setTokeninfo = (req: Request): (data: Token) => void => {
   return (data: Token) => {
 
-    const {
-      uid,
-      scope,
-      expires_in // tslint:disable-line
-    } = data;
+    const tokeninfo = { ...data };
 
-    const tokeninfo = {
-      uid,
-      scope,
-      expires_in // tslint:disable-line
-    };
+    // Avoid leaking of sensitive information
+    delete tokeninfo.access_token;
 
     Object.assign(req, {
       $$tokeninfo: tokeninfo
