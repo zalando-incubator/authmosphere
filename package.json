@@ -50,7 +50,7 @@
     "express": "4.15.3",
     "lolex": "1.6.0",
     "mocha": "3.4.2",
-    "nyc": "11.0.3",
+    "nyc": "11.3.0",
     "tslint": "5.5.0",
     "typescript": "2.4.2"
   },
@@ -63,28 +63,6 @@
     "tslint": "tslint --exclude 'src/**/*.d.ts' --type-check --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
     "build": "rm -rf lib && tsc",
     "prepublishOnly": "npm run build && npm run test && npm run tslint"
-  },
-  "nyc": {
-    "lines": 90,
-    "statements": 90,
-    "functions": 90,
-    "branches": 90,
-    "exclude": [
-      "coverage/**/*.js",
-      "lib/integration-test/**/*",
-      "lib/src/index.js",
-      "lib/test/**/*",
-      "lib/src/types"
-    ],
-    "reporter": [
-      "lcov",
-      "text",
-      "text-summary"
-    ],
-    "cache": true,
-    "all": true,
-    "check-coverage": true,
-    "report-dir": "./coverage"
   },
   "repository": {
     "type": "git",
