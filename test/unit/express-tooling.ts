@@ -6,6 +6,7 @@ import {
   requireScopesMiddleware,
   Logger​​
 } from '../../src/index';
+import { PrecedenceOptions } from '../../src/types';
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -44,10 +45,8 @@ describe('express tooling', () => {
           scope: ['uid', 'test']
         };
         const requiredScopes = ['uid', 'test', 'additional'];
-        let called = false;
-        const next = () => {
-          called = true;
-        };
+
+        const next = () => { return {}; };
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
@@ -133,7 +132,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
       // then
       // We wait for the done call here this we get no async handler back on that we can wait
@@ -160,7 +159,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;
@@ -187,7 +186,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;
@@ -215,7 +214,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
     });
 
     it('should call error log, if error handler fails', (done) => {
@@ -225,27 +224,28 @@ describe('express tooling', () => {
       const next = () => {
         return;
       };
-      const customErrorhandler = (e: any, logger: Logger​​): void => {
+      const customErrorhandler = (e: any, logger: Logger​​ | undefined): void => {
         // then
         throw Error('Handler failed');
       };
 
-      const preOptions = {
-        precedenceFunction: () => {
-          return Promise.reject('Error happened');
-        },
-        precedenceErrorHandler: customErrorhandler,
-        logger: {
-          ...loggerMock,
-          error: (p: any): void => {
-            expect(p).to.equal('Error while executing precedenceErrorHandler: ');
-            done();
-          }
+      const throwingLogger = {
+        ...loggerMock,
+        error: (p: any): void => {
+          expect(p).to.equal('Error while executing precedenceErrorHandler: ');
+          done();
         }
       };
 
+      const preOptions: PrecedenceOptions = {
+        precedenceFunction: () => {
+          return Promise.reject(false);
+        },
+        precedenceErrorHandler: customErrorhandler
+      };
+
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, throwingLogger, preOptions)(requestMock, responseMock, next);
     });
   });
 

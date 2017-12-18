@@ -19,7 +19,8 @@ import {
   ExtendedRequest,
   PrecedenceFunction,
   PrecedenceErrorHandler,
-  PrecedenceOptions
+  PrecedenceOptions,
+  Logger
 } from './types';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
@@ -33,37 +34,41 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
  *
  * @param scopes - array of scopes that are needed to access the endpoint
+ * @param logger - optional logger
  * @param precedenceOptions - This options let consumers define a way to over rule scope checking. The parameter is optional.
  *
  * @returns { function(any, any, any): undefined }
  */
 function requireScopesMiddleware(scopes: string[],
+                                 logger?: Logger,
                                  precedenceOptions?: PrecedenceOptions): RequestHandler {
 
   return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
-      const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
+      const { precedenceFunction, precedenceErrorHandler} = precedenceOptions;
 
       precedenceFunction(req, res, next)
       .then(result => {
         if (result) {
           next();
         } else {
-          validateScopes(req, res, next, scopes);
+          validateScopes(req, res, next, scopes, logger);
         }
       })
       .catch(err => {
         try {
           precedenceErrorHandler(err, logger);
         } catch (err) {
-          logger.error('Error while executing precedenceErrorHandler: ', err);
+          if (logger) {
+            logger.error('Error while executing precedenceErrorHandler: ', err);
+          }
         }
       });
       return; // skip normal scope validation
     }
 
-    validateScopes(req, res, next, scopes);
+    validateScopes(req, res, next, scopes, logger);
   };
 }
 
@@ -82,7 +87,8 @@ function requireScopesMiddleware(scopes: string[],
  * @param options
  * @returns express middleware
  */
-function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandler {
+function handleOAuthRequestMiddleware(options: MiddlewareOptions,
+  logger?: Logger): RequestHandler {
 
   const {
     tokenInfoEndpoint,
@@ -90,10 +96,13 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandle
   } = options;
 
   if (!tokenInfoEndpoint) {
+    if (logger) {
+      logger.error('tokenInfoEndpoint must be defined');
+    }
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
+  return function (req: ExtendedRequest, res: Response, next: NextFunction) {
 
     const originalUrl = req.originalUrl;
 
@@ -105,19 +114,30 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandle
     const authHeader = getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME);
 
     if (!authHeader) {
+      if (logger) {
+        logger.error('No authorization field in header');
+      }
       rejectRequest(res);
       return;
     }
 
     const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
+      if (logger) {
+        logger.error('No access_token field in header');
+      }
       rejectRequest(res);
       return;
     } else {
       getTokenInfo(tokenInfoEndpoint, accessToken)
-      .then(setTokeninfo(req))
-      .then(next)
-      .catch(err => rejectRequest(res, err.status));
+        .then(setTokeninfo(req))
+        .then(next)
+        .catch(err => {
+          if (logger) {
+            logger.error('Error occured when requesting token info: ', err);
+          }
+          return rejectRequest(res, err.status);
+        });
     }
   };
 }
@@ -125,7 +145,8 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandle
 function validateScopes(req: ExtendedRequest,
                         res: Response,
                         next: NextFunction,
-                        scopes: string[] = []): void {
+                        scopes: string[] = [],
+                        logger?: Logger): void {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
   const userScopes = Array.isArray(requestScopes) ? requestScopes : [];
@@ -137,6 +158,9 @@ function validateScopes(req: ExtendedRequest,
   if (filteredScopes.length === 0) {
     next();
   } else {
+    if (logger) {
+      logger.error('Scopes not found for user');
+    }
     rejectRequest(res, HttpStatus.FORBIDDEN);
   }
 }
