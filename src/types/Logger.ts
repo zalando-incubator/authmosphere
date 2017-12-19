@@ -11,16 +11,6 @@ interface Logger {
   warn(message: string, error?: any): void;
 }
 
-enum LogLevel {
-  info,
-  debug,
-  error,
-  fatal,
-  trace,
-  warn
-}
-
 export {
-  Logger,
-  LogLevel
+  Logger
 };
