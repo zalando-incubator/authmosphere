@@ -13,14 +13,7 @@ describe('express tooling', () => {
 
   let requestMock: any;
   let responseMock: any;
-  const loggerMock = {
-    info:  (p: any): void => { return; },
-    debug: (p: any): void => { return; },
-    error: (p: any): void => { return; },
-    fatal: (p: any): void => { return; },
-    trace: (p: any): void => { return; },
-    warn:  (p: any): void => { return; }
-  };
+  const loggerMock = undefined;
 
   before(() => {
 
@@ -44,7 +37,7 @@ describe('express tooling', () => {
         };
         const requiredScopes = ['uid', 'test', 'additional'];
 
-        const next = () => { return {}; };
+        const next = () => undefined;
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
@@ -125,8 +118,7 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(true);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
@@ -152,8 +144,7 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
@@ -179,8 +170,7 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
@@ -207,8 +197,7 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.reject('Error happened');
         },
-        precedenceErrorHandler: customErrorhandler,
-        logger: loggerMock
+        precedenceErrorHandler: customErrorhandler
       };
 
       // when
