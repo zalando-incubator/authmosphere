@@ -23,6 +23,8 @@ import {
   Logger
 } from './types';
 
+import * as log from './validatedLogger';
+
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
 /**
@@ -60,9 +62,7 @@ function requireScopesMiddleware(scopes: string[],
         try {
           precedenceErrorHandler(err, logger);
         } catch (err) {
-          if (logger) {
-            logger.error('Error while executing precedenceErrorHandler: ', err);
-          }
+            log.error(`Error while executing precedenceErrorHandler: ${err}`, logger);
         }
       });
       return; // skip normal scope validation
@@ -96,13 +96,11 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions,
   } = options;
 
   if (!tokenInfoEndpoint) {
-    if (logger) {
-      logger.error('tokenInfoEndpoint must be defined');
-    }
+    log.error('tokenInfoEndpoint must be defined', logger);
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function (req: ExtendedRequest, res: Response, next: NextFunction) {
+  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     const originalUrl = req.originalUrl;
 
@@ -114,18 +112,14 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions,
     const authHeader = getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME);
 
     if (!authHeader) {
-      if (logger) {
-        logger.error('No authorization field in header');
-      }
+      log.warn('No authorization field in header', logger);
       rejectRequest(res);
       return;
     }
 
     const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
-      if (logger) {
-        logger.error('No access_token field in header');
-      }
+      log.warn('access_token is empty', logger);
       rejectRequest(res);
       return;
     } else {
@@ -133,9 +127,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions,
         .then(setTokeninfo(req))
         .then(next)
         .catch(err => {
-          if (logger) {
-            logger.error('Error occured when requesting token info: ', err);
-          }
+          log.error(`Error occured when requesting token info: ${err}`, logger);
           return rejectRequest(res, err.status);
         });
     }
@@ -158,9 +150,7 @@ function validateScopes(req: ExtendedRequest,
   if (filteredScopes.length === 0) {
     next();
   } else {
-    if (logger) {
-      logger.error('Scopes not found for user');
-    }
+    log.warn(`Scopes ${scopes} not found for user`, logger);
     rejectRequest(res, HttpStatus.FORBIDDEN);
   }
 }

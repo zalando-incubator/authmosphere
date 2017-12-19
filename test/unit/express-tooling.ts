@@ -3,10 +3,8 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  Logger​​
+  requireScopesMiddleware
 } from '../../src/index';
-import { PrecedenceOptions } from '../../src/types';
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -215,37 +213,6 @@ describe('express tooling', () => {
 
       // when
       requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
-    });
-
-    it('should call error log, if error handler fails', (done) => {
-
-      // given
-      const requiredScopes = ['test'];
-      const next = () => {
-        return;
-      };
-      const customErrorhandler = (e: any, logger: Logger​​ | undefined): void => {
-        // then
-        throw Error('Handler failed');
-      };
-
-      const throwingLogger = {
-        ...loggerMock,
-        error: (p: any): void => {
-          expect(p).to.equal('Error while executing precedenceErrorHandler: ');
-          done();
-        }
-      };
-
-      const preOptions: PrecedenceOptions = {
-        precedenceFunction: () => {
-          return Promise.reject(false);
-        },
-        precedenceErrorHandler: customErrorhandler
-      };
-
-      // when
-      requireScopesMiddleware(requiredScopes, throwingLogger, preOptions)(requestMock, responseMock, next);
     });
   });
 
