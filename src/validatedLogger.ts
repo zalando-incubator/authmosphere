@@ -5,7 +5,7 @@ import {
 
 type validateLogger = (loglevel: LogLevel) => (message: string, logger: Logger | undefined) => void;
 const validateLogger: validateLogger = (loglevel) => (message, logger) =>
-  logger && logger[loglevel] && logger[loglevel].call(logger, []);
+  logger && logger[loglevel] && logger[loglevel].call(logger, message);
 
 const logOrNothing: Logger = {
   info: validateLogger(LogLevel.info),
