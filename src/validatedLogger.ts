@@ -1,22 +1,19 @@
 import {
-  Logger
+  Logger,
+  LogLevel
 } from './types';
 
-type logcall = (message: string, logger: Logger | undefined) => void;
-const info: logcall = (message, logger) => logger && logger.info && logger.info(message);
-const debug: logcall = (message, logger) => logger && logger.debug && logger.debug(message);
-const error: logcall = (message, logger) => logger && logger.error && logger.error(message);
-const fatal: logcall = (message, logger) => logger && logger.fatal && logger.fatal(message);
-const trace: logcall = (message, logger) => logger && logger.trace && logger.trace(message);
-const warn: logcall = (message, logger) => logger && logger.warn && logger.warn(message);
+type validateLogger = (loglevel: LogLevel) => (message: string, logger: Logger | undefined) => void;
+const validateLogger: validateLogger = (loglevel) => (message, logger) =>
+  logger && logger[loglevel] && logger[loglevel].call(logger, []);
 
 const logOrNothing: Logger = {
-  info,
-  debug,
-  error,
-  fatal,
-  trace,
-  warn
+  info: validateLogger(LogLevel.info),
+  debug: validateLogger(LogLevel.debug),
+  error: validateLogger(LogLevel.error),
+  fatal: validateLogger(LogLevel.fatal),
+  trace: validateLogger(LogLevel.trace),
+  warn: validateLogger(LogLevel.warn)
 };
 
 export {
