@@ -180,6 +180,37 @@ describe('express tooling', () => {
       return expect(called).to.be.false;
     });
 
+    it('should not call #next if precedence function rejects and precedenceErrorHandler throws', () => {
+
+      // given
+      requestMock.$$tokeninfo = {
+        scope: ['test']
+      };
+      const requiredScopes = ['test'];
+      let called = false;
+      const next = () => {
+        called = true;
+      };
+
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.reject(false);
+        },
+        precedenceErrorHandler: () => {
+          throw Error('Expected precedenceErrorHandler throw');
+        }
+      };
+
+      // when
+      try {
+        requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      } catch {
+        called = true;
+      }
+      // then
+      return expect(called).to.be.false;
+    });
+
     it('should call error handler', (done) => {
 
       // given
