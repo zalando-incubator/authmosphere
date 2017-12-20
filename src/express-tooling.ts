@@ -137,7 +137,7 @@ function handleOAuthRequestMiddleware(options: MiddlewareOptions,
 function validateScopes(req: ExtendedRequest,
                         res: Response,
                         next: NextFunction,
-                        scopes: string[] = [],
+                        scopes: string[],
                         logger?: Logger): void {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
