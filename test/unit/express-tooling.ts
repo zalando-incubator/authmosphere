@@ -180,7 +180,7 @@ describe('express tooling', () => {
       return expect(called).to.be.false;
     });
 
-    it('should not call #next if precedence function rejects and precedenceErrorHandler throws', () => {
+    it('should not call #next nor throw if precedence function rejects and precedenceErrorHandler throws', () => {
 
       // given
       requestMock.$$tokeninfo = {
