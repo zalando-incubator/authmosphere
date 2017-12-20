@@ -59,22 +59,27 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
  * @throws on parse error of options.url
  */
 export function mockTokeninfoEndpoint(options: MockOptions): void {
-
+  console.log('HERE I AM');
   const parsedUrl = url.parse(options.url);
 
   if (typeof parsedUrl !== 'object' ||
       typeof parsedUrl.path !== 'string') {
     throw new Error(`Error parsing '${options.url}'`);
   }
-
+  console.log('HERE I AM - PARSING DONE');
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
   .get(parsedUrl.path)
   .times(options.times || Number.MAX_SAFE_INTEGER)
   .query(true)
   .reply((uri: string) => {
 
+    console.log('HERE I AM - WOOOOOO');
+    console.log(uri);
+
     // token to validate
     const givenToken = uri.split('=')[1];
+
+    console.log(givenToken);
 
     if (givenToken) {
 
