@@ -6,6 +6,7 @@ import { Logger } from '../../src/types';
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
+
 describe('safeLogger', () => {
   describe('logOrNothing', () => {
 

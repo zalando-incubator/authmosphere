@@ -48,7 +48,7 @@ function requireScopesMiddleware(scopes: string[],
   return function(req: ExtendedRequest, res: Response, next: NextFunction) {
 
     if (precedenceOptions && precedenceOptions.precedenceFunction) {
-      const { precedenceFunction, precedenceErrorHandler} = precedenceOptions;
+      const { precedenceFunction, precedenceErrorHandler } = precedenceOptions;
 
       precedenceFunction(req, res, next)
       .then(result => {
