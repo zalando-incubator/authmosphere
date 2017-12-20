@@ -23,7 +23,7 @@ import {
   Logger
 } from './types';
 
-import { logOrNothing } from './validatedLogger';
+import { logOrNothing } from './safeLogger';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 

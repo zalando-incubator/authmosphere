@@ -3,6 +3,7 @@ export * from './express-tooling';
 export * from './TokenCache';
 export * from './constants';
 export * from './mock-tooling/index';
+export * from './safeLogger';
 export {
   Logger,
   Token,
