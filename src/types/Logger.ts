@@ -12,7 +12,7 @@ interface Logger {
 }
 
 enum LogLevel {
-  info= 'info',
+  info = 'info',
   debug = 'debug',
   error = 'error',
   fatal = 'fatal',
