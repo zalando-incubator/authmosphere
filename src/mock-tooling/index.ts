@@ -59,7 +59,6 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
  * @throws on parse error of options.url
  */
 export function mockTokeninfoEndpoint(options: MockOptions): void {
-
   const parsedUrl = url.parse(options.url);
 
   if (typeof parsedUrl !== 'object' ||
