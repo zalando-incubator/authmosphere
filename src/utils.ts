@@ -12,7 +12,7 @@ import {
    Token
 } from './types';
 
-const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
+const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
   const readPromise: Promise<string> = new Promise((resolve, reject) => {
     fs.readFile(fileName, encoding, (error, data) => {
       if (error) {

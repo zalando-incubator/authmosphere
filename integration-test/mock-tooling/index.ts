@@ -66,6 +66,27 @@ describe('mock tooling', () => {
       return expect(promise).to.become(validAuthToken);
     });
 
+    it('should return 400 if requested token is empty', function () {
+
+      // given
+      const validAuthToken = {
+        'expires_in': 3600,
+        'scope': ['uid'],
+        'access_token': 'foo'
+      };
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint,
+        tokens: [validAuthToken],
+        times: 1
+      });
+
+      // when
+      const promise = getTokenInfo(tokeninfoEndpoint, '');
+
+      // then
+      return expect(promise).to.rejected;
+    });
+
     it('should return the tokeninfo as often as defined', function () {
 
       // given
