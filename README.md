@@ -121,12 +121,14 @@ type OAuthConfig = {
 ```
 
 Valid `grantTypes`s are:
+
 * `'authorization_code'`
 * `'password'`
 * `'client_credentials'`
 * `'refresh_token'`
 
 You can also import the constants from the lib:
+
 ```typescript
 import {
   AUTHORIZATION_CODE_GRANT,
@@ -172,6 +174,7 @@ app.use(handleOAuthRequestMiddleware({
 ```
 
 `options`:
+
 * `publicEndpoints` string[]
 * `tokenInfoEndpoint` string
 
@@ -257,7 +260,7 @@ String constant specifying the Refresh Token Grant type.
 
 If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
 
-#### mockTokenInfoEndpoint(options: MockOptions)
+### mockTokenInfoEndpoint(options: MockOptions)
 
 Mocks a `tokeninfo` endpoint.
 
@@ -273,11 +276,12 @@ mockTokeninfoEndpoint({
 ```
 
 `options`:
+
 * `url` string (url of the `tokeninfo` endpoint)
 * `tokens` any optional (list of valid tokens)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
-#### mockAccessTokenEndpoint(options: MockOptions)
+### mockAccessTokenEndpoint(options: MockOptions)
 
 Mocks a `access_token` endpoint.
 
@@ -289,6 +293,7 @@ mockAccessTokenEndpoint({
 ```
 
 `options`:
+
 * `url` string (url of the `access_token` endpoint)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
@@ -301,14 +306,12 @@ Helpful when having multiple tests in a test suite, you can call `cleanMock()` i
 cleanMock();
 ```
 
-
 ## Development
 
 * clone this repo
 * `npm install`
 * to build: `npm run build`
 * to lint: `npm run tslint`
-
 
 ## Testing
 
@@ -319,17 +322,18 @@ cleanMock();
 ## Changelog
 
 ---
-#### `authmosphere 1.0.0` - **BREAKING**
+
+### `authmosphere 1.0.0` - **BREAKING**
 
 Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
 
 ---
 
-#### `lib-oauth-tooling 2.0.0` - **BREAKING**
+### `lib-oauth-tooling 2.0.0` - **BREAKING**
 
 The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
 
-#### `lib-oauth-tooling 1.0.0` - **BREAKING**
+### `lib-oauth-tooling 1.0.0` - **BREAKING**
 
 The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
