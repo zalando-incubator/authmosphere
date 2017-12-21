@@ -11,12 +11,16 @@ describe('safeLogger', () => {
   describe('logOrNothing', () => {
 
     it('should execute logger function', () => {
+      let called = false;
       const logger = {
-        info: () => undefined
+        info: () => {
+          called = true;
+        }
       };
 
       const result = () => logOrNothing.info('foo', logger);
-      return expect(result).not.to.throw();
+      expect(result).not.to.throw();
+      return expect(called).to.be.true;
     });
 
     it('should not throw, if logger undefined', () => {
