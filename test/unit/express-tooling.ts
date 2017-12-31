@@ -1,5 +1,7 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
 
 import {
   handleOAuthRequestMiddleware,
@@ -8,12 +10,14 @@ import {
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 let expect = chai.expect;
 
 describe('express tooling', () => {
 
   let requestMock: any;
   let responseMock: any;
+  let next: () => void;
   const loggerMock = {
     info:  (p: any): void => { return; },
     debug: (p: any): void => { return; },
@@ -28,11 +32,13 @@ describe('express tooling', () => {
     requestMock = {
       get: (name: string) => name
     };
+  });
+
+  beforeEach(() => {
+    next = sinon.spy();
 
     responseMock = {};
-    responseMock.sendStatus = function(status: string) {
-      this.status = status;
-    };
+    responseMock.sendStatus = sinon.spy((status: string) => {});
   });
 
   describe('requireScopesMiddleware', () => {
@@ -44,16 +50,12 @@ describe('express tooling', () => {
           scope: ['uid', 'test']
         };
         const requiredScopes = ['uid', 'test', 'additional'];
-        let called = false;
-        const next = () => {
-          called = true;
-        };
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
         // then
-        return expect(responseMock.status).to.equal(403);
+        return expect(responseMock.sendStatus).to.have.been.calledWith(403);
       });
 
     it('should not call next() if required scopes are not met', () => {
@@ -63,16 +65,12 @@ describe('express tooling', () => {
           scope: ['uid', 'test']
         };
         const requiredScopes = ['uid', 'test', 'additional'];
-        let called = false;
-        const next = () => {
-          called = true;
-        };
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
         // then
-        return expect(called).to.be.false;
+        return expect(next).to.not.have.been.called; // async calls won't be detected
       });
 
     it('should call #next if required scopes are met', () => {
@@ -82,16 +80,12 @@ describe('express tooling', () => {
         scope: ['uid', 'test']
       };
       const requiredScopes = ['uid', 'test'];
-      let called = false;
-      const next = () => {
-        called = true;
-      };
 
       // when
       requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.true;
+      return expect(next).to.have.been.called;
     });
 
     it('should call #next also if user has a superset of the required scopes', () => {
@@ -101,16 +95,12 @@ describe('express tooling', () => {
         scope: ['uid', 'test', 'additionalScope']
       };
       const requiredScopes = ['uid', 'test'];
-      let called = false;
-      const next = () => {
-        called = true;
-      };
 
       // when
       requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.true;
+      return expect(next).to.have.been.called;
     });
 
     it('should call #next if precedence function returns true', (done) => {
@@ -146,10 +136,6 @@ describe('express tooling', () => {
         scope: ['uid']
       };
       const requiredScopes = ['test'];
-      let called = false;
-      const next = () => {
-        called = true;
-      };
 
       const preOptions = {
         precedenceFunction: () => {
@@ -163,7 +149,7 @@ describe('express tooling', () => {
       requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.false;
+      return expect(next).to.not.have.been.called; // async calls won't be detected
     });
 
     it('should not call #next if precedence function returns false and scopes matches', () => {
@@ -173,10 +159,6 @@ describe('express tooling', () => {
         scope: ['test']
       };
       const requiredScopes = ['test'];
-      let called = false;
-      const next = () => {
-        called = true;
-      };
 
       const preOptions = {
         precedenceFunction: () => {
@@ -190,16 +172,14 @@ describe('express tooling', () => {
       requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.false;
+      return expect(next).to.not.have.been.called;
     });
 
     it('should call error handler', (done) => {
 
       // given
       const requiredScopes = ['test'];
-      const next = () => {
-        return;
-      };
+
       const customErrorhandler = (e: any​​): void => {
         // then
         expect(e).to.equal('Error happened');
@@ -265,10 +245,6 @@ describe('express tooling', () => {
     it('should call #next on public endpoint', () => {
 
       // given
-      let called = false;
-      const next = () => {
-        called = true;
-      };
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -282,16 +258,12 @@ describe('express tooling', () => {
       handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.true;
+      return expect(next).to.have.been.called;
     });
 
     it('should not call #next when non-public endpoint', () => {
 
       // given
-      let called = false;
-      const next = () => {
-        called = true;
-      };
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -305,16 +277,12 @@ describe('express tooling', () => {
       handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.false;
+      return expect(next).to.not.have.been.called; // async calls won't be detected
     });
 
     it('should not call #next when no token is provided', () => {
 
       // given
-      let called = false;
-      const next = () => {
-        called = true;
-      };
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -328,7 +296,7 @@ describe('express tooling', () => {
       handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
 
       // then
-      return expect(called).to.be.false;
+      return expect(next).to.not.have.been.called; // async calls won't be detected
     });
   });
 });
