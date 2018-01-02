@@ -58,14 +58,15 @@ function requireScopesMiddleware(scopes: string[],
           validateScopes(req, res, next, scopes, logger);
         }
       })
-      .catch(err => {
+      .catch(error => {
         try {
-          precedenceErrorHandler(err, logger);
-        } catch (err) {
-          logOrNothing.error(`Error while executing precedenceErrorHandler: ${err}`, logger);
+          precedenceErrorHandler(error, logger);
+        } catch (e) {
+          logOrNothing.error(`Error while executing precedenceErrorHandler: ${e}`, logger);
         }
       });
-      return; // skip normal scope validation
+
+      return; // skip default scope validation
     }
 
     validateScopes(req, res, next, scopes, logger);

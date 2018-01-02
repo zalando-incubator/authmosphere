@@ -13,7 +13,7 @@ interface PrecedenceFunction {
  * Will be called when IPrecedenceFunction throws an error. Should be side effect free, returned Promises are ignored.
  */
 interface PrecedenceErrorHandler {
-  (err: any, logger?: Logger): any;
+  (error: any, logger?: Logger): any;
 }
 
 interface PrecedenceOptions {

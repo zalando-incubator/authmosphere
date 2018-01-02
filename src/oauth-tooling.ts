@@ -80,15 +80,17 @@ function requestAccessToken(bodyObject: any,
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
-        return Promise.reject(`Response failed with status code ${status}`);
+        return response.json()
+        .then((error) => Promise.reject( `${error.error} ${error.error_description}`))
+        .catch((error) => Promise.reject(`Response failed with status code ${status}: ${error}`));
       }
 
       return response.json();
     })
-    .catch((err) => {
+    .catch((error) => {
       return Promise.reject({
-        msg: `Error requesting access token from ${accessTokenEndpoint}`,
-        err
+        message: `Error requesting access token from ${accessTokenEndpoint}`,
+        error
       });
     });
 
@@ -142,9 +144,9 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token>
         }
       });
     })
-    .catch((err) => Promise.reject({
-      msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-      err
+    .catch((error) => Promise.reject({
+      message: `Error requesting tokeninfo from ${tokenInfoUrl}`,
+      error
     }));
 
   return promise;
