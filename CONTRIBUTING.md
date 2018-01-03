@@ -58,8 +58,10 @@ feat(feature): commit message
 <optional blank line>
 close #<ticket number>
 ```
+
 Additional information on the format:
-https://github.com/angular/angular.js/blob/master/CONTRIBUTING.md
+https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits
+https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type
 * Finally: Create pull request. When creating a pull request, its comment should reference the corresponding issue id.
 
 **Have fun and enjoy hacking!**
