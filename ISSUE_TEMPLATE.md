@@ -1,1 +1,1 @@
-<Describe bug/feature in details here>
+<Describe bug/feature details here>
