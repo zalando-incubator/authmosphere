@@ -1,2 +1,3 @@
-<ticket number> <short description>
+<type>(<feature>): <commit message>
+<optional blank line>
 close #<ticket number>
