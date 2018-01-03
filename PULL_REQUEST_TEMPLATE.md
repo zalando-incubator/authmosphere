@@ -1,3 +1,1 @@
-<type>(<feature>): <short description>
-<optional blank line>
-close #<ticket number>
+close #<ticket number> (if already added automatically by github, delete this line)

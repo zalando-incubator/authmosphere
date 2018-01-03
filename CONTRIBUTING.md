@@ -55,13 +55,13 @@ feat(feature): commit message
 |     +-> scope
 |
 +-------> Type: chore, docs, feat, fix, refactor, style, or test.
-<optional blank line>
+<blank line>
 close #<ticket number>
 ```
 
 Additional information on the format:
-https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits
-https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type
+[Type description (by Angular.js project)](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type)
+[Angular.js commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits)
 * Finally: Create pull request. When creating a pull request, its comment should reference the corresponding issue id.
 
 **Have fun and enjoy hacking!**

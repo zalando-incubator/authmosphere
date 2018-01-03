@@ -1,2 +1,1 @@
-<Short description>
-<Describe in details here>
+<Describe bug/feature details here>
