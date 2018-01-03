@@ -1,3 +1,2 @@
-<type>(<feature>): <commit message>
-<optional blank line>
-close #<ticket number>
+<Short description>
+<Describe in details here>
