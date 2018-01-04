@@ -3,8 +3,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  Logger​​
+  requireScopesMiddleware
 } from '../../src/index';
 
 chai.use(chaiAsPromised);
@@ -14,14 +13,7 @@ describe('express tooling', () => {
 
   let requestMock: any;
   let responseMock: any;
-  const loggerMock = {
-    info:  (p: any): void => { return; },
-    debug: (p: any): void => { return; },
-    error: (p: any): void => { return; },
-    fatal: (p: any): void => { return; },
-    trace: (p: any): void => { return; },
-    warn:  (p: any): void => { return; }
-  };
+  const loggerMock = undefined;
 
   before(() => {
 
@@ -44,10 +36,8 @@ describe('express tooling', () => {
           scope: ['uid', 'test']
         };
         const requiredScopes = ['uid', 'test', 'additional'];
-        let called = false;
-        const next = () => {
-          called = true;
-        };
+
+        const next = () => undefined;
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
@@ -128,12 +118,11 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(true);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
       // then
       // We wait for the done call here this we get no async handler back on that we can wait
@@ -155,12 +144,11 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
       // then
       return expect(called).to.be.false;
@@ -182,13 +170,43 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
-        precedenceErrorHandler: () => { return; },
-        logger: loggerMock
+        precedenceErrorHandler: () => { return; }
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
 
+      // then
+      return expect(called).to.be.false;
+    });
+
+    it('should not call #next nor throw if precedence function rejects and precedenceErrorHandler throws', () => {
+
+      // given
+      requestMock.$$tokeninfo = {
+        scope: ['test']
+      };
+      const requiredScopes = ['test'];
+      let called = false;
+      const next = () => {
+        called = true;
+      };
+
+      const preOptions = {
+        precedenceFunction: () => {
+          return Promise.reject(false);
+        },
+        precedenceErrorHandler: () => {
+          throw Error('Expected precedenceErrorHandler throw');
+        }
+      };
+
+      // when
+      try {
+        requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      } catch {
+        called = true;
+      }
       // then
       return expect(called).to.be.false;
     });
@@ -210,42 +228,11 @@ describe('express tooling', () => {
         precedenceFunction: () => {
           return Promise.reject('Error happened');
         },
-        precedenceErrorHandler: customErrorhandler,
-        logger: loggerMock
+        precedenceErrorHandler: customErrorhandler
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
-    });
-
-    it('should call error log, if error handler fails', (done) => {
-
-      // given
-      const requiredScopes = ['test'];
-      const next = () => {
-        return;
-      };
-      const customErrorhandler = (e: any, logger: Logger​​): void => {
-        // then
-        throw Error('Handler failed');
-      };
-
-      const preOptions = {
-        precedenceFunction: () => {
-          return Promise.reject('Error happened');
-        },
-        precedenceErrorHandler: customErrorhandler,
-        logger: {
-          ...loggerMock,
-          error: (p: any): void => {
-            expect(p).to.equal('Error while executing precedenceErrorHandler: ');
-            done();
-          }
-        }
-      };
-
-      // when
-      requireScopesMiddleware(requiredScopes, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
     });
   });
 
