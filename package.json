@@ -96,6 +96,11 @@
     {
       "name": "Matthias Achatz",
       "email": "matthias.achatz@zalando.de"
+    },
+    {
+      "name": "André Waltert",
+      "email": "andre.waltert@zalando.de",
+      "url": "https://github.com/awaltert"
     }
   ]
 }

@@ -1,20 +1,50 @@
-type OAuthConfig = {
+import { OAuthGrantType } from '../types';
+
+type GrantConfigBase = {
   credentialsDir: string;
-  grantType: string; // (`AUTHORIZATION_CODE_GRANT` | `PASSWORD_CREDENTIALS_GRANT`)
   accessTokenEndpoint: string;
-  scopes?: string[];
-  redirect_uri?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  redirectUri?: string;
-  refreshToken?: string;
-  queryParams?: {};
+  queryParams?: { [index: string]: string };
 };
+
+type ClientCredentialsGrantConfig = GrantConfigBase & {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT;
+  scopes: string[];
+};
+
+type AuthorizationCodeGrantConfig = GrantConfigBase & {
+  grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT;
+  code: string;
+  redirectUri: string;
+  scopes: string[];
+};
+
+type PasswordCredentialsGrantConfig = GrantConfigBase & {
+  grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
+  scopes?: string[];
+};
+
+type RefreshGrantConfig = GrantConfigBase & {
+  grantType: OAuthGrantType.REFRESH_TOKEN_GRANT;
+  refreshToken: string;
+  scopes: string[];
+};
+
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
 
 type TokenCacheOAuthConfig = OAuthConfig & {
   tokenInfoEndpoint: string; // mandatory for TokenCache
 };
 
 export {
+  GrantConfigBase,
+  ClientCredentialsGrantConfig,
+  AuthorizationCodeGrantConfig,
+  PasswordCredentialsGrantConfig,
+  RefreshGrantConfig,
   OAuthConfig,
   TokenCacheOAuthConfig
 };
