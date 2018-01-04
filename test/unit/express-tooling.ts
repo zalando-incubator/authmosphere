@@ -30,7 +30,7 @@ describe('express tooling', () => {
     next = sinon.spy();
 
     responseMock = {};
-    responseMock.sendStatus = sinon.spy((status: string) => {});
+    responseMock.sendStatus = sinon.spy((status: string) => { return {}; });
   });
 
   describe('requireScopesMiddleware', () => {
@@ -42,8 +42,6 @@ describe('express tooling', () => {
           scope: ['uid', 'test']
         };
         const requiredScopes = ['uid', 'test', 'additional'];
-
-        const next = () => undefined;
 
         // when
         requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
@@ -104,7 +102,7 @@ describe('express tooling', () => {
         scope: ['uid']
       };
       const requiredScopes = ['test'];
-      const next = () => {
+      const localNext = () => {
         done();
       };
 
@@ -116,7 +114,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, localNext);
 
       // then
       // We wait for the done call here this we get no async handler back on that we can wait
@@ -174,7 +172,7 @@ describe('express tooling', () => {
       };
       const requiredScopes = ['test'];
       let called = false;
-      const next = () => {
+      const localNext = () => {
         called = true;
       };
 
@@ -189,7 +187,7 @@ describe('express tooling', () => {
 
       // when
       try {
-        requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+        requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, localNext);
       } catch {
         called = true;
       }
@@ -201,7 +199,7 @@ describe('express tooling', () => {
 
       // given
       const requiredScopes = ['test'];
-      const next = () => {
+      const localNext = () => {
         return;
       };
       const customErrorhandler = (e: any​​): void => {
@@ -218,7 +216,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, localNext);
     });
   });
 
