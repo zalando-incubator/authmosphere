@@ -36,7 +36,7 @@ describe('mock-tooling', () => {
       return expect(() => mockTooling.mockAccessTokenEndpointWithErrorResponse({ url: ''} as MockOptions, HttpStatus.BAD_REQUEST)).to.throw(Error);
     });
 
-    it('should return status code, the mock is configured to use', () => {
+    it('should return specified/configured status code', () => {
       const url = 'https://www.github.com';
       const expectedState = HttpStatus.BAD_REQUEST;
       mockTooling.mockAccessTokenEndpointWithErrorResponse({ url } as MockOptions, expectedState);

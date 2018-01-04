@@ -37,7 +37,7 @@ yourself, or create a new one that you would like work on and discuss your ideas
 ```
 
 - Make commits of logical units.
-- Lint your contribution by ```npm run tslint``` before committing
+- Lint your contribution by `npm run tslint` before commit
 - Write good commit messages ([see below](#commit-messages)).
 - Push your changes to a topic branch in your fork of the repository.
 - Submit a pull request
