@@ -4,12 +4,16 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 
 import {
-  getAccessToken,
-  PASSWORD_CREDENTIALS_GRANT,
-  AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT,
-  CLIENT_CREDENTIALS_GRANT
+  getAccessToken
 } from '../../src/index';
+
+import {
+  OAuthGrantType,
+  PasswordCredentialsGrantConfig,
+  ClientCredentialsGrantConfig,
+  AuthorizationCodeGrantConfig,
+  RefreshGrantConfig
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -46,7 +50,7 @@ describe('getAccessToken', () => {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: PASSWORD_CREDENTIALS_GRANT,
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
       queryParams: { realm: '/services' }
     });
 
@@ -67,7 +71,7 @@ describe('getAccessToken', () => {
       credentialsDir: 'integration-test/data/credentials',
       grantType: 'INVALID',
       queryParams: { realm: '/services' }
-    });
+    } as any); // deactivate type system in order to test runtime behavior
 
     // then
     return expect(promise).to.be.rejected;
@@ -75,11 +79,11 @@ describe('getAccessToken', () => {
 
   describe('password credentials grant', () => {
 
-    const passwordCredentialsOAuthOptions = {
+    const passwordCredentialsOAuthOptions: PasswordCredentialsGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: PASSWORD_CREDENTIALS_GRANT
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
     };
 
     it('should resolve with access token if valid', () => {
@@ -89,7 +93,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: PASSWORD_CREDENTIALS_GRANT,
+          grant_type: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           username: validUserName,
           password: validUserPassword,
           scope: 'campaign.edit_all campaign.read_all'
@@ -137,11 +141,11 @@ describe('getAccessToken', () => {
 
   describe('client credentials grant', () => {
 
-    const clientCredentialsOAuthOptions = {
+    const clientCredentialsOAuthOptions: ClientCredentialsGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: CLIENT_CREDENTIALS_GRANT
+      grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT
     };
 
     it('should resolve with access token if valid', () => {
@@ -151,7 +155,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: CLIENT_CREDENTIALS_GRANT,
+          grant_type: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
           scope: 'campaign.edit_all campaign.read_all'
         })
         .reply(HttpStatus.OK, { access_token: accessToken });
@@ -200,11 +204,11 @@ describe('getAccessToken', () => {
     const validCode = '1234';
     const validRedirectUri = 'http://redirect.com';
 
-    const authCodeOAuthOptions = {
+    const authCodeOAuthOptions: AuthorizationCodeGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: AUTHORIZATION_CODE_GRANT,
+      grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT,
       code: validCode,
       redirectUri: validRedirectUri
     };
@@ -216,7 +220,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: AUTHORIZATION_CODE_GRANT,
+          grant_type: OAuthGrantType.AUTHORIZATION_CODE_GRANT,
           code: validCode,
           redirect_uri: validRedirectUri,
           scope: 'campaign.edit_all campaign.read_all'
@@ -266,11 +270,11 @@ describe('getAccessToken', () => {
 
     const validRefreshToken = 'refresh';
 
-    const clientCredentialsOAuthOptions = {
+    const clientCredentialsOAuthOptions: RefreshGrantConfig = {
       scopes: ['campaign.edit_all', 'campaign.read_all'],
       accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
       credentialsDir: 'integration-test/data/credentials',
-      grantType: REFRESH_TOKEN_GRANT,
+      grantType: OAuthGrantType.REFRESH_TOKEN_GRANT,
       refreshToken: validRefreshToken
     };
 
@@ -281,7 +285,7 @@ describe('getAccessToken', () => {
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .matchHeader('Authorization', `Basic ${clientSecret}`)
         .post(accessTokenEndpoint, {
-          grant_type: REFRESH_TOKEN_GRANT,
+          grant_type: OAuthGrantType.REFRESH_TOKEN_GRANT,
           scope: 'campaign.edit_all campaign.read_all',
           refresh_token: validRefreshToken
         })

@@ -4,13 +4,12 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   TokenCache,
   getAccessToken,
-  createAuthCodeRequestUri,
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT
+  createAuthCodeRequestUri
 } from '../../src/index';
 
-import { TokenCacheOAuthConfig } from '../../src/types';
+import {
+  OAuthGrantType
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -22,7 +21,7 @@ describe('oauth tooling', () => {
     const config = {
       accessTokenEndpoint: '/oauth2/access_token',
       credentialsDir: 'credentials',
-      grantType: AUTHORIZATION_CODE_GRANT,
+      grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT,
       redirectUri: '/some/redirect',
       code: 'some-code'
     };
@@ -65,7 +64,7 @@ describe('oauth tooling', () => {
     it('if refreshToken is not defined (in case of Refresh Token Grant)', () => {
       expect(getAccessToken.bind(undefined, {
         ...config,
-        grantType: REFRESH_TOKEN_GRANT
+        grantType: OAuthGrantType.REFRESH_TOKEN_GRANT
       })).to.throw(TypeError);
     });
   });
@@ -118,15 +117,14 @@ describe('oauth tooling', () => {
   describe('TokenCache', () => {
 
     it('should throw if tokenInfoEndpoint is not specified', () => {
-
       expect(() => {
         return new TokenCache({
           'foo': ['uid']
         }, {
           accessTokenEndpoint: '/access_token',
           credentialsDir: '/credentials',
-          grantType: PASSWORD_CREDENTIALS_GRANT
-        } as TokenCacheOAuthConfig);
+          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+        } as any);
       }).to.throw(TypeError);
     });
 
@@ -138,8 +136,8 @@ describe('oauth tooling', () => {
         accessTokenEndpoint: '/access_token',
         tokenInfoEndpoint: '/tokeninfo',
         credentialsDir: '/credentials',
-        grantType: PASSWORD_CREDENTIALS_GRANT
-      });
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+      } as any); // deactivate type system in order to test runtime behavior
 
       return expect(tokenCache.get('bar')).to.be.rejected;
     });

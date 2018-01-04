@@ -9,15 +9,11 @@ import {
   validateOAuthConfig
 } from './utils';
 
-import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT,
-  CLIENT_CREDENTIALS_GRANT
-} from './constants';
-
 import { OAuthConfig } from './types/OAuthConfig';
-import { Token } from './types';
+import {
+  Token,
+  OAuthGrantType
+} from './types';
 import { BodyParameters } from './types/BodyParameters';
 
 const USER_JSON = 'user.json';
@@ -173,7 +169,7 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token>
  *  - accessTokenEndpoint string
  *  - scopes string[] optional
  *  - queryParams {} optional
- *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
+ *  - redirectUri string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
  *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
  *
@@ -187,7 +183,7 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
   const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
 
   // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-  if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+  if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
     credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
   }
 
@@ -198,24 +194,24 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
 
     let bodyParameters: BodyParameters;
 
-    if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
       const userData = JSON.parse(credentials[1]);
       bodyParameters = {
         'grant_type': options.grantType,
         'username': userData.application_username,
         'password': userData.application_password
       };
-    } else if (options.grantType === CLIENT_CREDENTIALS_GRANT) {
+    } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType
       };
-    }  else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+    }  else if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
         'code': options.code,
         'redirect_uri': options.redirectUri
       };
-    } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+    } else if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
         'refresh_token': options.refreshToken
