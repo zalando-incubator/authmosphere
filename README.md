@@ -24,50 +24,12 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 ## Project renaming
 
-The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Version `1.0.0` is soon to be released, keep track of the progess in [#92](https://github.com/zalando-incubator/lib-oauth-tooling/issues/92), this release will contain breaking changes.
+The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `1.0.0`.
 
-## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
+## Changelog and Migration
 
-* call `npm uninstall --save lib-oauth-tooling`
-* call `npm install --save authmosphere`
-
-The signature of the function `createAuthCodeRequestUri` was changed to be better suitable for partial application. The `authorizationEndpoint` parameter was moved to the first position.
-It's important to manually adjust your code to this change, since the type system is not helpful in this special case.
-
-```typescript
-function createAuthCodeRequestUri(authorizationEndpoint: string,
-                                  redirectUri: string,
-                                  clientId: string,
-                                  queryParams?: {}): string
-```
-
-## Migrating from `lib-oauth-tooling@1.x.` to `lib-oauth-tooling@2.x.x`
-
-If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
-
-```typescript
-// will NOT work anymore:
-getAccessToken({
-  // all the other config
-  // ...
-  realm: EMPLOYEES_REALM,
-})
-.then(token: Token => {
-  // ...
-});
-
-// instead use this:
-getAccessToken({
-  // all the other config
-  // ...
-  queryParams: { realm: '/employees' }
-})
-.then(token: Token => {
-  // ...
-});
-```
-
-See the [changelog](#changelog) for more information.
+* See the [changelog](./changelog) for more information.
+* See the [migration guide](./changelog) for more information.
 
 ## Usage
 
@@ -312,24 +274,6 @@ cleanMock();
 * `npm test` - runs all tests
 * `npm run unit-test` - runs unit tests
 * `npm run integration-test` - runs integration tests
-
-## Changelog
-
----
-
-### `authmosphere 1.0.0` - **BREAKING**
-
-Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
-
----
-
-### `lib-oauth-tooling 2.0.0` - **BREAKING**
-
-The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
-
-### `lib-oauth-tooling 1.0.0` - **BREAKING**
-
-The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ---
 
