@@ -1,21 +1,22 @@
 import {
-  Logger,
-  LogLevel
+  Logger
 } from './types';
 
-type safeLogger = (loglevel: LogLevel) => (message: string, logger: Logger | undefined) => void;
-const safeLogger: safeLogger = (loglevel) => (message, logger) =>
-  logger && logger[loglevel] && logger[loglevel].call(logger, message);
+const safeCall = (prop: string, obj?: any) =>
+  (obj !== undefined && obj[prop] !== undefined) ? obj[prop] : () => undefined;
 
-const logOrNothing: Logger = {
-  info: safeLogger(LogLevel.info),
-  debug: safeLogger(LogLevel.debug),
-  error: safeLogger(LogLevel.error),
-  fatal: safeLogger(LogLevel.fatal),
-  trace: safeLogger(LogLevel.trace),
-  warn: safeLogger(LogLevel.warn)
+const safeLogger = (logger?: Logger): Logger => {
+
+  return {
+    info: safeCall('info', logger),
+    debug: safeCall('debug', logger),
+    error: safeCall('error', logger),
+    fatal: safeCall('fatal', logger),
+    trace: safeCall('trace', logger),
+    warn: safeCall('warn', logger)
+  };
 };
 
 export {
-  logOrNothing
+  safeLogger
 };

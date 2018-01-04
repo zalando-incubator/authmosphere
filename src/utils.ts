@@ -6,7 +6,8 @@ import { Request, Response } from 'express';
 import {
    OAuthConfig,
    Token,
-   OAuthGrantType
+   OAuthGrantType,
+   Logger
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -119,9 +120,11 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
  * @param res
  * @param status
  */
-const rejectRequest = (res: Response, status?: number): void => {
+const rejectRequest = (res: Response, logger: Logger, status?: number): void => {
 
   const _status = status ? status : HttpStatus.UNAUTHORIZED;
+  logger.info(`Request will be rejected with status ${_status}`);
+
   res.sendStatus(_status);
 };
 

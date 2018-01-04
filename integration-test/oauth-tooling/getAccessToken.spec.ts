@@ -138,7 +138,7 @@ describe('getAccessToken', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should be rejected with correct error message', () => {
+    it('should be rejected with correct error message when response contains error object', () => {
 
       // given
       const status = 400;
@@ -157,7 +157,30 @@ describe('getAccessToken', () => {
 
       // then
       return expect(promise).to.be.rejected.and.to.eventually.deep.equal({
-        error: `Response failed with status code ${status}: ${error} ${errorDescription}`,
+        error: { status, error, errorDescription },
+        message: `Error requesting access token from ${oAuthServerHost}${accessTokenEndpoint}`
+      });
+    });
+
+    it('should be rejected with correct error message when response is empty', () => {
+
+      // given
+      const status = 400;
+
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(status);
+
+      // when
+      const promise = getAccessToken(passwordCredentialsOAuthOptions);
+
+      // then
+      return expect(promise).to.be.rejected.and.to.eventually.deep.equal({
+        error: {
+          message: `invalid json response body at ${oAuthServerHost}${accessTokenEndpoint} reason: Unexpected end of JSON input`,
+          name: 'FetchError',
+          type: 'invalid-json'
+        },
         message: `Error requesting access token from ${oAuthServerHost}${accessTokenEndpoint}`
       });
     });
