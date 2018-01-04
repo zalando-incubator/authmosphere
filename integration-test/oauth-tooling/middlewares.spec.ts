@@ -7,9 +7,12 @@ import fetch from 'node-fetch';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  PASSWORD_CREDENTIALS_GRANT
+  requireScopesMiddleware
 } from '../../src/index';
+
+import {
+  OAuthGrantType
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -67,7 +70,7 @@ describe('middlewares', () => {
             'campaign.editall',
             'campaign.readall'
           ],
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });
@@ -94,7 +97,7 @@ describe('middlewares', () => {
           'scope': [
             'campaign.readall'
           ],
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });
@@ -119,7 +122,7 @@ describe('middlewares', () => {
           'token_type': 'Bearer',
           'realm': 'employees',
           'scope': '',
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });

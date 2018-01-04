@@ -103,40 +103,34 @@ tokenCache.get('service-foo')
 });
 ```
 
-Where `OAuthConfig` is defined like:
+The `OAuthConfig` type is defined as union type:
 
 ```typescript
-type OAuthConfig = {
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+```
+
+As you can see there are four different config types defined, which can be used in any places where `OAuthConfig` is required:
+
+* ClientCredentialsGrantConfig
+* AuthorizationCodeGrantConfig
+* PasswordCredentialsGrantConfig
+* RefreshGrantConfig
+
+Each config type has common properties:
+
+```typescript
+type GrantConfigBase = {
   credentialsDir: string;
-  grantType: string;
   accessTokenEndpoint: string;
-  tokenInfoEndpoint?: string; // mandatory for TokenCache
-  scopes?: string[];
-  redirect_uri?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  redirectUri?: string;
-  refreshToken?: string;
-  queryParams?: {};
+  queryParams?: { [index: string]: string };
 };
 ```
 
-Valid `grantTypes`s are:
-
-* `'authorization_code'`
-* `'password'`
-* `'client_credentials'`
-* `'refresh_token'`
-
-You can also import the constants from the lib:
-
-```typescript
-import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  CLIENT_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT
-} from 'authmosphere';
-```
+The constant grant types literals can be found in `OAuthGrandType`
 
 Optionally, you can pass a third parameter of type `TokenCacheConfig` to the `TokenCache` constructor to configure the cache behaviour.
 

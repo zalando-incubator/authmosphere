@@ -7,3 +7,4 @@ export * from './TokenCacheConfig';
 export * from './Token';
 export * from './Logger';
 export * from './Precedence';
+export * from './OAuthGrantType';
