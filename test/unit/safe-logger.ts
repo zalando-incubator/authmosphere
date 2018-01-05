@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
-import { logOrNothing } from '../../src';
+import { safeLogger } from '../../src';
 import { Logger } from '../../src/types';
 
 chai.use(chaiAsPromised);
@@ -16,20 +16,20 @@ describe('safeLogger', () => {
         info: () => {
           called = true;
         }
-      };
+      } as any as Logger;
 
-      const result = () => logOrNothing.info('foo', logger);
+      const result = () => safeLogger(logger).info('foo');
       expect(result).not.to.throw();
       return expect(called).to.be.true;
     });
 
     it('should not throw, if logger undefined', () => {
-      const result = () => logOrNothing.info('foo', undefined);
+      const result = () => safeLogger(undefined).info('foo');
       return expect(result).not.to.throw();
     });
 
     it('should not throw, if logger does not fulfill Logger interface', () => {
-      const result = () => logOrNothing.info('foo', {} as Logger);
+      const result = () => safeLogger({} as Logger).info('foo');
       return expect(result).not.to.throw();
     });
   });
