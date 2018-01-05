@@ -162,6 +162,32 @@ describe('getAccessToken', () => {
       });
     });
 
+    it('should be rejected with correct error message when response contains empty error object', () => {
+
+      // given
+      const status = 400;
+      const customError = {
+        foo: 'bar'
+      };
+
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(status, customError);
+
+      // when
+      const promise = getAccessToken(passwordCredentialsOAuthOptions);
+
+      // then
+      return expect(promise).to.be.rejected.and.to.eventually.deep.equal({
+        error: {
+          error: customError,
+          errorDescription: undefined,
+          status
+        },
+        message: `Error requesting access token from ${oAuthServerHost}${accessTokenEndpoint}`
+      });
+    });
+
     it('should be rejected with correct error message when response is empty', () => {
 
       // given
