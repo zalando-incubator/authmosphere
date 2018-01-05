@@ -120,12 +120,13 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
  * @param res
  * @param status
  */
-const rejectRequest = (res: Response, logger: Logger, status?: number): void => {
+const rejectRequest = (res: Response,
+                       logger: Logger,
+                       status: number = HttpStatus.UNAUTHORIZED): void => {
 
-  const _status = status ? status : HttpStatus.UNAUTHORIZED;
-  logger.info(`Request will be rejected with status ${_status}`);
+  logger.info(`Request will be rejected with status ${status}`);
 
-  res.sendStatus(_status);
+  res.sendStatus(status);
 };
 
 /**

@@ -17,7 +17,7 @@ import {
   Logger
 } from './types';
 
-import { safeLogger } from './safeLogger';
+import { safeLogger } from './safe-logger';
 
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';

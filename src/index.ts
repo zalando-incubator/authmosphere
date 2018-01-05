@@ -2,7 +2,7 @@ export * from './oauth-tooling';
 export * from './express-tooling';
 export * from './TokenCache';
 export * from './mock-tooling/index';
-export * from './safeLogger';
+export * from './safe-logger';
 export {
   Logger,
   Token,

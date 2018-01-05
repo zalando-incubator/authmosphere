@@ -12,11 +12,11 @@ describe('safeLogger', () => {
 
     it('should execute logger function', () => {
       let called = false;
-      const logger: any = {
+      const logger = {
         info: () => {
           called = true;
         }
-      };
+      } as any as Logger;
 
       const result = () => safeLogger(logger).info('foo');
       expect(result).not.to.throw();
