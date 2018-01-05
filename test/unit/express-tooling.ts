@@ -30,7 +30,7 @@ describe('express tooling', () => {
     next = sinon.spy();
 
     responseMock = {};
-    responseMock.sendStatus = sinon.spy((status: string) => ({}));
+    responseMock.sendStatus = sinon.spy((status: string) => undefined);
   });
 
   describe('requireScopesMiddleware', () => {

@@ -61,15 +61,15 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
   });
 }
 
-export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: HttpStatus | number, responseBody?: object): void {
+export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
   mockEndpointWithErrorResponse(options, httpStatus, responseBody);
 }
 
-export function mockTokeninfoEndpointWithErrorResponse(options: MockOptions, httpStatus: HttpStatus | number, responseBody?: object): void {
+export function mockTokeninfoEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
   mockEndpointWithErrorResponse(options, httpStatus, responseBody);
 }
 
-function mockEndpointWithErrorResponse(options: MockOptions, httpStatus: HttpStatus | number, responseBody?: object): void {
+function mockEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
 
   const parsedUrl = parseUrlOrThrow(options);
 
@@ -78,7 +78,7 @@ function mockEndpointWithErrorResponse(options: MockOptions, httpStatus: HttpSta
   .times(options.times || Number.MAX_SAFE_INTEGER)
   .query(true)
   .reply(() => {
-    return [httpStatus, responseBody];
+    return [httpStatus, responseBody || {}];
   });
 }
 
