@@ -37,17 +37,6 @@ class TokenCache {
   private _tokens: TokenMap = {};
 
   /**
-   * `oauthConfig`:
-   * `credentialsDir` string
-   * `grantType` string
-   * `accessTokenEndpoint` string
-   * `tokenInfoEndpoint` string
-   * `realm` string
-   * `scopes` string[] optional
-   * `queryParams` {} optional
-   * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-   * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-   *
    * @param tokenConfig
    * @param oauthConfig
    */

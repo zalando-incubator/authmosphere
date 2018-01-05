@@ -9,12 +9,15 @@ import {
   validateOAuthConfig
 } from './utils';
 
-import { OAuthConfig } from './types/OAuthConfig';
 import {
+  OAuthConfig,
   Token,
-  OAuthGrantType
+  OAuthGrantType,
+  BodyParameters,
+  Logger
 } from './types';
-import { BodyParameters } from './types/BodyParameters';
+
+import { safeLogger } from './safe-logger';
 
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
@@ -56,12 +59,14 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
  * @param bodyObject an object of values put in the body
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
+ * @param logger
  * @param queryParams optional
  * @returns {Promise<Token>}
  */
 function requestAccessToken(bodyObject: any,
                             authorizationHeaderValue: string,
                             accessTokenEndpoint: string,
+                            logger: Logger,
                             queryParams?: Object): Promise<Token> {
 
   const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
@@ -80,15 +85,25 @@ function requestAccessToken(bodyObject: any,
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
-        return Promise.reject(`Response failed with status code ${status}`);
+        return response.json()
+        .catch((error) => Promise.reject(error))
+        .then((error) => Promise.reject({
+          // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
+          // but do fall back if for some reason the definition is not satisfied
+          error: (error && error.error) ? error.error : error,
+          errorDescription: (error && error.error_description) ? error.error_description : undefined,
+          status
+        }));
       }
 
+      logger.debug(`Successful request to ${accessTokenEndpoint}`);
       return response.json();
     })
-    .catch((err) => {
+    .catch((error) => {
+      logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
       return Promise.reject({
-        msg: `Error requesting access token from ${accessTokenEndpoint}`,
-        err
+        message: `Error requesting access token from ${accessTokenEndpoint}`,
+        error
       });
     });
 
@@ -123,29 +138,39 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  *
  * @param tokenInfoUrl
  * @param accessToken
+ * @param logger - optional logger
  * @returns {Promise<Token>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token> {
 
-    const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-    .then((response) => {
+  const logOrNothing = safeLogger(logger);
 
-      const status = response.status;
+  const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+  .then((response) => {
 
-      return response.json()
-      .then((data) => {
+    const status = response.status;
 
-        if (response.status === HttpStatus.OK) {
-          return data;
-        } else {
-          return Promise.reject({ status, data });
-        }
-      });
-    })
-    .catch((err) => Promise.reject({
-      msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-      err
-    }));
+    return response.json()
+    .then((data) => {
+
+      if (status === HttpStatus.OK) {
+        logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
+        return data;
+      } else {
+        logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+        return Promise.reject({ status, data });
+      }
+    });
+  })
+  .catch((error) => {
+
+    logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
+
+    return Promise.reject({
+      message: `Error validating token via ${tokenInfoUrl}`,
+      error
+    });
+  });
 
   return promise;
 }
@@ -158,25 +183,13 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token>
  * Resolves with object containing property `accessToken` with the access token
  * (in case of success). Otherwise, rejects with error message.
  *
- * Currently supports the following OAuth flows (specified by the `grantType` property):
- *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
- *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
- *  - Refresh Token Grant (REFRESH_TOKEN_GRANT)
- *
- *  The `options` object can have the following properties:
- *  - credentialsDir string
- *  - grantType string
- *  - accessTokenEndpoint string
- *  - scopes string[] optional
- *  - queryParams {} optional
- *  - redirectUri string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
- *
  * @param options
+ * @param logger - optional logger
  * @returns {Promise<T>}
  */
-function getAccessToken(options: OAuthConfig): Promise<Token> {
+function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
+
+  const logOrNothing = safeLogger(logger);
 
   validateOAuthConfig(options);
 
@@ -229,7 +242,7 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
     const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, options.queryParams);
+      options.accessTokenEndpoint, logOrNothing, options.queryParams);
   });
 }
 
