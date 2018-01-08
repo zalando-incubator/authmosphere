@@ -27,7 +27,7 @@
       "singleline": "never"
     }],
     "no-unused-expression": true,
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "no-consecutive-blank-lines": true,
     "one-line": [
       true,
