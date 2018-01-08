@@ -9,6 +9,7 @@ import {
 } from '../../src';
 
 import { PrecedenceOptions } from '../../src/types';
+import { Response, Request } from 'express';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -16,33 +17,27 @@ let expect = chai.expect;
 
 describe('express tooling', () => {
 
-  let requestMock: any;
-  let responseMock: any;
-  let next: () => void;
   const loggerMock = undefined;
 
-  before(() => {
+  const createRequestMock = (scopes: String[]): Request => ({
+    get: (name: string) => name,
+    $$tokeninfo: {
+      scope: scopes
+    }
+  } as any as Request);
 
-    requestMock = {
-      get: (name: string) => name
-    };
-  });
-
-  beforeEach(() => {
-    next = sinon.spy();
-
-    responseMock = {};
-    responseMock.sendStatus = sinon.spy((status: string) => undefined);
-  });
+  const createResponseMock = (): Response => ({
+    sendStatus: sinon.spy((status: string) => undefined)
+  } as any as Response);
 
   describe('requireScopesMiddleware', () => {
 
     it('should reject request with 403 if required scopes are not met', (done) => {
 
         // given
-        requestMock.$$tokeninfo = {
-          scope: ['uid', 'test']
-        };
+        const next = sinon.spy();
+        const requestMock = createRequestMock(['uid', 'test']);
+        const responseMock = createResponseMock();
         const requiredScopes = ['uid', 'test', 'additional'];
 
         // when
@@ -58,13 +53,13 @@ describe('express tooling', () => {
     it('should not call next() if required scopes are not met', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid', 'test']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid', 'test']);
       const requiredScopes = ['uid', 'test', 'additional'];
 
       // when
-      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -77,13 +72,13 @@ describe('express tooling', () => {
     it('should call #next if required scopes are met', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid', 'test']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid', 'test']);
       const requiredScopes = ['uid', 'test'];
 
       // when
-      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -96,13 +91,13 @@ describe('express tooling', () => {
     it('should call #next also if user has a superset of the required scopes', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid', 'test', 'additionalScope']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid', 'test', 'additionalScope']);
       const requiredScopes = ['uid', 'test'];
 
       // when
-      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -115,9 +110,9 @@ describe('express tooling', () => {
     it('should call #next if precedence function returns true', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['test'];
 
       const preOptions = {
@@ -128,7 +123,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -141,9 +136,9 @@ describe('express tooling', () => {
     it('should not call #next if precedence function returns false and scopes do not match', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['test'];
 
       const preOptions = {
@@ -154,7 +149,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -167,9 +162,9 @@ describe('express tooling', () => {
     it('should not fail if precedence function returns false and precedence error handler is undefined', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['uid']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['uid'];
 
       const preOptions = {
@@ -179,7 +174,7 @@ describe('express tooling', () => {
       } as any as PrecedenceOptions;
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -192,9 +187,9 @@ describe('express tooling', () => {
     it('should call #next if precedence function returns false and scopes matches', (done) => {
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['test']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['test']);
       const requiredScopes = ['test'];
 
       const preOptions = {
@@ -205,7 +200,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -220,9 +215,9 @@ describe('express tooling', () => {
       // if precedence function rejects and precedenceErrorHandler throws
 
       // given
-      requestMock.$$tokeninfo = {
-        scope: ['test']
-      };
+      const next = sinon.spy();
+
+      const requestMock = createRequestMock(['test']);
       const requiredScopes = ['test'];
 
       const preOptions = {
@@ -235,7 +230,7 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -248,8 +243,10 @@ describe('express tooling', () => {
     it('should call precedence error handler', (done) => {
 
       // given
+      const next = sinon.spy();
       const requiredScopes = ['test'];
 
+      const requestMock = createRequestMock([]);
       const customErrorhandler = (e: any​​): void => {
         // then
         expect(e).to.equal('Error happened');
@@ -264,13 +261,14 @@ describe('express tooling', () => {
       };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, responseMock, next);
+      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
     });
   });
 
   describe('handleOAuthRequestMiddleware', () => {
 
     it('should throw a TypeError, if tokenInfoEndpoint is undefined', () => {
+
       // given
       const config = {
         publicEndpoints: ['/public', '/healthcheck'],
@@ -284,6 +282,8 @@ describe('express tooling', () => {
     it('should call #next on public endpoint', (done) => {
 
       // given
+      const next = sinon.spy();
+
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -291,10 +291,10 @@ describe('express tooling', () => {
       const _requestMock = Object.assign({}, {
         originalUrl: '/healthcheck',
         headers: {}
-       }, requestMock);
+      }, createRequestMock([]));
 
       // when
-      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
+      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -307,6 +307,8 @@ describe('express tooling', () => {
     it('should not call #next when non-public endpoint', (done) => {
 
       // given
+      const next = sinon.spy();
+
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -314,10 +316,10 @@ describe('express tooling', () => {
       const _requestMock = Object.assign({}, {
         originalUrl: '/privateAPI',
         headers: {}
-       }, requestMock);
+      }, createRequestMock([]));
 
       // when
-      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
+      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -330,6 +332,8 @@ describe('express tooling', () => {
     it('should not call #next when no token is provided', (done) => {
 
       // given
+      const next = sinon.spy();
+
       const config = {
         publicEndpoints: [ '/public', '/healthcheck' ],
         tokenInfoEndpoint: '/oauth2/tokeninfo'
@@ -337,10 +341,10 @@ describe('express tooling', () => {
       const _requestMock = Object.assign({}, {
         originalUrl: '/privateAPI',
         headers: { authorization: ['auth1'] }
-       }, requestMock);
+      }, createRequestMock([]));
 
       // when
-      handleOAuthRequestMiddleware(config)(_requestMock, responseMock, next);
+      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
