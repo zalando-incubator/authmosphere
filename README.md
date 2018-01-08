@@ -1,7 +1,7 @@
 # authmosphere {🌍}
 
-[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere)
-[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg)](https://coveralls.io/github/zalando-incubator/authmosphere)
+[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg?branch=master)](https://coveralls.io/github/zalando-incubator/authmosphere)
 [![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
 [![npm version](https://img.shields.io/npm/v/authmosphere.svg?style=flat)](https://www.npmjs.com/package/authmosphere)
 
