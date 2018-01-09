@@ -4,15 +4,14 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 
 import {
-  handleOAuthRequestMiddleware,
   requireScopesMiddleware,
   PrecedenceOptions
-} from '../../src';
+} from '../../../src';
 import { Response, Request } from 'express';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
-let expect = chai.expect;
+const expect = chai.expect;
 
 describe('express tooling', () => {
 
@@ -33,21 +32,21 @@ describe('express tooling', () => {
 
     it('should reject request with 403 if required scopes are not met', (done) => {
 
-        // given
-        const next = sinon.spy();
-        const requestMock = createRequestMock(['uid', 'test']);
-        const responseMock = createResponseMock();
-        const requiredScopes = ['uid', 'test', 'additional'];
+      // given
+      const next = sinon.spy();
+      const requestMock = createRequestMock(['uid', 'test']);
+      const responseMock = createResponseMock();
+      const requiredScopes = ['uid', 'test', 'additional'];
 
-        // when
-        requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
+      // when
+      requireScopesMiddleware(requiredScopes)(requestMock, responseMock, next);
 
-        // then
-        setTimeout(() => {
-          expect(responseMock.sendStatus).to.have.been.calledWith(403);
-          done();
-        });
+      // then
+      setTimeout(() => {
+        expect(responseMock.sendStatus).to.have.been.calledWith(403);
+        done();
       });
+    });
 
     it('should not call next() if required scopes are not met', (done) => {
 
@@ -261,96 +260,6 @@ describe('express tooling', () => {
 
       // when
       requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
-    });
-  });
-
-  describe('handleOAuthRequestMiddleware', () => {
-
-    it('should throw a TypeError, if tokenInfoEndpoint is undefined', () => {
-
-      // given
-      const config = {
-        publicEndpoints: ['/public', '/healthcheck'],
-        tokenInfoEndpoint: ''
-      };
-
-      // then
-      expect(() => { handleOAuthRequestMiddleware(config); }).to.throw(TypeError);
-    });
-
-    it('should call #next on public endpoint', (done) => {
-
-      // given
-      const next = sinon.spy();
-
-      const config = {
-        publicEndpoints: [ '/public', '/healthcheck' ],
-        tokenInfoEndpoint: '/oauth2/tokeninfo'
-      };
-      const _requestMock = Object.assign({}, {
-        originalUrl: '/healthcheck',
-        headers: {}
-      }, createRequestMock([]));
-
-      // when
-      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
-
-      // then
-      setTimeout(() => {
-        // tslint:disable-next-line
-        expect(next).to.have.been.called;
-        done();
-      });
-    });
-
-    it('should not call #next when non-public endpoint', (done) => {
-
-      // given
-      const next = sinon.spy();
-
-      const config = {
-        publicEndpoints: [ '/public', '/healthcheck' ],
-        tokenInfoEndpoint: '/oauth2/tokeninfo'
-      };
-      const _requestMock = Object.assign({}, {
-        originalUrl: '/privateAPI',
-        headers: {}
-      }, createRequestMock([]));
-
-      // when
-      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
-
-      // then
-      setTimeout(() => {
-        // tslint:disable-next-line
-        expect(next).to.not.have.been.called;
-        done();
-      });
-    });
-
-    it('should not call #next when no token is provided', (done) => {
-
-      // given
-      const next = sinon.spy();
-
-      const config = {
-        publicEndpoints: [ '/public', '/healthcheck' ],
-        tokenInfoEndpoint: '/oauth2/tokeninfo'
-      };
-      const _requestMock = Object.assign({}, {
-        originalUrl: '/privateAPI',
-        headers: { authorization: ['auth1'] }
-      }, createRequestMock([]));
-
-      // when
-      handleOAuthRequestMiddleware(config)(_requestMock, createResponseMock(), next);
-
-      // then
-      setTimeout(() => {
-        // tslint:disable-next-line
-        expect(next).to.not.have.been.called;
-        done();
-      });
     });
   });
 });
