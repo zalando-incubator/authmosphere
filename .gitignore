@@ -1,8 +1,11 @@
 node_modules/
 lib/
 .DS_Store
-.vscode
 .idea
 **/npm-debug.log
 coverage
 .nyc_output
+
+# Fine tune allowed VSC configurations
+.vscode/*
+!.vscode/launch.json

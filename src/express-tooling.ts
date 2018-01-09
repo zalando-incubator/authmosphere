@@ -15,7 +15,7 @@ import {
 import { getTokenInfo } from './oauth-tooling';
 
 import {
-  MiddlewareOptions,
+  OAuthMiddlewareOptions,
   ExtendedRequest,
   PrecedenceFunction,
   PrecedenceErrorHandler,
@@ -89,22 +89,26 @@ const requireScopesMiddleware: requireScopesMiddleware =
  * The options object can have the following properties:
  *  - publicEndpoints string[]
  *  - tokenInfoEndpoint string
+ *  - optional logger
+ *  - onNotAuthenticatedHandler - a customer handler method that
+ *                                is executed if callee is not authorized,
+ *                                If not provided, `response.sendStatus(403)` is called
+ *                                and `next` is not called
  *
  * Usage:
  * app.use(handleOAuthRequestMiddleware(options))
  *
- * @param options
- * @param logger - optional logger
+ * @param middlewareOptions: OAuthMiddlewareOptions
  * @returns express middleware
  */
-type handleOAuthRequestMiddleware = (options: MiddlewareOptions, logger?: Logger) => RequestHandler;
-const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware =
-  (options, logger) => {
+type handleOAuthRequestMiddleware = (middlewareOptions: OAuthMiddlewareOptions) => RequestHandler;
+const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware = (middlewareOptions) => {
 
   const {
     tokenInfoEndpoint,
-    publicEndpoints
-  } = options;
+    publicEndpoints,
+    logger
+  } = middlewareOptions;
 
   const logOrNothing = safeLogger(logger);
 
@@ -114,6 +118,13 @@ const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware =
   }
 
   const oAuthMiddleware: RequestHandler = (req, res, next) => {
+
+    const customNotAuthenticatedHandler = middlewareOptions.onNotAuthenticatedHandler;
+
+    const notAuthenticatedHandler =
+      typeof customNotAuthenticatedHandler === 'function' ?
+        (_req: Response, _logger: Logger, status?: number) => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
+        rejectRequest;
 
     const originalUrl = req.originalUrl;
 
@@ -127,20 +138,20 @@ const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware =
 
     if (!authHeader) {
       logOrNothing.warn('No authorization field in header');
-      rejectRequest(res, logOrNothing);
+      notAuthenticatedHandler(res, logOrNothing);
       return;
     }
 
     const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
       logOrNothing.warn('access_token is empty');
-      rejectRequest(res, logOrNothing);
+      notAuthenticatedHandler(res, logOrNothing);
       return;
     } else {
       getTokenInfo(tokenInfoEndpoint, accessToken)
         .then(setTokeninfo(req))
         .then(next)
-        .catch(err => rejectRequest(res, logOrNothing, err.status));
+        .catch(err => notAuthenticatedHandler(res, logOrNothing, err.status));
     }
   };
 
