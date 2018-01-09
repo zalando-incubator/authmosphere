@@ -1,6 +1,7 @@
 import * as HttpStatus from 'http-status';
 import {
   NextFunction,
+  Request,
   Response,
   RequestHandler
 } from 'express';
@@ -20,6 +21,7 @@ import {
   PrecedenceFunction,
   PrecedenceErrorHandler,
   PrecedenceOptions,
+  ScopeMiddlewareOptions,
   Logger
 } from './types';
 
@@ -43,10 +45,24 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  *
  * @returns { function(any, any, any): undefined }
  */
-type requireScopesMiddleware = (scopes: string[], logger?: Logger, precedenceOptions?: PrecedenceOptions) => RequestHandler;
+type requireScopesMiddleware = (scopes: string[], middlewareOptions?: ScopeMiddlewareOptions) => RequestHandler;
 const requireScopesMiddleware: requireScopesMiddleware =
-  (scopes, logger, precedenceOptions) =>
-    (req: ExtendedRequest, res: Response, next: NextFunction) => {
+  (scopes, middlewareOptions = {}) =>
+    (request: ExtendedRequest, response: Response, nextFunction: NextFunction) => {
+
+      const {
+        logger,
+        onAuthorizationFailedHandler,
+        precedenceOptions
+      } = middlewareOptions;
+
+      const logOrNothing = safeLogger(logger);
+
+      const authorizationFailedHandler =
+        typeof onAuthorizationFailedHandler === 'function' ?
+          (req: Request, res: Response, next: NextFunction, _scopes: string[], _logger: Logger) =>
+            onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
+          acceptOrRejectRequest;
 
       const precedenceFunction =
         precedenceOptions && typeof precedenceOptions.precedenceFunction === 'function' ?
@@ -57,24 +73,24 @@ const requireScopesMiddleware: requireScopesMiddleware =
           precedenceOptions.precedenceErrorHandler :
           () => undefined;
 
-      precedenceFunction(req, res, next)
+      precedenceFunction(request, response, nextFunction)
       .then(isAllowed => {
         if (isAllowed) {
-          next();
+          nextFunction();
         } else {
           // If not allowed apply standard scope validation logic
-          acceptOrRejectRequest(req, res, next, scopes, logger);
+          authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
         }
       })
       .catch(error => {
         try {
           precedenceErrorHandler(error, logger);
         } catch (e) {
-          safeLogger(logger).error(`Error while executing precedenceErrorHandler: ${e}`);
+          logOrNothing.error(`Error while executing precedenceErrorHandler: ${e}`);
         } finally {
           // even if precedenceFunction and precedenceErrorHandler throws
           // fallback to the default way
-          acceptOrRejectRequest(req, res, next, scopes, logger);
+          authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
         }
       });
 

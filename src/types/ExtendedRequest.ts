@@ -1,10 +1,12 @@
-import * as express from 'express';
+import { Request } from 'express';
 
-interface ExtendedRequest extends express.Request {
+interface ExtendedRequest extends Request {
   $$tokeninfo?: {
     scope: string[]
   };
   originalUrl: string;
 }
 
-export { ExtendedRequest​​ };
+export {
+  ExtendedRequest​​
+};
