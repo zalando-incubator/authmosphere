@@ -17,6 +17,7 @@ export {
   TokenCacheConfig,
   TokenCacheOAuthConfig,
   OAuthConfig,
+  OAuthMiddlewareOptions,
   MockOptions,
   OAuthGrantType
 } from './types';
