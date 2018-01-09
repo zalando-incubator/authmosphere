@@ -4,9 +4,11 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 
 import {
+  PrecedenceOptions,
   requireScopesMiddleware,
-  PrecedenceOptions
+  ScopeMiddlewareOptions
 } from '../../../src';
+
 import { Response, Request } from 'express';
 
 chai.use(chaiAsPromised);
@@ -113,15 +115,19 @@ describe('express tooling', () => {
       const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['test'];
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(true);
         },
         precedenceErrorHandler: () => { return; }
       };
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -139,15 +145,19 @@ describe('express tooling', () => {
       const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['test'];
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
         precedenceErrorHandler: () => { return; }
       };
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
 
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -165,14 +175,19 @@ describe('express tooling', () => {
       const requestMock = createRequestMock(['uid']);
       const requiredScopes = ['uid'];
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.reject(false);
         }
       } as any as PrecedenceOptions;
 
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
+
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -190,15 +205,20 @@ describe('express tooling', () => {
       const requestMock = createRequestMock(['test']);
       const requiredScopes = ['test'];
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(false);
         },
         precedenceErrorHandler: () => { return; }
       };
 
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
+
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -218,7 +238,7 @@ describe('express tooling', () => {
       const requestMock = createRequestMock(['test']);
       const requiredScopes = ['test'];
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.reject(false);
         },
@@ -227,8 +247,13 @@ describe('express tooling', () => {
         }
       };
 
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
+
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -251,15 +276,43 @@ describe('express tooling', () => {
         done();
       };
 
-      const preOptions = {
+      const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.reject('Error happened');
         },
         precedenceErrorHandler: customErrorhandler
       };
 
+      const options: ScopeMiddlewareOptions = {
+        logger: loggerMock,
+        precedenceOptions
+      };
+
       // when
-      requireScopesMiddleware(requiredScopes, loggerMock, preOptions)(requestMock, createResponseMock(), next);
+      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
+    });
+
+    it('should call onAuthorizationFailed handler', (done) => {
+      // given
+      const next = sinon.spy();
+
+      const middlewareOptions: ScopeMiddlewareOptions = {
+        onAuthorizationFailedHandler: sinon.spy()
+      };
+      const requestMock = createRequestMock(['uid', 'test']);
+      const requiredScopes = ['uid', 'test', 'additional'];
+
+      // when
+      requireScopesMiddleware(requiredScopes, middlewareOptions)(requestMock, createResponseMock(), next);
+
+      // then
+      setTimeout(() => {
+        // tslint:disable-next-line
+        expect(next).to.not.have.been.called;
+        // tslint:disable-next-line
+        expect(middlewareOptions.onAuthorizationFailedHandler).to.have.been.called;
+        done();
+      });
     });
   });
 });

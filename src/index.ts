@@ -14,6 +14,7 @@ export {
   PasswordCredentialsGrantConfig,
   ClientCredentialsGrantConfig,
   RefreshGrantConfig,
+  ScopeMiddlewareOptions,
   TokenCacheConfig,
   TokenCacheOAuthConfig,
   OAuthConfig,
