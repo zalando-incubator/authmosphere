@@ -6,7 +6,11 @@ import * as formurlencoded from 'form-urlencoded';
 import {
   getFileData,
   getBasicAuthHeaderValue,
-  validateOAuthConfig
+  validateOAuthConfig,
+  isCredentialsDirConfig,
+  isPasswordGrantWOCredentialsDir,
+  extractUserCredentials,
+  extractClientCredentials
 } from './utils';
 
 import {
@@ -193,12 +197,7 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
 
   validateOAuthConfig(options);
 
-  const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
-
-  // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-  if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-    credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
-  }
+  const credentialsPromises = getCredentials(options);
 
   return Promise.all(credentialsPromises)
   .then((credentials) => {
@@ -244,6 +243,28 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
       options.accessTokenEndpoint, logOrNothing, options.queryParams);
   });
+}
+
+function getCredentials(options: OAuthConfig) {
+  let credentialsPromises: Promise<string>[];
+
+  if (isCredentialsDirConfig(options)) {
+    credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
+    // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+      credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
+    }
+  } else {
+    const clientCredentials = extractClientCredentials(options);
+    credentialsPromises = [Promise.resolve(clientCredentials)];
+    // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
+    if (isPasswordGrantWOCredentialsDir(options)) {
+      const userCredentials = extractUserCredentials(options);
+      credentialsPromises.push(Promise.resolve(userCredentials));
+    }
+  }
+
+  return credentialsPromises;
 }
 
 export {

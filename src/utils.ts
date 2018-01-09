@@ -7,7 +7,10 @@ import {
    OAuthConfig,
    Token,
    OAuthGrantType,
-   Logger
+   Logger,
+   CredentialsDirConfig,
+   PassCredentialsClientConfig,
+   PassCredentialsUserConfig
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -57,7 +60,7 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 
   const normalizedHeaderValue = Array.isArray(headerValue) ?
                                   headerValue.join(' ') :
-                                  headerValue;
+    headerValue;
 
   return normalizedHeaderValue;
 };
@@ -129,6 +132,41 @@ const rejectRequest = (res: Response,
   res.sendStatus(status);
 };
 
+function isCredentialsDirConfig(options: any): options is CredentialsDirConfig {
+  return !!options.credentialsDir;
+}
+
+function isPassCredentialsClientConfig(options: any): options is PassCredentialsClientConfig {
+  return !!options.client_id && !!options.client_secret;
+}
+
+function isPasswordGrantWOCredentialsDir(options: any): options is PassCredentialsClientConfig & PassCredentialsUserConfig {
+  return options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+    !!options.application_username &&
+    !!options.application_password &&
+    isPassCredentialsClientConfig(options);
+}
+
+function checkCredentialsSource(options: OAuthConfig) {
+  return isCredentialsDirConfig(options) ||
+    isPassCredentialsClientConfig(options) ||
+    isPasswordGrantWOCredentialsDir(options);
+}
+
+function extractUserCredentials(options: PassCredentialsClientConfig & PassCredentialsUserConfig) {
+  const application_password = options.application_password;
+  const application_username = options.application_username;
+  const userCredentials = JSON.stringify({ application_password, application_username });
+  return userCredentials;
+}
+
+function extractClientCredentials(options: PassCredentialsClientConfig) {
+  const client_id = options.client_id;
+  const client_secret = options.client_secret;
+  const clientCredentials = JSON.stringify({ client_id, client_secret });
+  return clientCredentials;
+}
+
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.
  *
@@ -136,8 +174,8 @@ const rejectRequest = (res: Response,
  */
 const validateOAuthConfig = (options: OAuthConfig): void => {
 
-  if (!options.credentialsDir) {
-    throw TypeError('credentialsDir must be defined');
+  if (!checkCredentialsSource(options)) {
+    throw TypeError('credentials must be defined');
   }
 
   if (!options.accessTokenEndpoint) {
@@ -163,9 +201,14 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
 
 export {
   extractAccessToken,
+  extractUserCredentials,
+  extractClientCredentials,
   getBasicAuthHeaderValue,
   getFileData,
   getHeaderValue,
+  isCredentialsDirConfig,
+  isPassCredentialsClientConfig,
+  isPasswordGrantWOCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
   setTokeninfo

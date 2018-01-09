@@ -12,7 +12,8 @@ import {
   PasswordCredentialsGrantConfig,
   ClientCredentialsGrantConfig,
   AuthorizationCodeGrantConfig,
-  RefreshGrantConfig
+  RefreshGrantConfig,
+  OAuthConfig
 } from '../../src/types';
 
 chai.use(chaiAsPromised);
@@ -118,6 +119,89 @@ describe('getAccessToken', () => {
       const promise = getAccessToken({
         ...passwordCredentialsOAuthOptions,
         credentialsDir: 'integration-test/data/not-existing'
+      });
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should be rejected if credentials are not defined', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK);
+
+      // when
+      const promise = getAccessToken({
+        ...passwordCredentialsOAuthOptions
+      });
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should resolve, if client credentials are passed in config', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK);
+
+      // when
+      const promise = getAccessToken({
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          credentialsDir: undefined,
+          client_id: validUserName,
+          client_secret: validUserPassword
+        } as any as OAuthConfig
+      });
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should resolve, if user and client credentials are passed in config with password credentials grant', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK);
+
+      // when
+      const promise = getAccessToken({
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
+          credentialsDir: undefined,
+          client_id: validUserName,
+          client_secret: validUserPassword,
+          application_username: validUserName,
+          application_password: validUserPassword
+        }
+      });
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should fail, if just client credentials are passed in config with password credentials grant', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK);
+
+      // when
+      const promise = getAccessToken({
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
+          credentialsDir: undefined,
+          client_id: validUserName,
+          client_secret: validUserPassword
+        } as any as OAuthConfig
       });
 
       // then
