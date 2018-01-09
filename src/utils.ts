@@ -4,15 +4,13 @@ import * as btoa from 'btoa';
 import { Request, Response } from 'express';
 
 import {
-  AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT
-} from './constants';
-import {
    OAuthConfig,
-   Token
+   Token,
+   OAuthGrantType,
+   Logger
 } from './types';
 
-const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
+const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
   const readPromise: Promise<string> = new Promise((resolve, reject) => {
     fs.readFile(fileName, encoding, (error, data) => {
       if (error) {
@@ -122,10 +120,13 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
  * @param res
  * @param status
  */
-const rejectRequest = (res: Response, status?: number): void => {
+const rejectRequest = (res: Response,
+                       logger: Logger,
+                       status: number = HttpStatus.UNAUTHORIZED): void => {
 
-  const _status = status ? status : HttpStatus.UNAUTHORIZED;
-  res.sendStatus(_status);
+  logger.info(`Request will be rejected with status ${status}`);
+
+  res.sendStatus(status);
 };
 
 /**
@@ -147,15 +148,15 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
     throw TypeError('grantType must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.code) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.code) {
     throw TypeError('code must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
     throw TypeError('redirectUri must be defined');
   }
 
-  if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
+  if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
 };

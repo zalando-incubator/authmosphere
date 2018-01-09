@@ -1,8 +1,8 @@
 export * from './oauth-tooling';
 export * from './express-tooling';
 export * from './TokenCache';
-export * from './constants';
 export * from './mock-tooling/index';
+export * from './safe-logger';
 export {
   Logger,
   Token,
@@ -10,5 +10,14 @@ export {
   PrecedenceFunction,
   PrecedenceErrorHandler,
   PrecedenceOptions,
-  ExtendedRequest
+  ExtendedRequest,
+  AuthorizationCodeGrantConfig,
+  PasswordCredentialsGrantConfig,
+  ClientCredentialsGrantConfig,
+  RefreshGrantConfig,
+  TokenCacheConfig,
+  TokenCacheOAuthConfig,
+  OAuthConfig,
+  MockOptions,
+  OAuthGrantType
 } from './types';

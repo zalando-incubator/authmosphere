@@ -4,13 +4,16 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   getTokenInfo,
   getAccessToken,
-  PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
   cleanMock
 } from '../../src/index';
 
-import { Token } from '../../src/types';
+import {
+  Token,
+  OAuthGrantType,
+  PasswordCredentialsGrantConfig
+} from '../../src/types';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -64,6 +67,27 @@ describe('mock tooling', () => {
 
       // then
       return expect(promise).to.become(validAuthToken);
+    });
+
+    it('should return 400 if requested token is empty', function () {
+
+      // given
+      const validAuthToken = {
+        'expires_in': 3600,
+        'scope': ['uid'],
+        'access_token': 'foo'
+      };
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint,
+        tokens: [validAuthToken],
+        times: 1
+      });
+
+      // when
+      const promise = getTokenInfo(tokeninfoEndpoint, '');
+
+      // then
+      return expect(promise).to.rejected;
     });
 
     it('should return the tokeninfo as often as defined', function () {
@@ -149,11 +173,11 @@ describe('mock tooling', () => {
     it('accessToken endpoint should return valid token', function () {
 
       // given
-      const options = {
+      const options: PasswordCredentialsGrantConfig = {
         scopes: ['uid'],
         accessTokenEndpoint: accessTokenEndpoint,
         credentialsDir: 'integration-test/data/credentials',
-        grantType: PASSWORD_CREDENTIALS_GRANT
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
       };
       mockAccessTokenEndpoint({
         url: accessTokenEndpoint

@@ -10,15 +10,14 @@ import {
 } from './utils';
 
 import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT,
-  CLIENT_CREDENTIALS_GRANT
-} from './constants';
+  OAuthConfig,
+  Token,
+  OAuthGrantType,
+  BodyParameters,
+  Logger
+} from './types';
 
-import { OAuthConfig } from './types/OAuthConfig';
-import { Token } from './types';
-import { BodyParameters } from './types/BodyParameters';
+import { safeLogger } from './safe-logger';
 
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
@@ -60,12 +59,14 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
  * @param bodyObject an object of values put in the body
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
+ * @param logger
  * @param queryParams optional
  * @returns {Promise<Token>}
  */
 function requestAccessToken(bodyObject: any,
                             authorizationHeaderValue: string,
                             accessTokenEndpoint: string,
+                            logger: Logger,
                             queryParams?: Object): Promise<Token> {
 
   const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
@@ -84,15 +85,25 @@ function requestAccessToken(bodyObject: any,
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
-        return Promise.reject(`Response failed with status code ${status}`);
+        return response.json()
+        .catch((error) => Promise.reject(error))
+        .then((error) => Promise.reject({
+          // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
+          // but do fall back if for some reason the definition is not satisfied
+          error: (error && error.error) ? error.error : error,
+          errorDescription: (error && error.error_description) ? error.error_description : undefined,
+          status
+        }));
       }
 
+      logger.debug(`Successful request to ${accessTokenEndpoint}`);
       return response.json();
     })
-    .catch((err) => {
+    .catch((error) => {
+      logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
       return Promise.reject({
-        msg: `Error requesting access token from ${accessTokenEndpoint}`,
-        err
+        message: `Error requesting access token from ${accessTokenEndpoint}`,
+        error
       });
     });
 
@@ -127,29 +138,39 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  *
  * @param tokenInfoUrl
  * @param accessToken
+ * @param logger - optional logger
  * @returns {Promise<Token>}
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token> {
+function getTokenInfo(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token> {
 
-    const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-    .then((response) => {
+  const logOrNothing = safeLogger(logger);
 
-      const status = response.status;
+  const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+  .then((response) => {
 
-      return response.json()
-      .then((data) => {
+    const status = response.status;
 
-        if (response.status === HttpStatus.OK) {
-          return data;
-        } else {
-          return Promise.reject({ status, data });
-        }
-      });
-    })
-    .catch((err) => Promise.reject({
-      msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-      err
-    }));
+    return response.json()
+    .then((data) => {
+
+      if (status === HttpStatus.OK) {
+        logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
+        return data;
+      } else {
+        logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+        return Promise.reject({ status, data });
+      }
+    });
+  })
+  .catch((error) => {
+
+    logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
+
+    return Promise.reject({
+      message: `Error validating token via ${tokenInfoUrl}`,
+      error
+    });
+  });
 
   return promise;
 }
@@ -162,32 +183,20 @@ function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token>
  * Resolves with object containing property `accessToken` with the access token
  * (in case of success). Otherwise, rejects with error message.
  *
- * Currently supports the following OAuth flows (specified by the `grantType` property):
- *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
- *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
- *  - Refresh Token Grant (REFRESH_TOKEN_GRANT)
- *
- *  The `options` object can have the following properties:
- *  - credentialsDir string
- *  - grantType string
- *  - accessTokenEndpoint string
- *  - scopes string[] optional
- *  - queryParams {} optional
- *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
- *
  * @param options
+ * @param logger - optional logger
  * @returns {Promise<T>}
  */
-function getAccessToken(options: OAuthConfig): Promise<Token> {
+function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
+
+  const logOrNothing = safeLogger(logger);
 
   validateOAuthConfig(options);
 
   const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
 
   // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-  if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+  if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
     credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
   }
 
@@ -198,24 +207,24 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
 
     let bodyParameters: BodyParameters;
 
-    if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
       const userData = JSON.parse(credentials[1]);
       bodyParameters = {
         'grant_type': options.grantType,
         'username': userData.application_username,
         'password': userData.application_password
       };
-    } else if (options.grantType === CLIENT_CREDENTIALS_GRANT) {
+    } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType
       };
-    }  else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+    }  else if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
         'code': options.code,
         'redirect_uri': options.redirectUri
       };
-    } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+    } else if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
         'refresh_token': options.refreshToken
@@ -230,10 +239,14 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
       });
     }
 
+    if (options.bodyParams) {
+      Object.assign(bodyParameters, options.bodyParams);
+    }
+
     const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, options.queryParams);
+      options.accessTokenEndpoint, logOrNothing, options.queryParams);
   });
 }
 
