@@ -10,5 +10,14 @@ export {
   PrecedenceFunction,
   PrecedenceErrorHandler,
   PrecedenceOptions,
-  ExtendedRequest
+  ExtendedRequest,
+  AuthorizationCodeGrantConfig,
+  PasswordCredentialsGrantConfig,
+  ClientCredentialsGrantConfig,
+  RefreshGrantConfig,
+  TokenCacheConfig,
+  TokenCacheOAuthConfig,
+  OAuthConfig,
+  MockOptions,
+  OAuthGrantType
 } from './types';
