@@ -4,6 +4,7 @@ type GrantConfigBase = {
   credentialsDir: string;
   accessTokenEndpoint: string;
   queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
 };
 
 type ClientCredentialsGrantConfig = GrantConfigBase & {
