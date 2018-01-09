@@ -6,7 +6,6 @@ export * from './safe-logger';
 export {
   Logger,
   Token,
-  MiddlewareOptions,
   PrecedenceFunction,
   PrecedenceErrorHandler,
   PrecedenceOptions,
