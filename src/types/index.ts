@@ -1,6 +1,6 @@
 export * from './BodyParameters';
 export * from './ExtendedRequest';
-export * from './MiddlewareOptions';
+export * from './OAuthMiddlewareOptions';
 export * from './MockOptions';
 export * from './OAuthConfig';
 export * from './TokenCacheConfig';

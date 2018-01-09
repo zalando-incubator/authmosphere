@@ -3,9 +3,12 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 
-import { handleOAuthRequestMiddleware } from '../../../src';
-
 import { Response, Request } from 'express';
+
+import {
+  handleOAuthRequestMiddleware,
+  OAuthMiddlewareOptions
+} from '../../../src';
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -112,6 +115,33 @@ describe('express tooling', () => {
       setTimeout(() => {
         // tslint:disable-next-line
         expect(next).to.not.have.been.called;
+        done();
+      });
+    });
+
+    it('should call custom notAuthenticated handler', (done) => {
+      // given
+      const next = sinon.spy();
+
+      const middleWareconfig: OAuthMiddlewareOptions = {
+        tokenInfoEndpoint: '/oauth2/tokeninfo',
+        onNotAuthenticatedHandler: sinon.spy()
+      };
+      const requestMock = {
+        originalUrl: '/privateAPI',
+        headers: { authorization: ['invalid auth'] },
+        ...createRequestMock([])
+      } as any as Request;
+
+      // when
+      handleOAuthRequestMiddleware(middleWareconfig)(requestMock, createResponseMock(), next);
+
+      // then
+      setTimeout(() => {
+        // tslint:disable-next-line
+        expect(next).to.not.have.been.called;
+        // tslint:disable-next-line
+        expect(middleWareconfig.onNotAuthenticatedHandler).to.have.been.called;
         done();
       });
     });
