@@ -238,6 +238,10 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
       });
     }
 
+    if (options.bodyParams) {
+      Object.assign(bodyParameters, options.bodyParams);
+    }
+
     const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,

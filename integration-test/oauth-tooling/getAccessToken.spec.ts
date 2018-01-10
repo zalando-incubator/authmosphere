@@ -59,6 +59,30 @@ describe('getAccessToken', () => {
     return expect(promise).to.be.fulfilled;
   });
 
+  it('should add optional body parameters to the request', () => {
+
+    //given
+    nock(oAuthServerHost)
+      .filteringRequestBody((body) => {
+        expect(body).to.contain('foo=bar');
+        return body;
+      })
+      .post(accessTokenEndpoint)
+      .reply(HttpStatus.OK, { 'access_token': accessToken });
+
+    //when
+    const promise = getAccessToken({
+      scopes: ['campaign.edit_all', 'campaign.read_all'],
+      accessTokenEndpoint: `${oAuthServerHost}${accessTokenEndpoint}`,
+      credentialsDir: 'integration-test/data/credentials',
+      grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
+      bodyParams: { foo: 'bar' }
+    });
+
+    //then
+    return expect(promise).to.be.fulfilled;
+  });
+
   it('should be rejected, if grant type is unknown', function() {
 
     nock(oAuthServerHost)
