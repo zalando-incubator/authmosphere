@@ -4,12 +4,9 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   TokenCache,
   getAccessToken,
-  createAuthCodeRequestUri
-} from '../../src/index';
-
-import {
+  createAuthCodeRequestUri,
   OAuthGrantType
-} from '../../src/types';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

@@ -6,14 +6,11 @@ import {
   getAccessToken,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
-  cleanMock
-} from '../../src/index';
-
-import {
+  cleanMock,
   Token,
   OAuthGrantType,
   PasswordCredentialsGrantConfig
-} from '../../src/types';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

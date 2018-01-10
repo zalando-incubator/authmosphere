@@ -10,7 +10,7 @@ import {
   isCredentialsClientConfig,
   isPasswordGrantNoCredentialsDir
 } from '../../src/utils';
-import { OAuthGrantType } from '../../src/types';
+import { OAuthGrantType } from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

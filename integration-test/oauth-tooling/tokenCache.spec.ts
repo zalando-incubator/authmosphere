@@ -6,12 +6,9 @@ import * as lolex from 'lolex';
 
 import {
   TokenCache,
-  defaultTokenCacheConfig
-} from '../../src/index';
-
-import {
+  defaultTokenCacheConfig,
   OAuthGrantType
-} from '../../src/types';
+} from '../../src';
 
 import { TokenCacheOAuthConfig } from '../../src/types/OAuthConfig';
 

@@ -4,17 +4,14 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 
 import {
-  getAccessToken
-} from '../../src/index';
-
-import {
+  getAccessToken,
   OAuthGrantType,
   PasswordCredentialsGrantConfig,
   ClientCredentialsGrantConfig,
   AuthorizationCodeGrantConfig,
   RefreshGrantConfig,
   OAuthConfig
-} from '../../src/types';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
