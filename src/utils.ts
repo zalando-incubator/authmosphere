@@ -134,11 +134,8 @@ const rejectRequest = (res: Response,
   res.sendStatus(status);
 };
 
-function isCredentialsDirConfig(options: any): options is CredentialsDirConfig {
-  const castedOptions = <CredentialsDirConfig> options;
-
-  return castedOptions.credentialsDir !== undefined;
-}
+const isCredentialsDirConfig = (options: any): options is CredentialsDirConfig =>
+  options.credentialsDir !== undefined;
 
 const isCredentialsClientConfig = (options: any): options is CredentialsClientConfig =>
   options.clientId !== undefined && options.clientSecret !== undefined;
@@ -153,13 +150,11 @@ const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUs
 const checkCredentialsSource = (options: OAuthConfig) =>
  isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
 
-const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig => {
-  return { applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername };
-};
+const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig =>
+  ({ applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername });
 
-const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig => {
-  return { clientId: options.clientId, clientSecret: options.clientSecret };
-};
+const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig =>
+  ({ clientId: options.clientId, clientSecret: options.clientSecret });
 
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.

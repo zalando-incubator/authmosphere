@@ -250,14 +250,12 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
 }
 
 type convertSnakeCredentialsToCamel = (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
-const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => {
-  return {
-    clientId: options.client_id,
-    clientSecret: options.client_secret,
-    applicationUsername: options.application_username,
-    applicationPassword: options.application_password
-  };
-};
+const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => ({
+  clientId: options.client_id,
+  clientSecret: options.client_secret,
+  applicationUsername: options.application_username,
+  applicationPassword: options.application_password
+});
 
 const getCredentials = (options: OAuthConfig): Promise<any>[] => {
 
