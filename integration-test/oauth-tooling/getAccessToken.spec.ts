@@ -173,7 +173,6 @@ describe('getAccessToken', () => {
       const promise = getAccessToken({
         ...passwordCredentialsOAuthOptions,
         ...{
-          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           credentialsDir: undefined,
           client_id: validUserName,
           client_secret: validUserPassword,

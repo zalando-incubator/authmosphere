@@ -9,8 +9,10 @@ import {
    OAuthGrantType,
    Logger,
    CredentialsDirConfig,
-   PassCredentialsClientConfig,
-   PassCredentialsUserConfig
+   CredentialsClientConfig,
+   CredentialsUserConfig,
+   CredentialsUserClientConfig,
+   PasswordCredentialsGrantConfig
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -37,12 +39,13 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-const getFileData = (filePath: string, fileName: string): Promise<string> => {
+const getFileDataAsObject = (filePath: string, fileName: string) => {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
 
-  const promise = fsReadFile(filePath + fileName, 'utf-8');
+  const promise = fsReadFile(filePath + fileName, 'utf-8')
+    .then((data) => JSON.parse(data));
 
   return promise;
 };
@@ -60,7 +63,7 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 
   const normalizedHeaderValue = Array.isArray(headerValue) ?
                                   headerValue.join(' ') :
-    headerValue;
+                                  headerValue;
 
   return normalizedHeaderValue;
 };
@@ -133,38 +136,51 @@ const rejectRequest = (res: Response,
 };
 
 function isCredentialsDirConfig(options: any): options is CredentialsDirConfig {
-  return !!options.credentialsDir;
+  const castedOptions = <CredentialsDirConfig> options;
+
+  return castedOptions.credentialsDir !== undefined;
 }
 
-function isPassCredentialsClientConfig(options: any): options is PassCredentialsClientConfig {
-  return !!options.client_id && !!options.client_secret;
+function isCredentialsClientConfig(options: any): options is CredentialsClientConfig {
+  const castedOptions = <CredentialsClientConfig> options;
+
+  return castedOptions.client_id !== undefined &&
+         castedOptions.client_secret !== undefined;
 }
 
-function isPasswordGrantWOCredentialsDir(options: any): options is PassCredentialsClientConfig & PassCredentialsUserConfig {
-  return options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
-    !!options.application_username &&
-    !!options.application_password &&
-    isPassCredentialsClientConfig(options);
+function isCredentialsUserConfig(options: any): options is CredentialsUserConfig {
+  const castedOptions = <CredentialsUserConfig> options;
+
+  return castedOptions.application_username !== undefined &&
+         castedOptions.application_password !== undefined;
+}
+
+function isPasswordGrantNoCredentialsDir(options: any): options is CredentialsUserClientConfig {
+  const castedOptions = <CredentialsUserClientConfig> options;
+
+  return (<PasswordCredentialsGrantConfig> options).grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+         isCredentialsUserConfig(castedOptions) &&
+         isCredentialsClientConfig(castedOptions);
 }
 
 function checkCredentialsSource(options: OAuthConfig) {
   return isCredentialsDirConfig(options) ||
-    isPassCredentialsClientConfig(options) ||
-    isPasswordGrantWOCredentialsDir(options);
+         isCredentialsClientConfig(options) ||
+         isPasswordGrantNoCredentialsDir(options);
 }
 
-function extractUserCredentials(options: PassCredentialsClientConfig & PassCredentialsUserConfig) {
+function extractUserCredentials(options: CredentialsUserConfig | CredentialsUserClientConfig): object {
   const application_password = options.application_password;
   const application_username = options.application_username;
-  const userCredentials = JSON.stringify({ application_password, application_username });
-  return userCredentials;
+
+  return { application_password, application_username };
 }
 
-function extractClientCredentials(options: PassCredentialsClientConfig) {
+function extractClientCredentials(options: CredentialsClientConfig | CredentialsUserClientConfig): object {
   const client_id = options.client_id;
   const client_secret = options.client_secret;
-  const clientCredentials = JSON.stringify({ client_id, client_secret });
-  return clientCredentials;
+
+  return { client_id, client_secret };
 }
 
 /**
@@ -204,11 +220,11 @@ export {
   extractUserCredentials,
   extractClientCredentials,
   getBasicAuthHeaderValue,
-  getFileData,
+  getFileDataAsObject,
   getHeaderValue,
   isCredentialsDirConfig,
-  isPassCredentialsClientConfig,
-  isPasswordGrantWOCredentialsDir,
+  isCredentialsClientConfig,
+  isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
   setTokeninfo

@@ -4,13 +4,13 @@ import fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
 
 import {
-  getFileData,
+  getFileDataAsObject,
   getBasicAuthHeaderValue,
   validateOAuthConfig,
   isCredentialsDirConfig,
-  isPasswordGrantWOCredentialsDir,
   extractUserCredentials,
-  extractClientCredentials
+  extractClientCredentials,
+  isPasswordGrantNoCredentialsDir
 } from './utils';
 
 import {
@@ -202,12 +202,12 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
   return Promise.all(credentialsPromises)
   .then((credentials) => {
 
-    const clientData = JSON.parse(credentials[0]);
+    const clientData = credentials[0];
 
     let bodyParameters: BodyParameters;
 
     if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-      const userData = JSON.parse(credentials[1]);
+      const userData = credentials[1];
       bodyParameters = {
         'grant_type': options.grantType,
         'username': userData.application_username,
@@ -246,19 +246,19 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
 }
 
 function getCredentials(options: OAuthConfig) {
-  let credentialsPromises: Promise<string>[];
+  let credentialsPromises;
 
   if (isCredentialsDirConfig(options)) {
-    credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
+    credentialsPromises = [getFileDataAsObject(options.credentialsDir, CLIENT_JSON)];
     // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
     if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-      credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
+      credentialsPromises.push(getFileDataAsObject(options.credentialsDir, USER_JSON));
     }
   } else {
     const clientCredentials = extractClientCredentials(options);
     credentialsPromises = [Promise.resolve(clientCredentials)];
     // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-    if (isPasswordGrantWOCredentialsDir(options)) {
+    if (isPasswordGrantNoCredentialsDir(options)) {
       const userCredentials = extractUserCredentials(options);
       credentialsPromises.push(Promise.resolve(userCredentials));
     }

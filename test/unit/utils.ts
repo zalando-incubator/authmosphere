@@ -2,13 +2,13 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
 import {
-  getFileData,
+  getFileDataAsObject,
   extractAccessToken,
   extractUserCredentials,
   extractClientCredentials,
   isCredentialsDirConfig,
-  isPassCredentialsClientConfig,
-  isPasswordGrantWOCredentialsDir
+  isCredentialsClientConfig,
+  isPasswordGrantNoCredentialsDir
 } from '../../src/utils';
 import { OAuthGrantType } from '../../src/types';
 
@@ -20,18 +20,17 @@ const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
 describe('utils', () => {
   describe('getFileData', () => {
     it('should ignore tailing / in filepath', () => {
-      const promise = Promise.all([
-        getFileData('test/unit/credentials', 'user.json'),
-        getFileData('test/unit/credentials/', 'user.json')
+      return Promise.all([
+        getFileDataAsObject('test/unit/credentials', 'user.json'),
+        getFileDataAsObject('test/unit/credentials/', 'user.json')
       ])
       .then((credentials) => {
-        return credentials[0] === credentials[1];
-        });
-      return expect(promise).to.become(true);
+        expect(credentials[0]).to.deep.equal(credentials[1]);
+      });
     });
 
     it('should be rejected, if file does not exist', () => {
-      const promise = getFileData('test/unit/credentials', 'foo.json');
+      const promise = getFileDataAsObject('test/unit/credentials', 'foo.json');
       return expect(promise).to.be.rejected;
     });
   });
@@ -54,33 +53,53 @@ describe('utils', () => {
 
   describe('extractUserCredentials', () => {
     it('return user credentials as string', () => {
+
+      const clientId = 'client_id';
+      const clientSecret = 'client_secret';
+      const applicationUsername = 'application_username';
+      const applicationPassword = 'application_password';
+
       const given = {
-        client_id: 'client_id',
-        client_secret: 'client_secret',
-        application_username: 'application_username',
-        application_password: 'application_password'
+        client_id: clientId,
+        client_secret: clientSecret,
+        application_username: applicationUsername,
+        application_password: applicationPassword
       };
 
-      const expected = '{"application_password":"application_password","application_username":"application_username"}';
+      const expected: object = {
+        application_username: applicationUsername,
+        application_password: applicationPassword
+      };
 
       const result = extractUserCredentials(given);
 
-      return expect(result).to.equal(expected);
+      return expect(result).to.deep.equal(expected);
     });
   });
 
   describe('extractClientCredentials', () => {
     it('return client credentials as string', () => {
+
+      const clientId = 'client_id';
+      const clientSecret = 'client_secret';
+      const applicationUsername = 'application_username';
+      const applicationPassword = 'application_password';
+
       const given = {
-        client_id: 'client_id',
-        client_secret: 'client_secret'
+        client_id: clientId,
+        client_secret: clientSecret,
+        application_username: applicationUsername,
+        application_password: applicationPassword
       };
 
-      const expected = '{"client_id":"client_id","client_secret":"client_secret"}';
+      const expected: object = {
+        client_id: clientId,
+        client_secret: clientSecret
+      };
 
       const result = extractClientCredentials(given);
 
-      return expect(result).to.equal(expected);
+      return expect(result).to.deep.equal(expected);
     });
   });
 
@@ -113,7 +132,7 @@ describe('utils', () => {
         client_secret: 'client_secret'
       };
 
-      const result = isPassCredentialsClientConfig(config);
+      const result = isCredentialsClientConfig(config);
 
       return expect(result).to.equal(true);
     });
@@ -125,7 +144,7 @@ describe('utils', () => {
       client_secret: 'client_secret'
     };
 
-    const result = isPassCredentialsClientConfig(config);
+    const result = isCredentialsClientConfig(config);
 
     return expect(result).to.equal(false);
   });
@@ -136,7 +155,7 @@ describe('utils', () => {
       client_secret: undefined
     };
 
-    const result = isPassCredentialsClientConfig(config);
+    const result = isCredentialsClientConfig(config);
 
     return expect(result).to.equal(false);
   });
@@ -151,7 +170,7 @@ describe('utils', () => {
         client_secret: 'client_secret'
       };
 
-      const result = isPasswordGrantWOCredentialsDir(config);
+      const result = isPasswordGrantNoCredentialsDir(config);
 
       return expect(result).to.equal(true);
     });
@@ -166,7 +185,7 @@ describe('utils', () => {
       client_secret: 'client_secret'
     };
 
-    const result = isPasswordGrantWOCredentialsDir(config);
+    const result = isPasswordGrantNoCredentialsDir(config);
 
     return expect(result).to.equal(false);
   });
@@ -180,7 +199,7 @@ describe('utils', () => {
       client_secret: 'client_secret'
     };
 
-    const result = isPasswordGrantWOCredentialsDir(config);
+    const result = isPasswordGrantNoCredentialsDir(config);
 
     return expect(result).to.equal(false);
   });
@@ -194,7 +213,7 @@ describe('utils', () => {
       client_secret: 'client_secret'
     };
 
-    const result = isPasswordGrantWOCredentialsDir(config);
+    const result = isPasswordGrantNoCredentialsDir(config);
 
     return expect(result).to.equal(false);
   });
@@ -208,7 +227,7 @@ describe('utils', () => {
       client_secret: undefined
     };
 
-    const result = isPasswordGrantWOCredentialsDir(config);
+    const result = isPasswordGrantNoCredentialsDir(config);
 
     return expect(result).to.equal(false);
   });
@@ -222,7 +241,7 @@ describe('utils', () => {
       client_secret: 'client_secret'
     };
 
-    const result = isPasswordGrantWOCredentialsDir(config);
+    const result = isPasswordGrantNoCredentialsDir(config);
 
     return expect(result).to.equal(false);
   });
