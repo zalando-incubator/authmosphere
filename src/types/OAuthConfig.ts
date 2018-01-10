@@ -22,6 +22,7 @@ type CredentialsPasswordConfig = CredentialsDirConfig | CredentialsUserClientCon
 type GrantConfigBase = {
   accessTokenEndpoint: string;
   queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
   scopes?: string[];
 };
 

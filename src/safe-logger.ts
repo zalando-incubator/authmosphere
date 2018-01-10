@@ -3,7 +3,7 @@ import {
 } from './types';
 
 const loggerOrNoop = (prop: string, obj: any) =>
-  (obj !== undefined && obj[prop] !== undefined) ? obj[prop] : () => undefined;
+  (obj !== undefined && obj[prop] !== undefined) ? obj[prop].bind(obj) : () => undefined;
 
 const safeLogger = (logger?: Logger): Logger => {
 
