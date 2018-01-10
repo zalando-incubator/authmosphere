@@ -4,16 +4,14 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 
 import {
-  getAccessToken
-} from '../../src/index';
-
-import {
+  getAccessToken,
   OAuthGrantType,
   PasswordCredentialsGrantConfig,
   ClientCredentialsGrantConfig,
   AuthorizationCodeGrantConfig,
-  RefreshGrantConfig
-} from '../../src/types';
+  RefreshGrantConfig,
+  OAuthConfig
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -136,12 +134,76 @@ describe('getAccessToken', () => {
       // given
       nock(oAuthServerHost)
         .post(accessTokenEndpoint)
-        .reply(HttpStatus.OK);
+        .reply(HttpStatus.OK, { access_token: accessToken });
 
       // when
       const promise = getAccessToken({
         ...passwordCredentialsOAuthOptions,
         credentialsDir: 'integration-test/data/not-existing'
+      });
+
+      // then
+      return expect(promise).to.be.rejected;
+    });
+
+    it('should throw TypeError if credentials are not defined', () => {
+
+      // given
+      const authConfig = {
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          credentialsDir: undefined,
+          clientId: undefined,
+          clientSecret: undefined
+        }
+      } as any as PasswordCredentialsGrantConfig;
+
+      const result = () => getAccessToken(authConfig);
+
+      // then
+      return expect(result).to.throw(TypeError);
+    });
+
+    it('should resolve, if client credentials are passed in config', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK, { access_token: accessToken });
+
+      const config = {
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          credentialsDir: undefined,
+          clientId: validUserName,
+          clientSecret: validUserPassword,
+          applicationUsername: validUserName,
+          applicationPassword: validUserPassword
+        }
+      } as PasswordCredentialsGrantConfig;
+
+      // when
+      const promise = getAccessToken(config);
+
+      // then
+      return expect(promise).to.become({ access_token: accessToken });
+    });
+
+    it('should fail, if just client credentials are passed in config with password credentials grant', () => {
+
+      // given
+      nock(oAuthServerHost)
+        .post(accessTokenEndpoint)
+        .reply(HttpStatus.OK, { access_token: accessToken });
+
+      // when
+      const promise = getAccessToken({
+        ...passwordCredentialsOAuthOptions,
+        ...{
+          credentialsDir: undefined,
+          clientId: validUserName,
+          clientSecret: validUserPassword
+        } as any as OAuthConfig
       });
 
       // then
@@ -310,7 +372,7 @@ describe('getAccessToken', () => {
       redirectUri: validRedirectUri
     };
 
-    it('should resolve with access token if valid', function() {
+    it('should resolve with access token if valid', () => {
 
       // given
       nock(oAuthServerHost)

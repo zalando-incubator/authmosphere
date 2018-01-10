@@ -1,33 +1,48 @@
 import { OAuthGrantType } from '../types';
 
-type GrantConfigBase = {
+type CredentialsDirConfig = {
   credentialsDir: string;
+};
+
+type CredentialsClientConfig = {
+  clientId: string,
+  clientSecret: string
+};
+
+type CredentialsUserConfig = {
+  applicationUsername: string,
+  applicationPassword: string
+};
+
+type CredentialsUserClientConfig = CredentialsClientConfig & CredentialsUserConfig;
+
+type CredentialsConfig = CredentialsDirConfig | CredentialsClientConfig;
+type CredentialsPasswordConfig = CredentialsDirConfig | CredentialsUserClientConfig;
+
+type GrantConfigBase = {
   accessTokenEndpoint: string;
   queryParams?: { [index: string]: string };
   bodyParams?: { [index: string]: string };
-};
-
-type ClientCredentialsGrantConfig = GrantConfigBase & {
-  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT;
-  scopes: string[];
-};
-
-type AuthorizationCodeGrantConfig = GrantConfigBase & {
-  grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT;
-  code: string;
-  redirectUri: string;
-  scopes: string[];
-};
-
-type PasswordCredentialsGrantConfig = GrantConfigBase & {
-  grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
   scopes?: string[];
 };
 
-type RefreshGrantConfig = GrantConfigBase & {
+type ClientCredentialsGrantConfig = CredentialsConfig & GrantConfigBase & {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT;
+};
+
+type AuthorizationCodeGrantConfig = CredentialsConfig & GrantConfigBase & {
+  grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT;
+  code: string;
+  redirectUri: string;
+};
+
+type PasswordCredentialsGrantConfig = CredentialsPasswordConfig & GrantConfigBase & {
+  grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
+};
+
+type RefreshGrantConfig = CredentialsConfig & GrantConfigBase & {
   grantType: OAuthGrantType.REFRESH_TOKEN_GRANT;
   refreshToken: string;
-  scopes: string[];
 };
 
 type OAuthConfig =
@@ -41,6 +56,12 @@ type TokenCacheOAuthConfig = OAuthConfig & {
 };
 
 export {
+  CredentialsDirConfig,
+  CredentialsUserConfig,
+  CredentialsClientConfig,
+  CredentialsUserClientConfig,
+  CredentialsPasswordConfig,
+  CredentialsConfig,
   GrantConfigBase,
   ClientCredentialsGrantConfig,
   AuthorizationCodeGrantConfig,

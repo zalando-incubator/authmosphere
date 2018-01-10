@@ -6,14 +6,11 @@ import {
   getAccessToken,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
-  cleanMock
-} from '../../src/index';
-
-import {
+  cleanMock,
   Token,
   OAuthGrantType,
   PasswordCredentialsGrantConfig
-} from '../../src/types';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -48,7 +45,7 @@ describe('mock tooling', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should return the tokeninfo if token is valid', function () {
+    it('should return the tokeninfo if token is valid', () => {
 
       // given
       const validAuthToken = {
@@ -69,7 +66,7 @@ describe('mock tooling', () => {
       return expect(promise).to.become(validAuthToken);
     });
 
-    it('should return 400 if requested token is empty', function () {
+    it('should return 400 if requested token is empty', () => {
 
       // given
       const validAuthToken = {
@@ -90,7 +87,7 @@ describe('mock tooling', () => {
       return expect(promise).to.rejected;
     });
 
-    it('should return the tokeninfo as often as defined', function () {
+    it('should return the tokeninfo as often as defined', () => {
 
       // given
       const validAuthToken = {
@@ -126,7 +123,7 @@ describe('mock tooling', () => {
       return expect(promise).to.rejected;
     });
 
-    it('should return the tokeninfo Number.MAX_SAFE_INTEGER times when `times` option not defined', function () {
+    it('should return the tokeninfo Number.MAX_SAFE_INTEGER times when `times` option not defined', () => {
 
       // given
       const validAuthToken = {
@@ -170,7 +167,7 @@ describe('mock tooling', () => {
       cleanMock();
     });
 
-    it('accessToken endpoint should return valid token', function () {
+    it('accessToken endpoint should return valid token', () => {
 
       // given
       const options: PasswordCredentialsGrantConfig = {

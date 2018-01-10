@@ -4,9 +4,13 @@ import fetch from 'node-fetch';
 import * as formurlencoded from 'form-urlencoded';
 
 import {
-  getFileData,
+  getFileDataAsObject,
   getBasicAuthHeaderValue,
-  validateOAuthConfig
+  validateOAuthConfig,
+  isCredentialsDirConfig,
+  extractUserCredentials,
+  extractClientCredentials,
+  isPasswordGrantNoCredentialsDir
 } from './utils';
 
 import {
@@ -14,7 +18,10 @@ import {
   Token,
   OAuthGrantType,
   BodyParameters,
-  Logger
+  Logger,
+  CredentialsUserClientConfig,
+  CredentialsClientConfig,
+  CredentialsUserConfig
 } from './types';
 
 import { safeLogger } from './safe-logger';
@@ -193,26 +200,18 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
 
   validateOAuthConfig(options);
 
-  const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
-
-  // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-  if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-    credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
-  }
+  const credentialsPromises = getCredentials(options);
 
   return Promise.all(credentialsPromises)
-  .then((credentials) => {
-
-    const clientData = JSON.parse(credentials[0]);
+  .then(([clientData, userData]) => {
 
     let bodyParameters: BodyParameters;
 
     if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-      const userData = JSON.parse(credentials[1]);
       bodyParameters = {
         'grant_type': options.grantType,
-        'username': userData.application_username,
-        'password': userData.application_password
+        'username': userData.applicationUsername,
+        'password': userData.applicationPassword
       };
     } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
       bodyParameters = {
@@ -243,12 +242,46 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
       Object.assign(bodyParameters, options.bodyParams);
     }
 
-    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
+    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
       options.accessTokenEndpoint, logOrNothing, options.queryParams);
   });
 }
+
+type convertSnakeCredentialsToCamel = (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
+const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => ({
+  clientId: options.client_id,
+  clientSecret: options.client_secret,
+  applicationUsername: options.application_username,
+  applicationPassword: options.application_password
+});
+
+const getCredentials = (options: OAuthConfig): Promise<any>[] => {
+
+  let getClientData;
+  let getUserData;
+
+  if (isCredentialsDirConfig(options)) {
+    getClientData = getFileDataAsObject(options.credentialsDir, CLIENT_JSON)
+      .then(convertSnakeCredentialsToCamel);
+
+    // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+      getUserData = getFileDataAsObject(options.credentialsDir, USER_JSON)
+        .then(convertSnakeCredentialsToCamel);
+    }
+  } else {
+    getClientData = Promise.resolve(extractClientCredentials(options));
+
+    // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
+    if (isPasswordGrantNoCredentialsDir(options)) {
+      getUserData = Promise.resolve(extractUserCredentials(options));
+    }
+  }
+
+  return getUserData ? [getClientData, getUserData] : [getClientData];
+};
 
 export {
   getTokenInfo,

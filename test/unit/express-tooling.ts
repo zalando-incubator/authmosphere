@@ -5,10 +5,9 @@ import * as sinonChai from 'sinon-chai';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware
+  requireScopesMiddleware,
+  PrecedenceOptions
 } from '../../src';
-
-import { PrecedenceOptions } from '../../src/types';
 import { Response, Request } from 'express';
 
 chai.use(chaiAsPromised);
