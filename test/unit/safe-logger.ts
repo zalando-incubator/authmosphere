@@ -1,8 +1,10 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
-import { safeLogger } from '../../src';
-import { Logger } from '../../src/types';
+import {
+  safeLogger,
+  Logger
+} from '../../src';
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
