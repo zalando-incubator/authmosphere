@@ -4,21 +4,22 @@ export * from './TokenCache';
 export * from './mock-tooling/index';
 export * from './safe-logger';
 export {
-  Logger,
-  Token,
-  PrecedenceFunction,
-  PrecedenceErrorHandler,
-  PrecedenceOptions,
-  ExtendedRequest,
+  AuthenticationMiddlewareOptions,
   AuthorizationCodeGrantConfig,
-  PasswordCredentialsGrantConfig,
   ClientCredentialsGrantConfig,
+  ExtendedRequest,
+  Logger,
+  MockOptions,
+  OAuthConfig,
+  OAuthGrantType,
+  onAuthorizationFailedHandler,
+  onNotAuthenticatedHandler,
+  PasswordCredentialsGrantConfig,
+  PrecedenceFunction,
+  PrecedenceOptions,
   RefreshGrantConfig,
   ScopeMiddlewareOptions,
+  Token,
   TokenCacheConfig,
-  TokenCacheOAuthConfig,
-  OAuthConfig,
-  OAuthMiddlewareOptions,
-  MockOptions,
-  OAuthGrantType
+  TokenCacheOAuthConfig
 } from './types';

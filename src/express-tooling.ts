@@ -1,7 +1,6 @@
 import * as HttpStatus from 'http-status';
 import {
   NextFunction,
-  Request,
   Response,
   RequestHandler
 } from 'express';
@@ -16,13 +15,12 @@ import {
 import { getTokenInfo } from './oauth-tooling';
 
 import {
-  OAuthMiddlewareOptions,
+  AuthenticationMiddlewareOptions,
   ExtendedRequest,
+  onAuthorizationFailedHandler,
   PrecedenceFunction,
-  PrecedenceErrorHandler,
   PrecedenceOptions,
-  ScopeMiddlewareOptions,
-  Logger
+  ScopeMiddlewareOptions
 } from './types';
 
 import { safeLogger } from './safe-logger';
@@ -30,77 +28,82 @@ import { safeLogger } from './safe-logger';
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
 /**
- * Returns a function (express middleware) that validates the scopes against the user scopes
- * attached to the request (for example by `handleOAuthRequestMiddleware`).
- * If the the requested scopes are not matched request is rejected (with 403 Forbidden).
+ * Returns a function (express middleware) that validates the scopes attached to the request
+ * against the specified required scopes.
  *
- * ⚠️ If precedence function throws or return `false`, the standard scope validation is applied afterwards.
+ * The scopes must be attached to the request (for example by `authenticationMiddleware`).
+ * If the requested scopes are not matched the `onAuthorizationFailedHandler` is called.
+ *
+ * The options object can have the following properties:
+ * - optional logger
+ * - onAuthorizationFailedHandler - a customer handler method that
+ *                                  is executed if callee is not authorized,
+ *                                  If not provided, `response.sendStatus(403)` is called.
+ * - precedenceOptions - Let consumers define a handler to overrule scope checking.
+ *                       ⚠️ If precedence function throws or return `false`,
+ *                        the standard scope validation is applied afterwards.
+ *
  *
  * Usage:
  *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
  *
  * @param scopes - array of scopes that are needed to access the endpoint
- * @param logger - optional logger
- * @param precedenceOptions - This options let consumers define a way to over rule scope checking. The parameter is optional.
+ * @param options: ScopeMiddlewareOptions
  *
  * @returns { function(any, any, any): undefined }
  */
-type requireScopesMiddleware = (scopes: string[], middlewareOptions?: ScopeMiddlewareOptions) => RequestHandler;
+type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
 const requireScopesMiddleware: requireScopesMiddleware =
-  (scopes, middlewareOptions = {}) =>
+  (scopes, options = {}) =>
     (request: ExtendedRequest, response: Response, nextFunction: NextFunction) => {
 
       const {
         logger,
-        onAuthorizationFailedHandler,
         precedenceOptions
-      } = middlewareOptions;
+      } = options;
+      // Need to do this to not shadow the symbol
+      const _onAuthorizationFailedHandler = options.onAuthorizationFailedHandler;
 
       const logOrNothing = safeLogger(logger);
 
-      const authorizationFailedHandler =
-        typeof onAuthorizationFailedHandler === 'function' ?
-          (req: Request, res: Response, next: NextFunction, _scopes: string[], _logger: Logger) =>
-            onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
-          acceptOrRejectRequest;
+      const authorizationFailedHandler: onAuthorizationFailedHandler =
+        typeof _onAuthorizationFailedHandler === 'function' ?
+          (req, res, next, _scopes, _logger) =>
+            _onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
+          (req, res, next, _scopes, _logger) =>
+            rejectRequest(res, _logger, HttpStatus.FORBIDDEN);
 
       const precedenceFunction =
         precedenceOptions && typeof precedenceOptions.precedenceFunction === 'function' ?
           precedenceOptions.precedenceFunction :
           () => Promise.resolve(false);
-      const precedenceErrorHandler =
-        precedenceOptions && typeof precedenceOptions.precedenceErrorHandler === 'function' ?
-          precedenceOptions.precedenceErrorHandler :
-          () => undefined;
 
       precedenceFunction(request, response, nextFunction)
+      .catch(error => {
+        logOrNothing.warn(`Error while executing precedenceFunction: ${error}`);
+        // PrecedencFunction was not successful
+        //  false -> trigger fallback to default scope validation
+        return false;
+      })
       .then(isAllowed => {
-        if (isAllowed) {
+        if (isAllowed) { // precedenceFunction grants access
+          logOrNothing.debug('PrecedenceFunction grants access');
+          nextFunction();
+        } else if (validateScopes(request, scopes)) {  // scope validation grants access
+          logOrNothing.debug('Scopes validated successfully');
           nextFunction();
         } else {
-          // If not allowed apply standard scope validation logic
-          authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
-        }
-      })
-      .catch(error => {
-        try {
-          precedenceErrorHandler(error, logger);
-        } catch (e) {
-          logOrNothing.error(`Error while executing precedenceErrorHandler: ${e}`);
-        } finally {
-          // even if precedenceFunction and precedenceErrorHandler throws
-          // fallback to the default way
+          logOrNothing.warn(`Scope validation failed for ${scopes}`);
           authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
         }
       });
-
-      return;
     };
 
 /**
  * Returns a function (middleware) to extract and validate an access token from a request.
  * Furthermore, it attaches the scopes granted by the token to the request for further usage.
- * If the token is not valid the request is rejected (with 401 Unauthorized).
+ *
+ * If the token is not valid the onNotAuthenticatedHandler is called.
  *
  * The options object can have the following properties:
  *  - publicEndpoints string[]
@@ -108,23 +111,22 @@ const requireScopesMiddleware: requireScopesMiddleware =
  *  - optional logger
  *  - onNotAuthenticatedHandler - a customer handler method that
  *                                is executed if callee is not authorized,
- *                                If not provided, `response.sendStatus(403)` is called
- *                                and `next` is not called
+ *                                If not provided, `response.sendStatus(401)` is called.
  *
  * Usage:
  * app.use(handleOAuthRequestMiddleware(options))
  *
- * @param middlewareOptions: OAuthMiddlewareOptions
+ * @param options: AuthenticationMiddlewareOptions
  * @returns express middleware
  */
-type handleOAuthRequestMiddleware = (middlewareOptions: OAuthMiddlewareOptions) => RequestHandler;
-const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware = (middlewareOptions) => {
+type authenticationMiddleware = (options: AuthenticationMiddlewareOptions) => RequestHandler;
+const authenticationMiddleware: authenticationMiddleware = (options) => {
 
   const {
     tokenInfoEndpoint,
     publicEndpoints,
     logger
-  } = middlewareOptions;
+  } = options;
 
   const logOrNothing = safeLogger(logger);
 
@@ -135,11 +137,11 @@ const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware = (middlewareOp
 
   const oAuthMiddleware: RequestHandler = (req, res, next) => {
 
-    const customNotAuthenticatedHandler = middlewareOptions.onNotAuthenticatedHandler;
+    const customNotAuthenticatedHandler = options.onNotAuthenticatedHandler;
 
-    const notAuthenticatedHandler =
+    const notAuthenticatedHandler: rejectRequest =
       typeof customNotAuthenticatedHandler === 'function' ?
-        (_req: Response, _logger: Logger, status?: number) => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
+        (_req, _logger, status) => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
         rejectRequest;
 
     const originalUrl = req.originalUrl;
@@ -154,52 +156,41 @@ const handleOAuthRequestMiddleware: handleOAuthRequestMiddleware = (middlewareOp
 
     if (!authHeader) {
       logOrNothing.warn('No authorization field in header');
-      notAuthenticatedHandler(res, logOrNothing);
+      notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     }
 
     const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
       logOrNothing.warn('access_token is empty');
-      notAuthenticatedHandler(res, logOrNothing);
+      notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     } else {
       getTokenInfo(tokenInfoEndpoint, accessToken)
         .then(setTokeninfo(req))
         .then(next)
-        .catch(err => notAuthenticatedHandler(res, logOrNothing, err.status));
+        // TODO we should send 500 for issues with network etc.
+        //      we should send HttpStatus.UNAUTHORIZED for invalid token
+        .catch(err => notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED));
     }
   };
 
   return oAuthMiddleware;
 };
 
-const acceptOrRejectRequest = (req: ExtendedRequest,
-                               res: Response,
-                               next: NextFunction,
-                               scopes: string[],
-                               logger?: Logger): void => {
-
-  const logOrNothing = safeLogger(logger);
+const validateScopes = (req: ExtendedRequest, scopes: string[]): boolean => {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
   const userScopes = Array.isArray(requestScopes) ? requestScopes : [];
 
   const filteredScopes = scopes.filter((scope) => !userScopes.includes(scope));
 
-  if (filteredScopes.length === 0) {
-    logOrNothing.debug('Scopes validated successfully');
-    next();
-  } else {
-    logOrNothing.warn(`Scope validation failed for ${scopes}`);
-    rejectRequest(res, safeLogger(logger), HttpStatus.FORBIDDEN);
-  }
+  return filteredScopes.length === 0;
 };
 
 export {
   PrecedenceFunction,
-  PrecedenceErrorHandler,
   PrecedenceOptions,
   requireScopesMiddleware,
-  handleOAuthRequestMiddleware
+  authenticationMiddleware
 };

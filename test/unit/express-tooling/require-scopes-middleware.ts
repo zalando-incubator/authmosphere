@@ -118,8 +118,7 @@ describe('express tooling', () => {
       const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(true);
-        },
-        precedenceErrorHandler: () => { return; }
+        }
       };
       const options: ScopeMiddlewareOptions = {
         logger: loggerMock,
@@ -148,8 +147,7 @@ describe('express tooling', () => {
       const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(false);
-        },
-        precedenceErrorHandler: () => { return; }
+        }
       };
       const options: ScopeMiddlewareOptions = {
         logger: loggerMock,
@@ -208,8 +206,7 @@ describe('express tooling', () => {
       const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.resolve(false);
-        },
-        precedenceErrorHandler: () => { return; }
+        }
       };
 
       const options: ScopeMiddlewareOptions = {
@@ -230,7 +227,7 @@ describe('express tooling', () => {
 
     it('should fallback to normal scope validation', (done) => {
 
-      // if precedence function rejects and precedenceErrorHandler throws
+      // if precedence function rejects
 
       // given
       const next = sinon.spy();
@@ -241,9 +238,6 @@ describe('express tooling', () => {
       const precedenceOptions = {
         precedenceFunction: () => {
           return Promise.reject(false);
-        },
-        precedenceErrorHandler: () => {
-          throw Error('Expected precedenceErrorHandler throw');
         }
       };
 
@@ -261,35 +255,6 @@ describe('express tooling', () => {
         expect(next).to.have.been.called;
         done();
       });
-    });
-
-    it('should call precedence error handler', (done) => {
-
-      // given
-      const next = sinon.spy();
-      const requiredScopes = ['test'];
-
-      const requestMock = createRequestMock([]);
-      const customErrorhandler = (e: any​​): void => {
-        // then
-        expect(e).to.equal('Error happened');
-        done();
-      };
-
-      const precedenceOptions = {
-        precedenceFunction: () => {
-          return Promise.reject('Error happened');
-        },
-        precedenceErrorHandler: customErrorhandler
-      };
-
-      const options: ScopeMiddlewareOptions = {
-        logger: loggerMock,
-        precedenceOptions
-      };
-
-      // when
-      requireScopesMiddleware(requiredScopes, options)(requestMock, createResponseMock(), next);
     });
 
     it('should call onAuthorizationFailed handler', (done) => {

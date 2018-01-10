@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as HttpStatus from 'http-status';
 import * as btoa from 'btoa';
 import { Request, Response } from 'express';
 
@@ -120,12 +119,13 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
 };
 
 /**
- * Reject a request with 401 or the given status code.
+ * Reject a request with the given status code.
  *
  * @param res
  * @param status
  */
-const rejectRequest = (res: Response, logger: Logger, status: number = HttpStatus.UNAUTHORIZED) => {
+type rejectRequest = (res: Response, logger: Logger, status: number) => void;
+const rejectRequest: rejectRequest = (res, logger, status) => {
 
   logger.info(`Request will be rejected with status ${status}`);
 
