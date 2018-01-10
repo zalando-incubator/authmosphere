@@ -7,12 +7,9 @@ import fetch from 'node-fetch';
 
 import {
   handleOAuthRequestMiddleware,
-  requireScopesMiddleware
-} from '../../src/index';
-
-import {
+  requireScopesMiddleware,
   OAuthGrantType
-} from '../../src/types';
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

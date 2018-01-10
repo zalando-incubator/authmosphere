@@ -7,7 +7,11 @@ import {
    OAuthConfig,
    Token,
    OAuthGrantType,
-   Logger
+   Logger,
+   CredentialsDirConfig,
+   CredentialsClientConfig,
+   CredentialsUserConfig,
+   CredentialsUserClientConfig
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -34,12 +38,13 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-const getFileData = (filePath: string, fileName: string): Promise<string> => {
+const getFileDataAsObject = (filePath: string, fileName: string) => {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
 
-  const promise = fsReadFile(filePath + fileName, 'utf-8');
+  const promise = fsReadFile(filePath + fileName, 'utf-8')
+    .then(JSON.parse);
 
   return promise;
 };
@@ -65,8 +70,8 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 /**
  * Returns a basic authentication header value with the given credentials
  *
- * @param client_id
- * @param client_secret
+ * @param clientId
+ * @param clientSecret
  * @returns {string}
  */
 const getBasicAuthHeaderValue = (clientId: string, clientSecret: string): string => {
@@ -129,6 +134,28 @@ const rejectRequest = (res: Response,
   res.sendStatus(status);
 };
 
+const isCredentialsDirConfig = (options: any): options is CredentialsDirConfig =>
+  options.credentialsDir !== undefined;
+
+const isCredentialsClientConfig = (options: any): options is CredentialsClientConfig =>
+  options.clientId !== undefined && options.clientSecret !== undefined;
+
+const isCredentialsUserConfig = (options: any): options is CredentialsUserConfig =>
+  options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
+
+const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUserClientConfig =>
+   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+   isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
+
+const checkCredentialsSource = (options: OAuthConfig) =>
+ isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
+
+const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig =>
+  ({ applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername });
+
+const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig =>
+  ({ clientId: options.clientId, clientSecret: options.clientSecret });
+
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.
  *
@@ -136,8 +163,8 @@ const rejectRequest = (res: Response,
  */
 const validateOAuthConfig = (options: OAuthConfig): void => {
 
-  if (!options.credentialsDir) {
-    throw TypeError('credentialsDir must be defined');
+  if (!checkCredentialsSource(options)) {
+    throw TypeError('credentials must be defined');
   }
 
   if (!options.accessTokenEndpoint) {
@@ -163,9 +190,14 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
 
 export {
   extractAccessToken,
+  extractUserCredentials,
+  extractClientCredentials,
   getBasicAuthHeaderValue,
-  getFileData,
+  getFileDataAsObject,
   getHeaderValue,
+  isCredentialsDirConfig,
+  isCredentialsClientConfig,
+  isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
   setTokeninfo
