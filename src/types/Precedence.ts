@@ -1,28 +1,21 @@
-import * as express from 'express';
-
-import { Logger } from './';
+import {
+  Request,
+  Response,
+  NextFunction
+} from 'express';
 
 /**
  * Must return a promise that return true or false. If the result is true the scope checking will be skipped and next is called
  */
 interface PrecedenceFunction {
-  (req: express.Request, res: express.Response, next: express.NextFunction): Promise<boolean>;
-}
-
-/**
- * Will be called when IPrecedenceFunction throws an error. Should be side effect free, returned Promises are ignored.
- */
-interface PrecedenceErrorHandler {
-  (error: any, logger?: Logger): any;
+  (req: Request, res: Response, next: NextFunction): Promise<boolean>;
 }
 
 interface PrecedenceOptions {
   precedenceFunction: PrecedenceFunction;
-  precedenceErrorHandler: PrecedenceErrorHandler;
 }
 
 export {
   PrecedenceFunction,
-  PrecedenceErrorHandler,
   PrecedenceOptions
 };

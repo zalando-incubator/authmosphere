@@ -6,7 +6,7 @@ import * as Http from 'http';
 import fetch from 'node-fetch';
 
 import {
-  handleOAuthRequestMiddleware,
+  authenticationMiddleware,
   requireScopesMiddleware,
   OAuthGrantType
 } from '../../src';
@@ -24,7 +24,7 @@ describe('middlewares', () => {
   beforeEach(() => {
     const app = Express();
 
-    app.use(handleOAuthRequestMiddleware({
+    app.use(authenticationMiddleware({
       publicEndpoints: [ '/public', '/healthcheck' ],
       tokenInfoEndpoint: 'http://127.0.0.1:30001/oauth2/tokeninfo'
     }));

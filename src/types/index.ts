@@ -4,7 +4,7 @@ export * from './Logger';
 export * from './MockOptions';
 export * from './OAuthConfig';
 export * from './OAuthGrantType';
-export * from './OAuthMiddlewareOptions';
+export * from './AuthenticationMiddlewareOptions';
 export * from './Precedence';
 export * from './ScopeMiddlewareOptions';
 export * from './Token';

@@ -6,8 +6,8 @@ import * as sinonChai from 'sinon-chai';
 import { Response, Request } from 'express';
 
 import {
-  handleOAuthRequestMiddleware,
-  OAuthMiddlewareOptions
+  authenticationMiddleware,
+  AuthenticationMiddlewareOptions
 } from '../../../src';
 
 chai.use(chaiAsPromised);
@@ -27,7 +27,7 @@ describe('express tooling', () => {
     sendStatus: sinon.spy((status: string) => undefined)
   } as any as Response);
 
-  describe('handleOAuthRequestMiddleware', () => {
+  describe('authenticationMiddleware', () => {
 
     it('should throw a TypeError, if tokenInfoEndpoint is undefined', () => {
 
@@ -38,7 +38,7 @@ describe('express tooling', () => {
       };
 
       // then
-      expect(() => { handleOAuthRequestMiddleware(config); }).to.throw(TypeError);
+      expect(() => { authenticationMiddleware(config); }).to.throw(TypeError);
     });
 
     it('should call #next on public endpoint', (done) => {
@@ -57,7 +57,7 @@ describe('express tooling', () => {
       } as any as Request;
 
       // when
-      handleOAuthRequestMiddleware(config)(requestMock, createResponseMock(), next);
+      authenticationMiddleware(config)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -83,7 +83,7 @@ describe('express tooling', () => {
       } as any as Request;
 
       // when
-      handleOAuthRequestMiddleware(config)(requestMock, createResponseMock(), next);
+      authenticationMiddleware(config)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -109,7 +109,7 @@ describe('express tooling', () => {
       } as any as Request;
 
       // when
-      handleOAuthRequestMiddleware(config)(requestMock, createResponseMock(), next);
+      authenticationMiddleware(config)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
@@ -119,11 +119,11 @@ describe('express tooling', () => {
       });
     });
 
-    it('should call custom notAuthenticated handler', (done) => {
+    it('should call onNotAuthenticatedHandler', (done) => {
       // given
       const next = sinon.spy();
 
-      const middleWareconfig: OAuthMiddlewareOptions = {
+      const middleWareconfig: AuthenticationMiddlewareOptions = {
         tokenInfoEndpoint: '/oauth2/tokeninfo',
         onNotAuthenticatedHandler: sinon.spy()
       };
@@ -134,7 +134,7 @@ describe('express tooling', () => {
       } as any as Request;
 
       // when
-      handleOAuthRequestMiddleware(middleWareconfig)(requestMock, createResponseMock(), next);
+      authenticationMiddleware(middleWareconfig)(requestMock, createResponseMock(), next);
 
       // then
       setTimeout(() => {
