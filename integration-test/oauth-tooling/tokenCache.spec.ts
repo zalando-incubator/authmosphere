@@ -278,18 +278,16 @@ describe('tokenCache', () => {
       const otherAccessTokenValue = 'bar';
 
       nock(oauthHost)
-        .post('/access_token', function (body: any) {
-          return body.scope === 'nucleus.write nucleus.read';
-        })
+        .post('/access_token', (body: any) =>
+          body.scope === 'nucleus.write nucleus.read')
         .reply(HttpStatus.OK, {
           access_token: defaultAccessTokenValue
         })
         .get('/tokeninfo')
         .query({ access_token: defaultAccessTokenValue })
         .reply(HttpStatus.OK, defaultTokenInfoResponse)
-        .post('/access_token', function (body: any) {
-          return body.scope === 'all';
-        })
+        .post('/access_token', (body: any) =>
+          body.scope === 'all')
         .reply(HttpStatus.OK, {
           access_token: otherAccessTokenValue
         })
