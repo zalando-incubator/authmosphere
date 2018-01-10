@@ -5,13 +5,13 @@ type CredentialsDirConfig = {
 };
 
 type CredentialsClientConfig = {
-  client_id: string,
-  client_secret: string
+  clientId: string,
+  clientSecret: string
 };
 
 type CredentialsUserConfig = {
-  application_username: string,
-  application_password: string
+  applicationUsername: string,
+  applicationPassword: string
 };
 
 type CredentialsUserClientConfig = CredentialsClientConfig & CredentialsUserConfig;

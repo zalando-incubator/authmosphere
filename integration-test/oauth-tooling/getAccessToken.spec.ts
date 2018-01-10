@@ -153,8 +153,8 @@ describe('getAccessToken', () => {
         ...passwordCredentialsOAuthOptions,
         ...{
           credentialsDir: undefined,
-          client_id: validUserName,
-          client_secret: validUserPassword
+          clientId: validUserName,
+          clientSecret: validUserPassword
         } as any as OAuthConfig
       });
 
@@ -174,10 +174,10 @@ describe('getAccessToken', () => {
         ...passwordCredentialsOAuthOptions,
         ...{
           credentialsDir: undefined,
-          client_id: validUserName,
-          client_secret: validUserPassword,
-          application_username: validUserName,
-          application_password: validUserPassword
+          clientId: validUserName,
+          clientSecret: validUserPassword,
+          applicationUsername: validUserName,
+          applicationPassword: validUserPassword
         }
       });
 
@@ -196,10 +196,9 @@ describe('getAccessToken', () => {
       const promise = getAccessToken({
         ...passwordCredentialsOAuthOptions,
         ...{
-          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           credentialsDir: undefined,
-          client_id: validUserName,
-          client_secret: validUserPassword
+          clientId: validUserName,
+          clientSecret: validUserPassword
         } as any as OAuthConfig
       });
 
@@ -369,7 +368,7 @@ describe('getAccessToken', () => {
       redirectUri: validRedirectUri
     };
 
-    it('should resolve with access token if valid', function() {
+    it('should resolve with access token if valid', () => {
 
       // given
       nock(oAuthServerHost)

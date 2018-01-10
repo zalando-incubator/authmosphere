@@ -11,8 +11,7 @@ import {
    CredentialsDirConfig,
    CredentialsClientConfig,
    CredentialsUserConfig,
-   CredentialsUserClientConfig,
-   PasswordCredentialsGrantConfig
+   CredentialsUserClientConfig
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -45,7 +44,7 @@ const getFileDataAsObject = (filePath: string, fileName: string) => {
   }
 
   const promise = fsReadFile(filePath + fileName, 'utf-8')
-    .then((data) => JSON.parse(data));
+    .then(JSON.parse);
 
   return promise;
 };
@@ -71,8 +70,8 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 /**
  * Returns a basic authentication header value with the given credentials
  *
- * @param client_id
- * @param client_secret
+ * @param clientId
+ * @param clientSecret
  * @returns {string}
  */
 const getBasicAuthHeaderValue = (clientId: string, clientSecret: string): string => {
@@ -141,47 +140,26 @@ function isCredentialsDirConfig(options: any): options is CredentialsDirConfig {
   return castedOptions.credentialsDir !== undefined;
 }
 
-function isCredentialsClientConfig(options: any): options is CredentialsClientConfig {
-  const castedOptions = <CredentialsClientConfig> options;
+const isCredentialsClientConfig = (options: any): options is CredentialsClientConfig =>
+  options.clientId !== undefined && options.clientSecret !== undefined;
 
-  return castedOptions.client_id !== undefined &&
-         castedOptions.client_secret !== undefined;
-}
+const isCredentialsUserConfig = (options: any): options is CredentialsUserConfig =>
+  options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
 
-function isCredentialsUserConfig(options: any): options is CredentialsUserConfig {
-  const castedOptions = <CredentialsUserConfig> options;
+const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUserClientConfig =>
+   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+   isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
 
-  return castedOptions.application_username !== undefined &&
-         castedOptions.application_password !== undefined;
-}
+const checkCredentialsSource = (options: OAuthConfig) =>
+ isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
 
-function isPasswordGrantNoCredentialsDir(options: any): options is CredentialsUserClientConfig {
-  const castedOptions = <CredentialsUserClientConfig> options;
+const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig => {
+  return { applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername };
+};
 
-  return (<PasswordCredentialsGrantConfig> options).grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
-         isCredentialsUserConfig(castedOptions) &&
-         isCredentialsClientConfig(castedOptions);
-}
-
-function checkCredentialsSource(options: OAuthConfig) {
-  return isCredentialsDirConfig(options) ||
-         isCredentialsClientConfig(options) ||
-         isPasswordGrantNoCredentialsDir(options);
-}
-
-function extractUserCredentials(options: CredentialsUserConfig | CredentialsUserClientConfig): object {
-  const application_password = options.application_password;
-  const application_username = options.application_username;
-
-  return { application_password, application_username };
-}
-
-function extractClientCredentials(options: CredentialsClientConfig | CredentialsUserClientConfig): object {
-  const client_id = options.client_id;
-  const client_secret = options.client_secret;
-
-  return { client_id, client_secret };
-}
+const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig => {
+  return { clientId: options.clientId, clientSecret: options.clientSecret };
+};
 
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.

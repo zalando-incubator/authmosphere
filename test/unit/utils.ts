@@ -24,8 +24,8 @@ describe('utils', () => {
         getFileDataAsObject('test/unit/credentials', 'user.json'),
         getFileDataAsObject('test/unit/credentials/', 'user.json')
       ])
-      .then((credentials) => {
-        expect(credentials[0]).to.deep.equal(credentials[1]);
+      .then(([nonTailingCredentials, tailingCredentials]) => {
+        expect(nonTailingCredentials).to.deep.equal(tailingCredentials);
       });
     });
 
@@ -52,23 +52,23 @@ describe('utils', () => {
   });
 
   describe('extractUserCredentials', () => {
-    it('return user credentials as string', () => {
+    it('should return user credentials as object', () => {
 
-      const clientId = 'client_id';
-      const clientSecret = 'client_secret';
-      const applicationUsername = 'application_username';
-      const applicationPassword = 'application_password';
+      const clientId = 'clientId';
+      const clientSecret = 'clientSecret';
+      const applicationUsername = 'applicationUsername';
+      const applicationPassword = 'applicationPassword';
 
       const given = {
-        client_id: clientId,
-        client_secret: clientSecret,
-        application_username: applicationUsername,
-        application_password: applicationPassword
+        clientId,
+        clientSecret,
+        applicationUsername,
+        applicationPassword
       };
 
       const expected: object = {
-        application_username: applicationUsername,
-        application_password: applicationPassword
+        applicationUsername,
+        applicationPassword
       };
 
       const result = extractUserCredentials(given);
@@ -78,23 +78,23 @@ describe('utils', () => {
   });
 
   describe('extractClientCredentials', () => {
-    it('return client credentials as string', () => {
+    it('should return client credentials as object', () => {
 
-      const clientId = 'client_id';
-      const clientSecret = 'client_secret';
-      const applicationUsername = 'application_username';
-      const applicationPassword = 'application_password';
+      const clientId = 'clientId';
+      const clientSecret = 'clientSecret';
+      const applicationUsername = 'applicationUsername';
+      const applicationPassword = 'applicationPassword';
 
       const given = {
-        client_id: clientId,
-        client_secret: clientSecret,
-        application_username: applicationUsername,
-        application_password: applicationPassword
+        clientId,
+        clientSecret,
+        applicationUsername,
+        applicationPassword
       };
 
       const expected: object = {
-        client_id: clientId,
-        client_secret: clientSecret
+        clientId,
+        clientSecret
       };
 
       const result = extractClientCredentials(given);
@@ -104,7 +104,7 @@ describe('utils', () => {
   });
 
   describe('isCredentialsDirConfig', () => {
-    it('return true, if credentialsDir exists in config', () => {
+    it('should return true, if credentialsDir exists in config', () => {
       const config = {
         credentialsDir: 'credentialsDir'
       };
@@ -115,7 +115,7 @@ describe('utils', () => {
     });
   });
 
-  it('return false, if credentialsDir do not exists in config', () => {
+  it('should return false, if credentialsDir do not exists in config', () => {
     const config = {
       credentialsDir: undefined
     };
@@ -126,10 +126,10 @@ describe('utils', () => {
   });
 
   describe('isPassCredentialsClientConfig', () => {
-    it('return true, if client_id and client_secret exists in config', () => {
+    it('should return true, if clientId and client_secret exists in config', () => {
       const config = {
-        client_id: 'client_id',
-        client_secret: 'client_secret'
+        clientId: 'clientId',
+        clientSecret: 'clientSecret'
       };
 
       const result = isCredentialsClientConfig(config);
@@ -138,10 +138,10 @@ describe('utils', () => {
     });
   });
 
-  it('return false, if client_id do not exists in config', () => {
+  it('should return false, if clientId do not exists in config', () => {
     const config = {
-      client_id: undefined,
-      client_secret: 'client_secret'
+      clientId: undefined,
+      clientSecret: 'clientSecret'
     };
 
     const result = isCredentialsClientConfig(config);
@@ -149,10 +149,10 @@ describe('utils', () => {
     return expect(result).to.equal(false);
   });
 
-  it('return false, if client_secret do not exists in config', () => {
+  it('should return false, if clientSecret do not exists in config', () => {
     const config = {
-      client_id: 'client_id',
-      client_secret: undefined
+      clientId: 'clientId',
+      clientSecret: undefined
     };
 
     const result = isCredentialsClientConfig(config);
@@ -161,13 +161,13 @@ describe('utils', () => {
   });
 
   describe('isPasswordGrantWOCredentialsDir', () => {
-    it('return true, if client_id and client_secret exists in config', () => {
+    it('should return true, if clientId and clientSecret exists in config', () => {
       const config = {
         grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-        application_username: 'application_username',
-        application_password: 'application_password',
-        client_id: 'client_id',
-        client_secret: 'client_secret'
+        applicationUsername: 'applicationUsername',
+        applicationPassword: 'applicationPassword',
+        clientId: 'clientId',
+        clientSecret: 'clientSecret'
       };
 
       const result = isPasswordGrantNoCredentialsDir(config);
@@ -176,13 +176,13 @@ describe('utils', () => {
     });
   });
 
-  it('return false, if application_username do not exists in config', () => {
+  it('should return false, if applicationUsername do not exists in config', () => {
     const config = {
       grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-      application_username: undefined,
-      application_password: 'application_password',
-      client_id: 'client_id',
-      client_secret: 'client_secret'
+      applicationUsername: undefined,
+      applicationPassword: 'applicationPassword',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret'
     };
 
     const result = isPasswordGrantNoCredentialsDir(config);
@@ -190,13 +190,13 @@ describe('utils', () => {
     return expect(result).to.equal(false);
   });
 
-  it('return false, if application_password do not exists in config', () => {
+  it('should return false, if applicationPassword do not exists in config', () => {
     const config = {
       grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-      application_username: 'application_username',
-      application_password: undefined,
-      client_id: 'client_id',
-      client_secret: 'client_secret'
+      applicationUsername: 'applicationUsername',
+      applicationPassword: undefined,
+      clientId: 'clientId',
+      clientSecret: 'clientSecret'
     };
 
     const result = isPasswordGrantNoCredentialsDir(config);
@@ -204,13 +204,13 @@ describe('utils', () => {
     return expect(result).to.equal(false);
   });
 
-  it('return false, if client_id do not exists in config', () => {
+  it('should return false, if clientId do not exists in config', () => {
     const config = {
       grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-      application_username: 'application_username',
-      application_password: 'application_password',
-      client_id: undefined,
-      client_secret: 'client_secret'
+      applicationUsername: 'applicationUsername',
+      applicationPassword: 'applicationPassword',
+      clientId: undefined,
+      clientSecret: 'clientSecret'
     };
 
     const result = isPasswordGrantNoCredentialsDir(config);
@@ -218,13 +218,13 @@ describe('utils', () => {
     return expect(result).to.equal(false);
   });
 
-  it('return false, if client_secret do not exists in config', () => {
+  it('should return false, if clientSecret do not exists in config', () => {
     const config = {
       grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-      application_username: 'application_username',
-      application_password: 'application_password',
-      client_id: 'client_id',
-      client_secret: undefined
+      applicationUsername: 'applicationUsername',
+      applicationPassword: 'applicationPassword',
+      clientId: 'clientId',
+      clientSecret: undefined
     };
 
     const result = isPasswordGrantNoCredentialsDir(config);
@@ -232,13 +232,13 @@ describe('utils', () => {
     return expect(result).to.equal(false);
   });
 
-  it('return false, if grantType != PASSWORD_CREDENTIALS_GRANT', () => {
+  it('should return false, if grantType != PASSWORD_CREDENTIALS_GRANT', () => {
     const config = {
       grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
-      application_username: 'application_username',
-      application_password: 'application_password',
-      client_id: 'client_id',
-      client_secret: 'client_secret'
+      applicationUsername: 'applicationUsername',
+      applicationPassword: 'applicationPassword',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret'
     };
 
     const result = isPasswordGrantNoCredentialsDir(config);
