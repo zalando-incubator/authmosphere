@@ -6,7 +6,7 @@ import * as lolex from 'lolex';
 
 import {
   TokenCache,
-  defaultTokenCacheConfig,
+  defaultCacheConfig,
   OAuthGrantType
 } from '../../src';
 
@@ -15,7 +15,7 @@ import { TokenCacheOAuthConfig } from '../../src/types/OAuthConfig';
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe('tokenCache', () => {
+describe('TokenCache', () => {
 
   let oauthConfig: TokenCacheOAuthConfig;
   const oauthHost = 'http://auth.zalando.com/oauth2';
@@ -44,6 +44,7 @@ describe('tokenCache', () => {
   });
 
   describe('get', () => {
+
     it('should reject if there is no token configuration for given name', () => {
 
       // given
@@ -108,7 +109,7 @@ describe('tokenCache', () => {
       // given
       const clock = lolex.install();
       const initialLifetime = 3600;
-      const timeBeforeExpiry = initialLifetime * (1 - defaultTokenCacheConfig.percentageLeft) * 1000 - 1;
+      const timeBeforeExpiry = initialLifetime * (1 - defaultCacheConfig.percentageLeft) * 1000 - 1;
 
       nock(oauthHost)
         .post('/access_token')
@@ -143,7 +144,7 @@ describe('tokenCache', () => {
       // given
       const clock = lolex.install();
       const initialLifetime = 3600;
-      const timeUntilExpiry = initialLifetime * (1 - defaultTokenCacheConfig.percentageLeft) * 1000 + 1;
+      const timeUntilExpiry = initialLifetime * (1 - defaultCacheConfig.percentageLeft) * 1000 + 1;
 
       const otherAccessTokenValue = 'bar';
 
