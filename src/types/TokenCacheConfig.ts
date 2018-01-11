@@ -1,5 +1,15 @@
-type TokenCacheConfig = {
+import { Logger } from './';
+
+type CacheConfig = {
   percentageLeft: number
 };
 
-export { TokenCacheConfig };
+type TokenCacheOptions = {
+  cacheConfig?: CacheConfig,
+  logger?: Logger
+};
+
+export {
+  CacheConfig,
+  TokenCacheOptions
+};
