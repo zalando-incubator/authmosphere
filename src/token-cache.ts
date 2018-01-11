@@ -29,7 +29,7 @@ type TokenMap = { [key: string]: Token | undefined };
  * Usage:
  *  const tokenCache = new TokenCache({
  *    'nucleus': ['write.all', 'read.all']
- *  }, oAuthConfig);
+ *  }, oAuthConfig, options);
  *
  *  tokenCache.get('nucleus')
  *  .then((token) => {
@@ -167,7 +167,7 @@ class TokenCache {
 
     if (this.tokenConfig[tokenName] === undefined) {
       const msg = `TokenCache miss: ${tokenName} does not exist`;
-      this.logger.warn(msg);
+      this.logger.error(msg);
       return Promise.reject(msg);
     }
 
@@ -175,7 +175,7 @@ class TokenCache {
 
     if (token === undefined) {
       const msg = `TokenCache miss: ${tokenName}`;
-      this.logger.warn(msg);
+      this.logger.debug(msg);
       return Promise.reject(msg);
     }
 
@@ -183,7 +183,7 @@ class TokenCache {
 
     if (localExpiry < Date.now()) {
       const msg = `TokenCache miss: ${tokenName} expired locally`;
-      this.logger.warn(msg);
+      this.logger.debug(msg);
       return Promise.reject(msg);
     }
 
