@@ -1,6 +1,6 @@
 export * from './oauth-tooling';
 export * from './express-tooling';
-export * from './TokenCache';
+export * from './token-cache';
 export * from './mock-tooling/index';
 export * from './safe-logger';
 export {
@@ -20,6 +20,6 @@ export {
   RefreshGrantConfig,
   ScopeMiddlewareOptions,
   Token,
-  TokenCacheConfig,
+  TokenCacheOptions,
   TokenCacheOAuthConfig
 } from './types';
