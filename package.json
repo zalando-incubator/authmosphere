@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "btoa": "1.1.2",
-    "form-urlencoded": "2.0.4",
     "http-status": "1.0.1",
     "nock": "9.1.6",
     "node-fetch": "1.7.3",
