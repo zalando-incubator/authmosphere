@@ -4,11 +4,11 @@
 
 ### Upgrade
 
-* call `npm install --save authmosphere@~2.0.0`
+* run `npm install --save authmosphere@~2.0.0`
 
 ### General changes
 
-* All exported functions got support for a custom Logger. Providing a logger is optional.
+* All exported functions got support for a custom logger. Providing a logger is optional.
   Any logger need to satisfy the [Logger](./src/types/Logger.ts) interface.
   * If a logging framework does not satisfy the interface, it need to be wrapped for authmosphere.
 * To keep arguments lists short, `option` objects were introduced to group a number of (mostly) optional parameters.
@@ -41,8 +41,8 @@
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
-* call `npm uninstall --save lib-oauth-tooling`
-* call `npm install --save authmosphere`
+* run `npm uninstall --save lib-oauth-tooling`
+* run `npm install --save authmosphere`
 
 The signature of the function `createAuthCodeRequestUri` was changed to be better suitable for partial application. The `authorizationEndpoint` parameter was moved to the first position.
 It's important to manually adjust your code to this change, since the type system is not helpful in this special case.
