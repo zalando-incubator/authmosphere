@@ -45,7 +45,7 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  *
  *
  * Usage:
- *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
+ *  app.get('/path', requireScopesMiddleware(['scopeA', 'scopeB']), (req, res) => { // Do route work })
  *
  * @param scopes - array of scopes that are needed to access the endpoint
  * @param options: ScopeMiddlewareOptions

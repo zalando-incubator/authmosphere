@@ -20,9 +20,14 @@
   * config parameter `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`
   * an optional logger can be provided ([Logger](./src/types/Logger.ts))
   * an optional `onNotAuthenticatedHandler` can be provided, it helps to customize handling the case authentication fails
-  * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/PrecedenceOptions.ts)). `onNotAuthenticatedHandler` should be used instead.
 
-
+* `requireScopesMiddleware`
+  * added optional `options` object of type [`ScopeMiddlewareOptions`](./src/types/ScopeMiddlewareOptions.ts)
+    * an optional logger can be provided ([Logger](./src/types/Logger.ts))
+    * an optional `onAuthorizationFailedHandler` can be provided, it helps to customize handling the case authentication fails
+  * moved `precedenceOptions` parameter into `options` parameter
+    * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts).
+      `onAuthorizationFailedHandler` should be used instead.
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
