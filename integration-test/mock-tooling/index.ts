@@ -186,6 +186,62 @@ describe('mock tooling', () => {
       // when
       const promise = getAccessToken(options)
       .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
+
+        return getTokenInfo(tokeninfoEndpoint, token.access_token);
+      });
+
+      // then
+      return expect(promise).to.eventually.haveOwnProperty('access_token');
+    });
+
+    it('accessToken endpoint should return valid token if multiple scopes are defined', () => {
+
+      // given
+      const options: PasswordCredentialsGrantConfig = {
+        scopes: ['read_service', 'write_service'],
+        accessTokenEndpoint: accessTokenEndpoint,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+      };
+      mockAccessTokenEndpoint({
+        url: accessTokenEndpoint
+      });
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint
+      });
+
+      // when
+      const promise = getAccessToken(options)
+      .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
+
+        return getTokenInfo(tokeninfoEndpoint, token.access_token);
+      });
+
+      // then
+      return expect(promise).to.eventually.haveOwnProperty('access_token');
+    });
+
+    it('accessToken endpoint should return valid token if scope is undefined', () => {
+
+      // given
+      const options: PasswordCredentialsGrantConfig = {
+        accessTokenEndpoint: accessTokenEndpoint,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+      };
+      mockAccessTokenEndpoint({
+        url: accessTokenEndpoint
+      });
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint
+      });
+
+      // when
+      const promise = getAccessToken(options)
+      .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
 
         return getTokenInfo(tokeninfoEndpoint, token.access_token);
       });

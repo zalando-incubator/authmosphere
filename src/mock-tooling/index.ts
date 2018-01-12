@@ -2,6 +2,7 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
+import * as querystring from 'querystring';
 
 import {
   MockOptions,
@@ -10,11 +11,11 @@ import {
 
 let tokens: Token[] = [];
 
-function generateToken(): Token {
+function generateToken(scopes?: string[]): Token {
 
   return {
     expires_in: 3600,
-    scope: [ 'uid' ],
+    scope: scopes,
     access_token: uuid.v4()
   };
 }
@@ -48,17 +49,20 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
   const parsedUrl = parseUrlOrThrow(options);
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-  .times(options.times || Number.MAX_SAFE_INTEGER)
-  .query(true)
-  .reply(() => {
+    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply((uri: string, requestBody: string) => {
 
-    // TODO: in the future we want to extract scopes from body
-    const newToken = generateToken();
-    tokens.push(newToken);
+      const body = querystring.parse(requestBody);
 
-    return [HttpStatus.OK, newToken];
-  });
+      const scope = body.scope ? body.scope.toString().split(' ') : undefined;
+
+      const newToken = generateToken(scope);
+      tokens.push(newToken);
+
+      return [HttpStatus.OK, newToken];
+    });
 }
 
 export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {

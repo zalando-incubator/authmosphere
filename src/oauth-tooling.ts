@@ -1,7 +1,7 @@
 import * as qs from 'querystring';
 import * as HttpStatus from 'http-status';
 import fetch from 'node-fetch';
-import * as formurlencoded from 'form-urlencoded';
+import * as querystring from 'querystring';
 
 import {
   getFileDataAsObject,
@@ -81,7 +81,7 @@ function requestAccessToken(bodyObject: any,
   const promise =
     fetch(url, {
       method: 'POST',
-      body: formurlencoded(bodyObject),
+      body: querystring.stringify(bodyObject),
       headers: {
         'Authorization': authorizationHeaderValue,
         'Content-Type': OAUTH_CONTENT_TYPE
