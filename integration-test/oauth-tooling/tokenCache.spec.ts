@@ -280,7 +280,8 @@ describe('TokenCache', () => {
 
       nock(oauthHost)
         .post('/access_token', (body: any) =>
-          body.scope === 'nucleus.write nucleus.read')
+          body.scope === 'nucleus.write nucleus.read'
+        )
         .reply(HttpStatus.OK, {
           access_token: defaultAccessTokenValue
         })
@@ -288,7 +289,8 @@ describe('TokenCache', () => {
         .query({ access_token: defaultAccessTokenValue })
         .reply(HttpStatus.OK, defaultTokenInfoResponse)
         .post('/access_token', (body: any) =>
-          body.scope === 'all')
+          body.scope === 'all'
+        )
         .reply(HttpStatus.OK, {
           access_token: otherAccessTokenValue
         })
