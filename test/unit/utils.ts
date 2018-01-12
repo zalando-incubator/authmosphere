@@ -159,22 +159,6 @@ describe('utils', () => {
       return expect(result).to.equal(false);
     });
 
-    describe('isPasswordGrantWOCredentialsDir', () => {
-      it('should return true, if clientId and clientSecret exists in config', () => {
-        const config = {
-          grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-          applicationUsername: 'applicationUsername',
-          applicationPassword: 'applicationPassword',
-          clientId: 'clientId',
-          clientSecret: 'clientSecret'
-        };
-
-        const result = isPasswordGrantNoCredentialsDir(config);
-
-        return expect(result).to.equal(true);
-      });
-    });
-
     it('should return false, if applicationUsername do not exists in config', () => {
       const config = {
         grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
@@ -243,6 +227,22 @@ describe('utils', () => {
       const result = isPasswordGrantNoCredentialsDir(config);
 
       return expect(result).to.equal(false);
+    });
+  });
+
+  describe('isPasswordGrantWOCredentialsDir', () => {
+    it('should return true, if clientId and clientSecret exists in config', () => {
+      const config = {
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
+        applicationUsername: 'applicationUsername',
+        applicationPassword: 'applicationPassword',
+        clientId: 'clientId',
+        clientSecret: 'clientSecret'
+      };
+
+      const result = isPasswordGrantNoCredentialsDir(config);
+
+      return expect(result).to.equal(true);
     });
   });
 
