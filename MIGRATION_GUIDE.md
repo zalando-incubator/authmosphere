@@ -2,7 +2,27 @@
 
 ## Migrate from `authmosphere@1.0.x` to `authmosphere@2.0.y`
 
-**TODO**
+### Upgrade
+
+* call `npm install --save authmosphere@~2.0.0`
+
+### General changes
+
+* All exported functions got support for a custom Logger. Providing a logger is optional.
+  Any logger need to statisfy the [Logger](./src/types/Logger.ts) interface.
+  * If a logging framework does not satisfy the interface, it need to be wrapped for authmosphere. (TODO: Question provide example here?)
+* To keep arguments lists short, `option` objects were introduced to group a number of (mostly) optional parameters.
+
+
+### express middlewares
+
+* `handleOAuthRequestMiddleware` was renamed to [`authenticationMiddleware`](./src/express-tooling.ts)
+  * config parameter `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`
+  * an optional logger can be provided ([Logger](./src/types/Logger.ts))
+  * an optional `onNotAuthenticatedHandler` can be provided, it helps to customize handling the case authentication fails
+  * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/PrecedenceOptions.ts)). `onNotAuthenticatedHandler` should be used instead.
+
+
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
