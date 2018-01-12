@@ -13,14 +13,6 @@ import {
    CredentialsUserClientConfig
 } from './types';
 
-/**
- * Converts an form-urlencoded string to a JSON formatted string
- *
- * @param requestBody form-urlencoded string
- */
-const formURLencodedToJSONformatted = (requestBody: string) =>
-  '{"' + requestBody.replace(RegExp('&', 'g'), '","').replace(RegExp('=', 'g'), '":"') + '"}';
-
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
   const readPromise: Promise<string> = new Promise((resolve, reject) => {
     fs.readFile(fileName, encoding, (error, data) => {
@@ -206,6 +198,5 @@ export {
   isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
-  setTokeninfo,
-  formURLencodedToJSONformatted
+  setTokeninfo
 };

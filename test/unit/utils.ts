@@ -1,6 +1,5 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as formurlencoded from 'form-urlencoded';
 
 import {
   getFileDataAsObject,
@@ -9,8 +8,7 @@ import {
   extractClientCredentials,
   isCredentialsDirConfig,
   isCredentialsClientConfig,
-  isPasswordGrantNoCredentialsDir,
-  formURLencodedToJSONformatted
+  isPasswordGrantNoCredentialsDir
 } from '../../src/utils';
 import { OAuthGrantType } from '../../src';
 
@@ -243,28 +241,6 @@ describe('utils', () => {
       const result = isPasswordGrantNoCredentialsDir(config);
 
       return expect(result).to.equal(true);
-    });
-  });
-
-  describe('formURLencodedToJSONformatted', () => {
-    it('should converts an form-urlencoded string to a JSON formatted string', () => {
-      const config = {
-        ...{},
-        ...{
-          grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
-          applicationUsername: 'applicationUsername',
-          applicationPassword: 'applicationPassword',
-          clientId: 'clientId',
-          clientSecret: 'clientSecret'
-        }
-      };
-      const expected = JSON.stringify(config);
-
-      const urlformencodedString = formurlencoded(config);
-
-      const result = formURLencodedToJSONformatted(urlformencodedString);
-
-      return expect(result).to.deep.equal(expected);
     });
   });
 });

@@ -2,12 +2,12 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
+import * as querystring from 'querystring';
 
 import {
   MockOptions,
   Token
 } from '../types';
-import { formURLencodedToJSONformatted } from '../utils';
 
 let tokens: Token[] = [];
 
@@ -54,10 +54,10 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
     .query(true)
     .reply((uri: string, requestBody: string) => {
 
-      const jsonText = formURLencodedToJSONformatted(requestBody);
-      const body = JSON.parse(jsonText);
+      const body = querystring.parse(requestBody);
 
-      const scope = body && body.scope ? [body.scope] : undefined;
+      const scope = body.scope ? body.scope.toString().split(' ') : undefined;
+
       const newToken = generateToken(scope);
       tokens.push(newToken);
 

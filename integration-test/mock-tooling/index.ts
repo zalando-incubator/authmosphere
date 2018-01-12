@@ -186,6 +186,7 @@ describe('mock tooling', () => {
       // when
       const promise = getAccessToken(options)
       .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
 
         return getTokenInfo(tokeninfoEndpoint, token.access_token);
       });
@@ -213,6 +214,7 @@ describe('mock tooling', () => {
       // when
       const promise = getAccessToken(options)
       .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
 
         return getTokenInfo(tokeninfoEndpoint, token.access_token);
       });
@@ -239,6 +241,7 @@ describe('mock tooling', () => {
       // when
       const promise = getAccessToken(options)
       .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
 
         return getTokenInfo(tokeninfoEndpoint, token.access_token);
       });
