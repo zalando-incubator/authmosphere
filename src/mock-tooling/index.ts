@@ -7,14 +7,15 @@ import {
   MockOptions,
   Token
 } from '../types';
+import { formURLencodedToJSONformatted } from '../utils';
 
 let tokens: Token[] = [];
 
-function generateToken(): Token {
+function generateToken(scopes?: string[]): Token {
 
   return {
     expires_in: 3600,
-    scope: [ 'uid' ],
+    scope: scopes,
     access_token: uuid.v4()
   };
 }
@@ -48,17 +49,20 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
   const parsedUrl = parseUrlOrThrow(options);
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-  .times(options.times || Number.MAX_SAFE_INTEGER)
-  .query(true)
-  .reply(() => {
+    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply((uri: string, requestBody: string) => {
 
-    // TODO: in the future we want to extract scopes from body
-    const newToken = generateToken();
-    tokens.push(newToken);
+      const jsonText = formURLencodedToJSONformatted(requestBody);
+      const body = JSON.parse(jsonText);
 
-    return [HttpStatus.OK, newToken];
-  });
+      const scope = body && body.scope ? [body.scope] : undefined;
+      const newToken = generateToken(scope);
+      tokens.push(newToken);
+
+      return [HttpStatus.OK, newToken];
+    });
 }
 
 export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
