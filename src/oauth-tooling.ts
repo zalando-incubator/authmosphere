@@ -143,12 +143,15 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  * Resolves with an object containing access token information in case of success.
  * Otherwise, rejects with an error message.
  *
+ * Specify T if a Token was extended.
+ *
  * @param tokenInfoUrl
  * @param accessToken
  * @param logger - optional logger
- * @returns {Promise<Token>}
+ *
+ * @returns { Promise<Token<T>> }
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token> {
+function getTokenInfo<T>(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token<T>> {
 
   const logOrNothing = safeLogger(logger);
 
