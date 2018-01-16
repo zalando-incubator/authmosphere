@@ -1,6 +1,6 @@
 {
   "name": "authmosphere",
-  "version": "2.0.2-rc6",
+  "version": "2.0.2-rc7",
   "description": "authmosphere is a library to support OAuth2 workflows in JavaScript projects.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -50,7 +50,7 @@
     "lolex": "2.3.1",
     "mocha": "4.1.0",
     "nyc": "11.4.1",
-    "sinon": "4.1.4",
+    "sinon": "4.1.5",
     "sinon-chai": "2.14.0",
     "tslint": "5.9.1",
     "typescript": "2.6.2"
