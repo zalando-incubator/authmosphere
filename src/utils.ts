@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as btoa from 'btoa';
 import { Request, Response } from 'express';
 
 import {
@@ -65,6 +64,8 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 
   return normalizedHeaderValue;
 };
+
+const btoa = (input: string) => Buffer.from(input, 'binary').toString('base64');
 
 /**
  * Returns a basic authentication header value with the given credentials
