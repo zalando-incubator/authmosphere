@@ -14,7 +14,8 @@
 * To keep arguments lists short, `option` objects were introduced to group a number of (mostly) optional parameters.
 
 
-### express middlewares
+
+### Express middlewares
 
 * `handleOAuthRequestMiddleware` was renamed to [`authenticationMiddleware`](./src/express-tooling.ts)
   * config parameter `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`
@@ -29,6 +30,68 @@
     * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts).
       `onAuthorizationFailedHandler` should be used instead.
 
+### Improved `OAuthConfig` type
+
+Instead of providing one bulky type for all OAuth2 grants the type `OAuthConfig` is split up into a union type of all supported grants. A type for the `TokenCache` config (`TokenCacheOAuthConfig`) is also derived:
+
+```ts
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+
+type TokenCacheOAuthConfig = OAuthConfig & {
+  tokenInfoEndpoint: string; // mandatory for TokenCache
+};
+```
+
+Additionally, it is now possible to provide client (and user) credentials as a `string` instead of just via a `credentialsDir`:
+
+```ts
+const config: OAuthConfig = {
+  ...,
+  clientId,
+  clientSecret,
+  applicationUsername,
+  applicationPassword
+};
+```
+
+For detailed information have a look at the implementation of [`OAuthConfig`](./src/types/OAuthConfig.ts).
+
+### Improved `OAuthGrantType`
+
+Instead of specifying the grant type by a magic string, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
+
+```ts
+enum OAuthGrantType {
+  AUTHORIZATION_CODE_GRANT = 'authorization_code',
+  PASSWORD_CREDENTIALS_GRANT = 'password',
+  REFRESH_TOKEN_GRANT = 'refresh_token',
+  CLIENT_CREDENTIALS_GRANT = 'client_credentials'
+}
+```
+
+### Improved error handling
+
+Promises returned by `getAccessToken` and `getTokenInfo` are now rejected in a consistent way with an error object like:
+
+```ts
+{
+  error?: string | Error | object,
+  message?: string
+}
+```
+
+### New mocking function `mockEndpointWithErrorResponse`
+
+The library now exports `mockEndpointWithErrorResponse` which allows to mock an OAuth endpoint with an error response to be able to test behaviour in error case more precisley:
+
+```
+mockEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void
+```
+
 ### TODO undocumented breaking migration steps
 
 * [improve oauth config type](https://github.com/zalando-incubator/authmosphere/commit/4fd53430ccb19cb2553d0114e0b748e062202a14)
@@ -38,6 +101,7 @@
 * [Extract scopes from body in mock (#157) ](https://github.com/zalando-incubator/authmosphere/commit/d3961030cf1a5d498b6d960e26f4bb08d3a440a0)
   * 'uid' scope has to be provided excplitly now
 * [feat(token-cache): optional logger (#156) ](https://github.com/zalando-incubator/authmosphere/commit/1f7e8103f957aa19c792154e1cf2601e9117065d)
+
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
