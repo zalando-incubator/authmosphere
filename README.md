@@ -1,7 +1,7 @@
 # authmosphere {🌍}
 
-[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere)
-[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg)](https://coveralls.io/github/zalando-incubator/authmosphere)
+[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg?branch=master)](https://coveralls.io/github/zalando-incubator/authmosphere)
 [![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
 [![npm version](https://img.shields.io/npm/v/authmosphere.svg?style=flat)](https://www.npmjs.com/package/authmosphere)
 
@@ -24,50 +24,12 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 ## Project renaming
 
-The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Version `1.0.0` is soon to be released, keep track of the progess in [#92](https://github.com/zalando-incubator/lib-oauth-tooling/issues/92), this release will contain breaking changes.
+The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `1.0.0`.
 
-## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
+## Changelog and Migration
 
-* call `npm uninstall --save lib-oauth-tooling`
-* call `npm install --save authmosphere`
-
-The signature of the function `createAuthCodeRequestUri` was changed to be better suitable for partial application. The `authorizationEndpoint` parameter was moved to the first position.
-It's important to manually adjust your code to this change, since the type system is not helpful in this special case.
-
-```typescript
-function createAuthCodeRequestUri(authorizationEndpoint: string,
-                                  redirectUri: string,
-                                  clientId: string,
-                                  queryParams?: {}): string
-```
-
-## Migrating from `lib-oauth-tooling@1.x.` to `lib-oauth-tooling@2.x.x`
-
-If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
-
-```typescript
-// will NOT work anymore:
-getAccessToken({
-  // all the other config
-  // ...
-  realm: EMPLOYEES_REALM,
-})
-.then(token: Token => {
-  // ...
-});
-
-// instead use this:
-getAccessToken({
-  // all the other config
-  // ...
-  queryParams: { realm: '/employees' }
-})
-.then(token: Token => {
-  // ...
-});
-```
-
-See the [changelog](#changelog) for more information.
+* See the [changelog](./changelog) for more information.
+* See the [migration guide](./changelog) for more information.
 
 ## Usage
 
@@ -103,38 +65,34 @@ tokenCache.get('service-foo')
 });
 ```
 
-Where `OAuthConfig` is defined like:
+The `OAuthConfig` type is defined as union type:
 
 ```typescript
-type OAuthConfig = {
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+```
+
+As you can see there are four different config types defined, which can be used in any places where `OAuthConfig` is required:
+
+* ClientCredentialsGrantConfig
+* AuthorizationCodeGrantConfig
+* PasswordCredentialsGrantConfig
+* RefreshGrantConfig
+
+Each config type has common properties:
+
+```typescript
+type GrantConfigBase = {
   credentialsDir: string;
-  grantType: string;
   accessTokenEndpoint: string;
-  tokenInfoEndpoint?: string; // mandatory for TokenCache
-  scopes?: string[];
-  redirect_uri?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  redirectUri?: string;
-  refreshToken?: string;
-  queryParams?: {};
+  queryParams?: { [index: string]: string };
 };
 ```
 
-Valid `grantTypes`s are:
-* `'authorization_code'`
-* `'password'`
-* `'client_credentials'`
-* `'refresh_token'`
-
-You can also import the constants from the lib:
-```typescript
-import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  CLIENT_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT
-} from 'authmosphere';
-```
+The constant grant types literals can be found in `OAuthGrandType`
 
 Optionally, you can pass a third parameter of type `TokenCacheConfig` to the `TokenCache` constructor to configure the cache behaviour.
 
@@ -172,6 +130,7 @@ app.use(handleOAuthRequestMiddleware({
 ```
 
 `options`:
+
 * `publicEndpoints` string[]
 * `tokenInfoEndpoint` string
 
@@ -257,7 +216,7 @@ String constant specifying the Refresh Token Grant type.
 
 If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
 
-#### mockTokenInfoEndpoint(options: MockOptions)
+### mockTokenInfoEndpoint(options: MockOptions)
 
 Mocks a `tokeninfo` endpoint.
 
@@ -273,11 +232,12 @@ mockTokeninfoEndpoint({
 ```
 
 `options`:
+
 * `url` string (url of the `tokeninfo` endpoint)
 * `tokens` any optional (list of valid tokens)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
-#### mockAccessTokenEndpoint(options: MockOptions)
+### mockAccessTokenEndpoint(options: MockOptions)
 
 Mocks a `access_token` endpoint.
 
@@ -289,6 +249,7 @@ mockAccessTokenEndpoint({
 ```
 
 `options`:
+
 * `url` string (url of the `access_token` endpoint)
 * `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
 
@@ -301,7 +262,6 @@ Helpful when having multiple tests in a test suite, you can call `cleanMock()` i
 cleanMock();
 ```
 
-
 ## Development
 
 * clone this repo
@@ -309,29 +269,11 @@ cleanMock();
 * to build: `npm run build`
 * to lint: `npm run tslint`
 
-
 ## Testing
 
 * `npm test` - runs all tests
 * `npm run unit-test` - runs unit tests
 * `npm run integration-test` - runs integration tests
-
-## Changelog
-
----
-#### `authmosphere 1.0.0` - **BREAKING**
-
-Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
-
----
-
-#### `lib-oauth-tooling 2.0.0` - **BREAKING**
-
-The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
-
-#### `lib-oauth-tooling 1.0.0` - **BREAKING**
-
-The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ---
 

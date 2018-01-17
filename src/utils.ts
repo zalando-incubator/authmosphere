@@ -1,18 +1,18 @@
 import * as fs from 'fs';
-import * as HttpStatus from 'http-status';
-import * as btoa from 'btoa';
 import { Request, Response } from 'express';
 
 import {
-  AUTHORIZATION_CODE_GRANT,
-  REFRESH_TOKEN_GRANT
-} from './constants';
-import {
    OAuthConfig,
-   Token
+   Token,
+   OAuthGrantType,
+   Logger,
+   CredentialsDirConfig,
+   CredentialsClientConfig,
+   CredentialsUserConfig,
+   CredentialsUserClientConfig
 } from './types';
 
-const fsReadFile = (fileName: string, encoding = 'utf8'): Promise<string> => {
+const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
   const readPromise: Promise<string> = new Promise((resolve, reject) => {
     fs.readFile(fileName, encoding, (error, data) => {
       if (error) {
@@ -36,12 +36,13 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-const getFileData = (filePath: string, fileName: string): Promise<string> => {
+const getFileDataAsObject = (filePath: string, fileName: string) => {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
 
-  const promise = fsReadFile(filePath + fileName, 'utf-8');
+  const promise = fsReadFile(filePath + fileName, 'utf-8')
+    .then(JSON.parse);
 
   return promise;
 };
@@ -64,11 +65,13 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
   return normalizedHeaderValue;
 };
 
+const btoa = (input: string) => Buffer.from(input, 'binary').toString('base64');
+
 /**
  * Returns a basic authentication header value with the given credentials
  *
- * @param client_id
- * @param client_secret
+ * @param clientId
+ * @param clientSecret
  * @returns {string}
  */
 const getBasicAuthHeaderValue = (clientId: string, clientSecret: string): string => {
@@ -117,16 +120,40 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
 };
 
 /**
- * Reject a request with 401 or the given status code.
+ * Reject a request with the given status code.
  *
  * @param res
  * @param status
  */
-const rejectRequest = (res: Response, status?: number): void => {
+type rejectRequest = (res: Response, logger: Logger, status: number) => void;
+const rejectRequest: rejectRequest = (res, logger, status) => {
 
-  const _status = status ? status : HttpStatus.UNAUTHORIZED;
-  res.sendStatus(_status);
+  logger.info(`Request will be rejected with status ${status}`);
+
+  res.sendStatus(status);
 };
+
+const isCredentialsDirConfig = (options: any): options is CredentialsDirConfig =>
+  options.credentialsDir !== undefined;
+
+const isCredentialsClientConfig = (options: any): options is CredentialsClientConfig =>
+  options.clientId !== undefined && options.clientSecret !== undefined;
+
+const isCredentialsUserConfig = (options: any): options is CredentialsUserConfig =>
+  options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
+
+const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUserClientConfig =>
+   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+   isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
+
+const checkCredentialsSource = (options: OAuthConfig) =>
+ isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
+
+const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig =>
+  ({ applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername });
+
+const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig =>
+  ({ clientId: options.clientId, clientSecret: options.clientSecret });
 
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.
@@ -135,8 +162,8 @@ const rejectRequest = (res: Response, status?: number): void => {
  */
 const validateOAuthConfig = (options: OAuthConfig): void => {
 
-  if (!options.credentialsDir) {
-    throw TypeError('credentialsDir must be defined');
+  if (!checkCredentialsSource(options)) {
+    throw TypeError('credentials must be defined');
   }
 
   if (!options.accessTokenEndpoint) {
@@ -147,24 +174,29 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
     throw TypeError('grantType must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.code) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.code) {
     throw TypeError('code must be defined');
   }
 
-  if (options.grantType === AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
+  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
     throw TypeError('redirectUri must be defined');
   }
 
-  if (options.grantType === REFRESH_TOKEN_GRANT && !options.refreshToken) {
+  if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
 };
 
 export {
   extractAccessToken,
+  extractUserCredentials,
+  extractClientCredentials,
   getBasicAuthHeaderValue,
-  getFileData,
+  getFileDataAsObject,
   getHeaderValue,
+  isCredentialsDirConfig,
+  isCredentialsClientConfig,
+  isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
   setTokeninfo

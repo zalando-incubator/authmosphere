@@ -2,6 +2,7 @@ import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
 import * as uuid from 'uuid';
 import * as url from 'url';
+import * as querystring from 'querystring';
 
 import {
   MockOptions,
@@ -10,13 +11,29 @@ import {
 
 let tokens: Token[] = [];
 
-function generateToken(): Token {
+function generateToken(scopes?: string[]): Token {
 
   return {
     expires_in: 3600,
-    scope: [ 'uid' ],
+    scope: scopes,
     access_token: uuid.v4()
   };
+}
+
+/**
+ * Parses URL and throws, if URL is neither string nor object
+ *
+ * @param options
+ *
+ * @throws on parse error of options.url
+ */
+function parseUrlOrThrow(options: MockOptions) {
+  const parsedUrl = url.parse(options.url);
+  if (typeof parsedUrl !== 'object' ||
+    typeof parsedUrl.path !== 'string') {
+    throw new Error(`Error parsing '${options.url}'`);
+  }
+  return parsedUrl;
 }
 
 /**
@@ -29,24 +46,43 @@ function generateToken(): Token {
  */
 export function mockAccessTokenEndpoint(options: MockOptions): void {
 
-  const parsedUrl = url.parse(options.url);
-
-  if (typeof parsedUrl !== 'object' ||
-      typeof parsedUrl.path !== 'string') {
-    throw new Error(`Error parsing '${options.url}'`);
-  }
+  const parsedUrl = parseUrlOrThrow(options);
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .post(parsedUrl.path)
+    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply((uri: string, requestBody: string) => {
+
+      const body = querystring.parse(requestBody);
+
+      const scope = body.scope ? body.scope.toString().split(' ') : undefined;
+
+      const newToken = generateToken(scope);
+      tokens.push(newToken);
+
+      return [HttpStatus.OK, newToken];
+    });
+}
+
+export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
+  mockEndpointWithErrorResponse(options, httpStatus, responseBody);
+}
+
+export function mockTokeninfoEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
+  mockEndpointWithErrorResponse(options, httpStatus, responseBody);
+}
+
+function mockEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
+
+  const parsedUrl = parseUrlOrThrow(options);
+
+  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+  .post(parsedUrl.path as string) // checked by parseUrlOrThrow
   .times(options.times || Number.MAX_SAFE_INTEGER)
   .query(true)
   .reply(() => {
-
-    // TODO: in the future we want to extrat scopes from body
-    const newToken = generateToken();
-    tokens.push(newToken);
-
-    return [HttpStatus.OK, newToken];
+    return [httpStatus, responseBody || {}];
   });
 }
 
@@ -60,15 +96,10 @@ export function mockAccessTokenEndpoint(options: MockOptions): void {
  */
 export function mockTokeninfoEndpoint(options: MockOptions): void {
 
-  const parsedUrl = url.parse(options.url);
-
-  if (typeof parsedUrl !== 'object' ||
-      typeof parsedUrl.path !== 'string') {
-    throw new Error(`Error parsing '${options.url}'`);
-  }
+  const parsedUrl = parseUrlOrThrow(options);
 
   nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .get(parsedUrl.path)
+  .get(parsedUrl.path as string) // checked by parseUrlOrThrow
   .times(options.times || Number.MAX_SAFE_INTEGER)
   .query(true)
   .reply((uri: string) => {
