@@ -1,97 +1,12 @@
 # Migration guide
 
-## Migrate from `authmosphere@1.0.x` to `authmosphere@2.0.y`
+## Migrate from `authmosphere@1.x.x` to `authmosphere@2.x.x`
 
 ### Upgrade
 
 * run `npm install --save authmosphere@~2.0.0`
 
-### General changes
-
-* All exported functions got support for a custom logger. Providing a logger is optional.
-  Any logger need to satisfy the [Logger](./src/types/Logger.ts) interface.
-  * If a logging framework does not satisfy the interface, it need to be wrapped for authmosphere.
-* To keep arguments lists short, `option` objects were introduced to group a number of (mostly) optional parameters.
-
-
-### Express middlewares
-
-* `handleOAuthRequestMiddleware` was renamed to [`authenticationMiddleware`](./src/express-tooling.ts)
-  * config parameter `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`
-  * an optional logger can be provided ([`Logger`](./src/types/Logger.ts))
-  * an optional `onNotAuthenticatedHandler` can be provided, it helps to customize handling the case authentication fails
-
-* `requireScopesMiddleware`
-  * added optional `options` object of type [`ScopeMiddlewareOptions`](./src/types/ScopeMiddlewareOptions.ts)
-    * an optional logger can be provided ([`Logger`](./src/types/Logger.ts))
-    * an optional `onAuthorizationFailedHandler` can be provided, it helps to customize handling the case authentication fails
-  * moved `precedenceOptions` parameter into `options` parameter
-    * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts).
-      `onAuthorizationFailedHandler` should be used instead.
-
-### TODO undocumented breaking migration steps
-
-### Improved `OAuthConfig` type
-
-Instead of providing one bulky type for all OAuth2 grants the type `OAuthConfig` is split up into a union type of all supported grants. A type for the `TokenCache` config (`TokenCacheOAuthConfig`) is also derived:
-
-```ts
-type OAuthConfig =
-  ClientCredentialsGrantConfig   |
-  AuthorizationCodeGrantConfig   |
-  PasswordCredentialsGrantConfig |
-  RefreshGrantConfig;
-
-type TokenCacheOAuthConfig = OAuthConfig & {
-  tokenInfoEndpoint: string; // mandatory for TokenCache
-};
-```
-
-Additionally, it is now possible to provide client (and user) credentials as a `string` instead of just via a `credentialsDir`:
-
-```ts
-const config: OAuthConfig = {
-  ...,
-  clientId,
-  clientSecret,
-  applicationUsername,
-  applicationPassword
-};
-```
-
-For detailed information have a look at the implementation of [`OAuthConfig`](./src/types/OAuthConfig.ts).
-
-### Improved `OAuthGrantType`
-
-Instead of specifying the grant type by a magic string, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
-
-```ts
-enum OAuthGrantType {
-  AUTHORIZATION_CODE_GRANT = 'authorization_code',
-  PASSWORD_CREDENTIALS_GRANT = 'password',
-  REFRESH_TOKEN_GRANT = 'refresh_token',
-  CLIENT_CREDENTIALS_GRANT = 'client_credentials'
-}
-```
-
-### Improved error handling
-
-Promises returned by `getAccessToken` and `getTokenInfo` are now rejected in a consistent way with an error object like:
-
-```ts
-{
-  error?: string | Error | object,
-  message?: string
-}
-```
-
-### New mocking function `mockEndpointWithErrorResponse`
-
-The library now exports `mockEndpointWithErrorResponse` which allows to mock an OAuth endpoint with an error response to be able to test behaviour in error case more precisley:
-
-```
-mockEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void
-```
+TODO
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
