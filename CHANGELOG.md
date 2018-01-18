@@ -27,8 +27,7 @@ To keep arguments lists short, `option` objects were introduced to group a numbe
     * An optional logger can be provided ([`Logger`](./src/types/Logger.ts))
     * An optional `onAuthorizationFailedHandler` can be provided, which let you explicitly handle the case when authentication fails. Important note: if `onAuthorizationFailedHandler` is defined you are responsible to handle the request yourself (e.g. calling `response.sendStatus(code)` or `next()`).
   * Moved `precedenceOptions` parameter into `options` parameter
-    * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts).
-      `onAuthorizationFailedHandler` should be used instead.
+    * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts). `onAuthorizationFailedHandler` should be used instead.
 
 ### Changed `TokenCache` parameter type
 
@@ -109,7 +108,7 @@ enum OAuthGrantType {
 
 #### `mockAccessTokenEndpoint` respects scopes property
 
-Before this release, `mockAccessTokenEndpoint` always includes `uid` as value of the `scopes` property in the returned token. Now, `mockAccessTokenEndpoint` includes the scopes which were requested by the HTTP request. So a request like:
+Before this release, `mockAccessTokenEndpoint` always includes `uid` as value of the `scopes` property in the returned token. Now, `mockAccessTokenEndpoint` includes the scopes which were requested by the HTTP request. A request like:
 
 ```ts
 getAccessToken({
