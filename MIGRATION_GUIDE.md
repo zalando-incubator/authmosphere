@@ -1,43 +1,124 @@
 # Migration guide
 
-## Migrate from `authmosphere@1.0.x` to `authmosphere@2.0.y`
-
-### Upgrade
+## Migrate from `authmosphere@1.x.x` to `authmosphere@2.x.x`
 
 * run `npm install --save authmosphere@~2.0.0`
 
-### General changes
+### Express middlewares
 
-* All exported functions got support for a custom logger. Providing a logger is optional.
-  Any logger need to satisfy the [Logger](./src/types/Logger.ts) interface.
-  * If a logging framework does not satisfy the interface, it need to be wrapped for authmosphere.
-* To keep arguments lists short, `option` objects were introduced to group a number of (mostly) optional parameters.
+#### `handleOAuthRequestMiddleware`
 
+`handleOAuthRequestMiddleware` was renamed to [`authenticationMiddleware`](./src/express-tooling.ts) and its config parameter type `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`.
 
-### express middlewares
+#### `requireScopesMiddleware`
 
-* `handleOAuthRequestMiddleware` was renamed to [`authenticationMiddleware`](./src/express-tooling.ts)
-  * config parameter `MiddlewareOptions` was renamed to `AuthenticationMiddlewareOptions`
-  * an optional logger can be provided ([`Logger`](./src/types/Logger.ts))
-  * an optional `onNotAuthenticatedHandler` can be provided, it helps to customize handling the case authentication fails
+Signature changed from:
 
-* `requireScopesMiddleware`
-  * added optional `options` object of type [`ScopeMiddlewareOptions`](./src/types/ScopeMiddlewareOptions.ts)
-    * an optional logger can be provided ([`Logger`](./src/types/Logger.ts))
-    * an optional `onAuthorizationFailedHandler` can be provided, it helps to customize handling the case authentication fails
-  * moved `precedenceOptions` parameter into `options` parameter
-    * `precedenceErrorHandler` got removed from [`PrecedenceOptions`](./src/types/Precedence.ts).
-      `onAuthorizationFailedHandler` should be used instead.
+```ts
+type PrecedenceOptions = {
+  precedenceFunction: PrecedenceFunction;
+  precedenceErrorHandler: PrecedenceErrorHandler;
+};
 
-### TODO undocumented breaking migration steps
+type requireScopesMiddleware = (scopes: string[], logger?: Logger, precedenceOptions?: PrecedenceOptions) => RequestHandler;
+```
 
-* [improve oauth config type](https://github.com/zalando-incubator/authmosphere/commit/4fd53430ccb19cb2553d0114e0b748e062202a14)
-* [improve error handling](https://github.com/zalando-incubator/authmosphere/commit/afdcfa9a8619c0be4c39a22fd9353d086aa0364d)
-* [mock failing server](https://github.com/zalando-incubator/authmosphere/commit/2a68e18bcc08d1b3e2fdfc7f5472e99bc28a1a16)
-* [accept optional body params](https://github.com/zalando-incubator/authmosphere/commit/25aee2978dded718d93849c829411c65624a98f6)
-* [Extract scopes from body in mock (#157) ](https://github.com/zalando-incubator/authmosphere/commit/d3961030cf1a5d498b6d960e26f4bb08d3a440a0)
-  * 'uid' scope has to be provided excplitly now
-* [feat(token-cache): optional logger (#156) ](https://github.com/zalando-incubator/authmosphere/commit/1f7e8103f957aa19c792154e1cf2601e9117065d)
+... to:
+
+```ts
+type PrecedenceOptions = {
+    precedenceFunction: PrecedenceFunction;
+};
+
+type ScopeMiddlewareOptions = {
+  logger?: Logger;
+  onAuthorizationFailedHandler?: onAuthorizationFailedHandler;
+  precedenceOptions?: PrecedenceOptions;
+};
+
+type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
+```
+
+The `precedenceErrorHandler` is removed which means that errors during the execution of the middleware created by `requireScopesMiddleware` can be handled by `onAuthorizationFailedHandler`. The optional `logger` is also moved to the `ScopeMiddlewareOptions`.
+
+### `TokenCache`
+
+The parameter type `TokenCacheConfig` was renamed to `TokenCacheOptions` and restructured, from:
+
+```ts
+type TokenCacheConfig = {
+  percentageLeft: number
+};
+```
+... to:
+
+```ts
+type CacheConfig = {
+  percentageLeft: number
+};
+
+type TokenCacheOptions = {
+  cacheConfig?: CacheConfig,
+  logger?: Logger
+};
+```
+
+### `OAuthConfig` type
+
+`OAuthConfig` is split up into a union type of all supported grants which should be used directly. A type for the `TokenCache` config (`TokenCacheOAuthConfig`) is also derived:
+
+```ts
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+
+type TokenCacheOAuthConfig = OAuthConfig & {
+  tokenInfoEndpoint: string;
+};
+```
+
+#### `OAuthGrantType`
+
+Instead of specifying the grant type by a magic string, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
+
+```ts
+enum OAuthGrantType {
+  AUTHORIZATION_CODE_GRANT = 'authorization_code',
+  PASSWORD_CREDENTIALS_GRANT = 'password',
+  REFRESH_TOKEN_GRANT = 'refresh_token',
+  CLIENT_CREDENTIALS_GRANT = 'client_credentials'
+}
+```
+
+### Mock tooling: `mockAccessTokenEndpoint`
+
+If you use `mockAccessTokenEndpoint` and rely on the scope `uid` which is incuded by default in the returned token, you now have to explicitly request for this scope. For example, if you do a request like the following with `authmosphere@1.x.x`:
+
+```ts
+getAccessToken({
+  ...,
+  scopes: ['foo', 'bar']
+  // or even:
+  // scopes: undefined
+  // or:
+  // scopes: []
+})
+```
+
+... the requested scopes are ignored and the returned token includes always only scope `uid`. With `authmosphere@2.x.x` the token contains exactly the scopes which were requested.
+
+### Improved error handling
+
+Promises returned by `getAccessToken` and `getTokenInfo` are now rejected in a consistent way with an error object like:
+
+```ts
+{
+  error?: string | Error | object,
+  message?: string
+}
+```
 
 ## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
 
