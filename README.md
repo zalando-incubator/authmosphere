@@ -19,17 +19,14 @@ Currently the following flows are supported:
 * [Refresh Token Grant](https://tools.ietf.org/html/rfc6749#section-6)
 * Express middlewares to simplify authentication/authorization
 * `TokenCache` service to manage access tokens in your application
+* Mock tooling for OAuth2.0 endpoints to enable decent unit and integration tests
 
 See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
 
-## Project renaming
-
-The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `1.0.0`.
-
 ## Changelog and Migration
 
-* See the [changelog](./changelog) for more information.
-* See the [migration guide](./changelog) for more information.
+* See the [changelog](./CHANGELOG.md) for more information.
+* See the [migration guide](./MIGRATION_GUIDE.md) for more information.
 
 ## Usage
 
