@@ -25,8 +25,8 @@ See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/acce
 
 ## Changelog and Migration
 
-* See the [changelog](./changelog.md) for more information.
-* See the [migration guide](./changelog.md) for more information.
+* See the [changelog](./CHANGELOG.md) for more information.
+* See the [migration guide](./MIGRATION_GUIDE.md) for more information.
 
 ## Usage
 
