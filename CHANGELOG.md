@@ -146,6 +146,7 @@ Promises returned by `getAccessToken` and `getTokenInfo` are now rejected in a c
 
 ## `authmosphere 1.0.0` - **BREAKING**
 
+The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `1.0.0`.
 Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
 
 ---
