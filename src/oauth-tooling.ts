@@ -7,21 +7,23 @@ import {
   getFileDataAsObject,
   getBasicAuthHeaderValue,
   validateOAuthConfig,
+  isAuthorizationCodeGrantConfig,
   isCredentialsDirConfig,
+  isRefreshGrantConfig,
   extractUserCredentials,
   extractClientCredentials,
   isPasswordGrantNoCredentialsDir
 } from './utils';
 
 import {
-  OAuthConfig,
-  Token,
-  OAuthGrantType,
   BodyParameters,
-  Logger,
   CredentialsUserClientConfig,
   CredentialsClientConfig,
-  CredentialsUserConfig
+  CredentialsUserConfig,
+  Logger,
+  OAuthConfig,
+  OAuthGrantType,
+  Token
 } from './types';
 
 import { safeLogger } from './safe-logger';
@@ -220,13 +222,13 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
       bodyParameters = {
         'grant_type': options.grantType
       };
-    }  else if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT) {
+    } else if (isAuthorizationCodeGrantConfig(options)) {
       bodyParameters = {
         'grant_type': options.grantType,
         'code': options.code,
         'redirect_uri': options.redirectUri
       };
-    } else if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT) {
+    } else if (isRefreshGrantConfig(options)) {
       bodyParameters = {
         'grant_type': options.grantType,
         'refresh_token': options.refreshToken
