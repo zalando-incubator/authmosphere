@@ -1,5 +1,3 @@
-import { OAuthGrantType } from '../types';
-
 type CredentialsDirConfig = {
   credentialsDir: string;
 };
@@ -20,28 +18,23 @@ type CredentialsConfig = CredentialsDirConfig | CredentialsClientConfig;
 type CredentialsPasswordConfig = CredentialsDirConfig | CredentialsUserClientConfig;
 
 type GrantConfigBase = {
+  grantType: string;
   accessTokenEndpoint: string;
   queryParams?: { [index: string]: string };
   bodyParams?: { [index: string]: string };
   scopes?: string[];
 };
 
-type ClientCredentialsGrantConfig = CredentialsConfig & GrantConfigBase & {
-  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT;
-};
+type ClientCredentialsGrantConfig = CredentialsConfig & GrantConfigBase;
 
 type AuthorizationCodeGrantConfig = CredentialsConfig & GrantConfigBase & {
-  grantType: OAuthGrantType.AUTHORIZATION_CODE_GRANT;
   code: string;
   redirectUri: string;
 };
 
-type PasswordCredentialsGrantConfig = CredentialsPasswordConfig & GrantConfigBase & {
-  grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
-};
+type PasswordCredentialsGrantConfig = CredentialsPasswordConfig & GrantConfigBase;
 
 type RefreshGrantConfig = CredentialsConfig & GrantConfigBase & {
-  grantType: OAuthGrantType.REFRESH_TOKEN_GRANT;
   refreshToken: string;
 };
 
