@@ -2,14 +2,16 @@ import * as fs from 'fs';
 import { Request, Response } from 'express';
 
 import {
-   OAuthConfig,
-   Token,
-   OAuthGrantType,
+   AuthorizationCodeGrantConfig,
    Logger,
    CredentialsDirConfig,
    CredentialsClientConfig,
    CredentialsUserConfig,
-   CredentialsUserClientConfig
+   CredentialsUserClientConfig,
+   OAuthConfig,
+   OAuthGrantType,
+   RefreshGrantConfig,
+   Token
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -174,18 +176,24 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
     throw TypeError('grantType must be defined');
   }
 
-  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.code) {
+  if (isAuthorizationCodeGrantConfig(options) && !options.code) {
     throw TypeError('code must be defined');
   }
 
-  if (options.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT && !options.redirectUri) {
+  if (isAuthorizationCodeGrantConfig(options) && !options.redirectUri) {
     throw TypeError('redirectUri must be defined');
   }
 
-  if (options.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT && !options.refreshToken) {
+  if (isRefreshGrantConfig(options) && !options.refreshToken) {
     throw TypeError('refreshToken must be defined');
   }
 };
+
+const isAuthorizationCodeGrantConfig = (config: OAuthConfig): config is AuthorizationCodeGrantConfig =>
+  config.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT;
+
+const isRefreshGrantConfig = (config: OAuthConfig): config is RefreshGrantConfig =>
+  config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT;
 
 export {
   extractAccessToken,
@@ -194,8 +202,10 @@ export {
   getBasicAuthHeaderValue,
   getFileDataAsObject,
   getHeaderValue,
+  isAuthorizationCodeGrantConfig,
   isCredentialsDirConfig,
   isCredentialsClientConfig,
+  isRefreshGrantConfig,
   isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
