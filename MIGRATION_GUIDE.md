@@ -65,7 +65,7 @@ type TokenCacheOptions = {
 
 ### `OAuthConfig` type
 
-`OAuthConfig` is split up into a union type of all supported grants which should be used directly. A type for the `TokenCache` config (`TokenCacheOAuthConfig`) is also derived:
+Instead of four single string values, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
 
 ```ts
 type OAuthConfig =
