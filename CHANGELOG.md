@@ -93,7 +93,7 @@ For detailed information have a look at the implementation of [`OAuthConfig`](./
 
 #### Improved `OAuthGrantType`
 
-Instead of specifying the grant type by a magic string, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
+Instead of four single string values, an enum `OAuthGrantType` is exported which should be used as `grantType` in `OAuthConfig`:
 
 ```ts
 enum OAuthGrantType {
