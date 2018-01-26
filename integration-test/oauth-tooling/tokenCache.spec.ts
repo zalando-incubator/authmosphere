@@ -50,7 +50,12 @@ describe('TokenCache', () => {
       // given
       nock(oauthHost)
         .post('/access_token')
-        .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+        .reply(HttpStatus.OK, {
+          access_token: defaultAccessTokenValue
+        })
+        .get('/tokeninfo')
+        .query({ access_token: defaultAccessTokenValue })
+        .reply(HttpStatus.OK, defaultTokenInfoResponse);
 
       // when
       const tokenCache = new TokenCache({
@@ -59,7 +64,7 @@ describe('TokenCache', () => {
       }, oauthConfig);
 
       // then
-      return expect(tokenCache.get('foo')).to.be.rejected;
+      return expect(tokenCache.get('foo')).to.be.eventually.rejectedWith('TokenCache miss: foo does not exist');
     });
 
     it('should reject if there is no token and is not able to request a new one', () => {
