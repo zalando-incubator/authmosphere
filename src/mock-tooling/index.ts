@@ -9,9 +9,113 @@ import {
   Token
 } from '../types';
 
-let tokens: Token[] = [];
+let _tokens: Token[] = [];
 
-function generateToken(scopes?: string[]): Token {
+/**
+ * Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
+ *
+ * @param options
+ * @returns {nock.Scope}
+ *
+ * @throws on parse error of options.url
+ */
+const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
+
+  const parsedUrl = parseUrlOrThrow(options);
+
+  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply((uri: string, requestBody: string) => {
+
+      const body = querystring.parse(requestBody);
+
+      const scope = body.scope ? body.scope.toString().split(' ') : undefined;
+
+      const newToken = generateToken(scope);
+      _tokens.push(newToken);
+
+      return [HttpStatus.OK, newToken];
+    });
+}
+
+/**
+ * Creates a __very basic__ mock of a token validation endpoint.
+ *
+ * @param options
+ * @returns {nock.Scope}
+ *
+ * @throws on parse error of options.url
+ */
+const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Scope => {
+
+  const parsedUrl = parseUrlOrThrow(options);
+
+  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    .get(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply((uri: string) => {
+
+      // token to validate
+      const givenToken = uri.split('=')[1];
+
+      if (givenToken) {
+
+        // concat all valid tokens (from this function call and potentially from
+        // previous calls of `mockAccessTokenEndpoint`)
+        const validTokens = (tokens) ? _tokens.concat(tokens) : _tokens;
+
+        // find token
+        const foundIndex = validTokens.findIndex((token) => {
+
+          return givenToken === token.access_token;
+        });
+
+        if (foundIndex >= 0) {
+          return [HttpStatus.OK, validTokens[foundIndex]];
+        }
+      }
+
+      return [HttpStatus.BAD_REQUEST, { error: 'invalid_request' }];
+    });
+}
+
+const mockAccessTokenEndpointWithErrorResponse =
+  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+    return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
+  }
+
+const mockTokeninfoEndpointWithErrorResponse =
+  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+    return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
+  }
+
+const mockEndpointWithErrorResponse =
+  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+
+    const parsedUrl = parseUrlOrThrow(options);
+
+    return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+    .times(options.times || Number.MAX_SAFE_INTEGER)
+    .query(true)
+    .reply(() => {
+      return [httpStatus, responseBody || {}];
+    });
+  }
+
+/**
+ * Removes generated tokens and mocked endpoints.
+ */
+const cleanMock = (): void => {
+
+  nock.cleanAll();
+  _tokens = [];
+}
+
+const generateToken = (scopes?: string[]): Token => {
 
   return {
     expires_in: 3600,
@@ -27,7 +131,7 @@ function generateToken(scopes?: string[]): Token {
  *
  * @throws on parse error of options.url
  */
-function parseUrlOrThrow(options: MockOptions) {
+const parseUrlOrThrow = (options: MockOptions) => {
   const parsedUrl = url.parse(options.url);
   if (typeof parsedUrl !== 'object' ||
     typeof parsedUrl.path !== 'string') {
@@ -36,103 +140,10 @@ function parseUrlOrThrow(options: MockOptions) {
   return parsedUrl;
 }
 
-/**
- * Mocks the access token endpoint (to request a token).
- *
- * @param options
- * @returns {Scope}
- *
- * @throws on parse error of options.url
- */
-export function mockAccessTokenEndpoint(options: MockOptions): void {
-
-  const parsedUrl = parseUrlOrThrow(options);
-
-  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-    .times(options.times || Number.MAX_SAFE_INTEGER)
-    .query(true)
-    .reply((uri: string, requestBody: string) => {
-
-      const body = querystring.parse(requestBody);
-
-      const scope = body.scope ? body.scope.toString().split(' ') : undefined;
-
-      const newToken = generateToken(scope);
-      tokens.push(newToken);
-
-      return [HttpStatus.OK, newToken];
-    });
-}
-
-export function mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
-  mockEndpointWithErrorResponse(options, httpStatus, responseBody);
-}
-
-export function mockTokeninfoEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
-  mockEndpointWithErrorResponse(options, httpStatus, responseBody);
-}
-
-function mockEndpointWithErrorResponse(options: MockOptions, httpStatus: number, responseBody?: object): void {
-
-  const parsedUrl = parseUrlOrThrow(options);
-
-  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-  .times(options.times || Number.MAX_SAFE_INTEGER)
-  .query(true)
-  .reply(() => {
-    return [httpStatus, responseBody || {}];
-  });
-}
-
-/**
- * Mocks the tokeninfo endpoint (to validate a token).
- *
- * @param options
- * @returns {Scope}
- *
- * @throws on parse error of options.url
- */
-export function mockTokeninfoEndpoint(options: MockOptions): void {
-
-  const parsedUrl = parseUrlOrThrow(options);
-
-  nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-  .get(parsedUrl.path as string) // checked by parseUrlOrThrow
-  .times(options.times || Number.MAX_SAFE_INTEGER)
-  .query(true)
-  .reply((uri: string) => {
-
-    // token to validate
-    const givenToken = uri.split('=')[1];
-
-    if (givenToken) {
-
-      // concat all valid tokens (from this function call and potentially from
-      // previous calls of `mockAccessTokenEndpoint`)
-      const validTokens = (options.tokens) ? tokens.concat(options.tokens) : tokens;
-
-      // find token
-      const foundIndex = validTokens.findIndex((token) => {
-
-        return givenToken === token.access_token;
-      });
-
-      if (foundIndex >= 0) {
-        return [HttpStatus.OK, validTokens[foundIndex]];
-      }
-    }
-
-    return [HttpStatus.BAD_REQUEST, { error: 'invalid_request' }];
-  });
-}
-
-/**
- * Removes generated tokens and mocked endpoints.
- */
-export function cleanMock(): void {
-
-  nock.cleanAll();
-  tokens = [];
+export {
+  cleanMock,
+  mockAccessTokenEndpoint,
+  mockAccessTokenEndpointWithErrorResponse,
+  mockTokeninfoEndpoint,
+  mockTokeninfoEndpointWithErrorResponse
 }
