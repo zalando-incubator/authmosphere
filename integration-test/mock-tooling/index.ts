@@ -53,11 +53,13 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken],
-        times: 1
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 1
+        },
+        [validAuthToken]
+      );
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, 'foo');
@@ -74,11 +76,13 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken],
-        times: 1
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 1
+        },
+        [validAuthToken]
+      );
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, '');
@@ -95,11 +99,13 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken],
-        times: 3
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 3
+        },
+        [validAuthToken]
+      );
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, 'foo')
@@ -131,10 +137,12 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken]
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+        },
+        [validAuthToken]
+      );
 
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
