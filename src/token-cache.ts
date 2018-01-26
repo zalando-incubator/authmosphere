@@ -90,7 +90,14 @@ class TokenCache {
    */
   get(tokenName: string): Promise<Token> {
 
-    const promise = this.validateToken(tokenName)
+    if (!this.isTokenConfigured(tokenName)) {
+      const msg = `TokenCache miss: ${tokenName} does not exist`;
+      this.logger.debug(msg);
+
+      return Promise.reject(msg);
+    }
+
+    const promise = this.getCachedToken(tokenName)
       .catch(() => {
 
         const config = {
@@ -155,6 +162,10 @@ class TokenCache {
       .then(() => this._tokens);
   }
 
+  private isTokenConfigured(tokenName: string): boolean {
+    return this.tokenConfig[tokenName] !== undefined;
+  }
+
   /**
    * Checks whether a valid token for the given name is present.
    * Resolves with that token if that is the case.
@@ -163,13 +174,7 @@ class TokenCache {
    * @param tokenName
    * @returns {Promise<Token>}
    */
-  private validateToken(tokenName: string): Promise<Token> {
-
-    if (this.tokenConfig[tokenName] === undefined) {
-      const msg = `TokenCache miss: ${tokenName} does not exist`;
-      this.logger.error(msg);
-      return Promise.reject(msg);
-    }
+  private getCachedToken(tokenName: string): Promise<Token> {
 
     const token = this._tokens[tokenName];
 
