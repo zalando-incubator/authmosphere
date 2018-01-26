@@ -119,7 +119,13 @@ getAccessToken({
 
 ...will lead to a response with a token which includes the scopes `uid` and `test`. If no `scopes` are requested, the `scopes` property of the token will be `undefined`.
 
-#### New functionality to test OAuth behaviour in case of error
+#### New functionality to test OAuth behavior in case of error
+
+##### mockTokeninfoEndpoint
+
+Token was moved out of MockOptions into a separate parameter: `mockTokeninfoEndpoint(options: MockOptions, tokens?: Token[]): nock.Scope`.
+
+##### mockWithErrorResponse
 
 The library now exports `mockTokeninfoEndpointWithErrorResponse` and `mockAccessTokenEndpointWithErrorResponse` which allow to mock an OAuth endpoint with an error response to be able to test behaviour in error case more accurate:
 
