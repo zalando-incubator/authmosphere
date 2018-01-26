@@ -209,56 +209,6 @@ String constant specifying the Resource Owner Password Credentials Grant type.
 
 String constant specifying the Refresh Token Grant type.
 
-## Mock tooling
-
-If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
-
-### mockTokenInfoEndpoint(options: MockOptions)
-
-Mocks a `tokeninfo` endpoint.
-
-```typescript
-mockTokeninfoEndpoint({
-  url: 'http://some.oauth.endpoint/tokeninfo',
-  tokens: [{
-    access_token: 'someToken123',
-    scope: ['uid', 'something.read', 'something.write']
-  }],
-  times: 1
-});
-```
-
-`options`:
-
-* `url` string (url of the `tokeninfo` endpoint)
-* `tokens` any optional (list of valid tokens)
-* `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
-
-### mockAccessTokenEndpoint(options: MockOptions)
-
-Mocks a `access_token` endpoint.
-
-```typescript
-mockAccessTokenEndpoint({
-  url: 'http://some.oauth.endpoint/access_token',
-  times: 1
-});
-```
-
-`options`:
-
-* `url` string (url of the `access_token` endpoint)
-* `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
-
-#### cleanMock()
-
-Cleans all `nock` mocks (not only from this lib, really ALL) and given tokens.
-Helpful when having multiple tests in a test suite, you can call `cleanMock()` in the `afterEach()` callback for example.
-
-```typescript
-cleanMock();
-```
-
 ## Development
 
 * clone this repo
