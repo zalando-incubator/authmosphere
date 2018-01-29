@@ -45,11 +45,11 @@ getAccessToken(config)
 
 #### Returns
 
-`Promise<Token>`
+`Promise<Token>` which resolves with the token if the request was successful. Otherwise, rejects with an error message.
 
 ### getTokenInfo
 
-Requests validation information from the specified `tokenInfoUrl` and returns a `Promise` which resolves with these information, if the token is valid. Otherwise, it rejects with an error.
+Requests validation information from the specified `tokenInfoUrl` and returns a `Promise` that resolves with these information, if the token is valid. Otherwise, it rejects with an error.
 
 #### Usage
 
@@ -80,11 +80,13 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 
 #### Returns
 
-`Promise<Token>`
+`Promise<Token>` which resolves with the validated token if it is valid. Otherwise, rejects with an error message.
 
 ### createAuthCodeRequestUri
 
-Helper function to request an authorization code when using the [Authorization Code Grant](https://tools.ietf.org/html/rfc6749#page-24).
+Helper function to create the URI to request an authorization code when using the [Authorization Code Grant](https://tools.ietf.org/html/rfc6749#page-24).
+
+⚠️ This function only creates the URI, it does not handle the actual request.
 
 #### Usage
 
@@ -99,13 +101,13 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 #### Arguments
 
 * `authorizationEndpoint: string` - [OAuth authorization endpoint](https://tools.ietf.org/html/rfc6749#page-18)
-* `redirectUri: string` - URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
+* `redirectUri: string` - absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
 * `clientId: string` - [client id]((https://tools.ietf.org/html/rfc6749#section-2.2)) of the requesting application
 * `queryParams?: { [index: string]: string }` - optional set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
 
 #### Returns
 
-`string`
+`string` of the created request URI.
 
 ## Mock tooling
 
