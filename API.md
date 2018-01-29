@@ -36,7 +36,7 @@ getAccessToken(config)
 
 #### Signature
 
-`getAccessToken(config[, logger]): Promise<Token>`
+`getAccessToken(config[, logger]) => Promise<Token>`
 
 #### Arguments
 
@@ -96,7 +96,7 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 
 #### Signature
 
-`createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId[, queryParams]): string`
+`createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId[, queryParams]) => string`
 
 #### Arguments
 
@@ -119,7 +119,7 @@ Authmosphere provides two middleware factories to secure [Express](http://expres
 
 Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
 
-If configured as a global middleware (see usage section), all request need to provide a valid token to access the endpoint.
+If configured as a global middleware (see usage section), all requests need to provide a valid token to access the endpoint.
 <br>
 If some endpoints should be excluded from this restriction, they need to be added to the `options.publicEndpoints` array to be whitelisted.
 
@@ -162,7 +162,7 @@ A factory that returns a middleware that compares scopes attached to `express.Re
 
 * ⚠️&nbsp;&nbsp;This middleware requires scope information to be attached to the `Express.request` object. The `authenticationMiddleware` can do this job. Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
 
-There may apply cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function returns with anything else than resolved state normal scope validation is applied afterwards.
+There may occur cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function resolves with anything else than 'true', normal scope validation is applied afterwards.
 
 Detailed middleware authorization flow:
 
@@ -173,26 +173,26 @@ Detailed middleware authorization flow:
         |             |
         |             | yes
         |             v
-        |    +----------------------+    resolve   +--------+       +---------------+
-     no |    | precedenceFunction() |------------->| next() | ----->| call endpoint |
-        |    +----------------------+              +--------+       +---------------+
+        |    +----------------------+  resolve(true)  +--------+       +---------------+
+     no |    | precedenceFunction() |---------------->| next() | ----->| call endpoint |
+        |    +----------------------+                 +--------+       +---------------+
         |             |
         |             | reject
         v             v
-+-----------------------------------+      yes     +--------+       +---------------+
-| scopes match with requiredScopes? |------------->| next() |------>| call endpoint |
-+-----------------------------------+              +--------+       +---------------+
++-----------------------------------+        yes      +--------+       +---------------+
+| scopes match with requiredScopes? |---------------->| next() |------>| call endpoint |
++-----------------------------------+                 +--------+       +---------------+
         |
     no/ |
   throw v
-+----------------------------------+       yes     +--------------------------------+
-| is onAuthorizationFailedHandler  |-------------->| onAuthorizationFailedHandler() |
-| configured?                      |               +--------------------------------+
++----------------------------------+         yes      +--------------------------------+
+| is onAuthorizationFailedHandler  |----------------->| onAuthorizationFailedHandler() |
+| configured?                      |                  +--------------------------------+
 +----------------------------------+
         |
-        |               no                         +--------------------------------+
-        +----------------------------------------->|    response.sendStatus(403)    |
-                                                   +--------------------------------+
+        |               no                            +--------------------------------+
+        +-------------------------------------------->|    response.sendStatus(403)    |
+                                                      +--------------------------------+
 ```
 
 #### Usage
