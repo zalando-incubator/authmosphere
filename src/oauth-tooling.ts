@@ -44,7 +44,7 @@ const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 function createAuthCodeRequestUri(authorizationEndpoint: string,
                                   redirectUri: string,
                                   clientId: string,
-                                  queryParams?: {}): string {
+                                  queryParams?: { [index: string]: string }): string {
 
   const _queryParams = {
     'client_id': clientId,
