@@ -158,14 +158,48 @@ app.use(authenticationMiddleware({
 
 ### requireScopesMiddleware
 
+A factory that returns a middleware that compare scopes of the request token with a given list and either call `next` or reject request with 403 Forbidden.
+
+More complex description of the middleware's authorization flow:<br>
+  * if precedence function resolves
+    *  give control to next request handler (i.e. call `next()`)
+  * if precedenceFunction rejects and
+    * if token scopes from the request has at least the scopes specified in the `scopes` parameter
+      * give control to next request handler (i.e. call `next()`)
+    * if token scopes from the request has less scopes then specified in the `scopes` parameter
+      * __reject request__
+        * if custom handler is configured call: `options.onAuthorizationFailedHandler`
+        * if no custom handler is configured, respond with status Forbidden(403)
+
+* ⚠️&nbsp;&nbsp;This middleware requires that scope information is attached to the `request` object. The `authenticationMiddleware` can do this job. Otherwise `req.$$tokeninfo.scope: string[]` has to be set manually.
+
 Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
-If the the requested scopes are not matched request is rejected (with 403 Forbidden).
+If the the requested scopes are not matched request is rejected (with _403 Forbidden_).
+
+#### Usage
 
 ```typescript
+import {
+  requireScopesMiddleware
+} from 'authmosphere';
+
 app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
-  // do your work...
-})
+  // handle request
+});
 ```
+
+#### Signature
+
+`(scopes: string[], options?: ScopeMiddlewareOptions) => express.RequestHandler`
+
+#### Arguments
+
+* `scopes: string`
+* [`options`](./src/types/ScopeMiddlewareOptions.ts) -
+  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
+  * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
+
 
 ## Mock Tooling
 
