@@ -114,34 +114,6 @@ type TokenCacheConfig = {
 };
 ```
 
-#### handleOAuthRequestMiddleware(options: MiddlewareOptions)
-
-Express middleware to extract and validate an access token. It attaches the scopes matched by the token to the request (`request.scopes`) for further usage.
-If the token is not valid the request is rejected (with 401 Unauthorized).
-
-```typescript
-app.use(handleOAuthRequestMiddleware({
-  publicEndpoints: ['/heartbeat', '/status'],
-  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
-});
-```
-
-`options`:
-
-* `publicEndpoints` string[]
-* `tokenInfoEndpoint` string
-
-#### requireScopesMiddleware(scopes: string[])
-
-Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
-If the the requested scopes are not matched request is rejected (with 403 Forbidden).
-
-```typescript
-app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
-  // do your work...
-})
-```
-
 #### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<Token>
 
 Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
