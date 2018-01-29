@@ -113,13 +113,13 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 
 ## Express Tooling
 
-Authmosphere provides two middleware factories to secure Express based http services.
+Authmosphere provides two middleware factories to secure [Express](http://expressjs.com/) based http services.
 
 ### authenticationMiddleware
 
 Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
 
-If configured as a global middleware(see usage section), all request need to provide a valid token to access the endpoint.
+If configured as a global middleware (see usage section), all request need to provide a valid token to access the endpoint.
 <br>
 If some endpoints should be excluded from this restriction, they need to be added to the `options.publicEndpoints` array to be whitelisted.
 
@@ -127,7 +127,7 @@ If validation of the provided token fails the middleware rejects the request wit
 To overwrite this behavior a custom handler can be specified by passing in `options.onNotAuthenticatedHandler` (see [`onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts)).
 
 * ⚠️&nbsp;&nbsp;While this middleware could also be configured per endpoint (i.e. `app.get(authenticationMiddleware(...), endpoint)` it is not recommended as using it as global middleware will force you into a whitelist setup.
-  * Make sure `authenticationMiddleware` is at the top of the registered request handlers. This is essential to gurantee the enforceability of the whitelist strategy.
+  * Make sure `authenticationMiddleware` is at the top of the registered request handlers. This is essential to guarantee the enforceability of the whitelist strategy.
 * ⚠️&nbsp;&nbsp;The middleware attaches metadata (scopes of the token) to the express request object. The `requireScopesMiddleware` relies on this information.
 
 
@@ -158,23 +158,42 @@ app.use(authenticationMiddleware({
 
 ### requireScopesMiddleware
 
-A factory that returns a middleware that compare scopes of the request token with a given list and either call `next` or reject request with 403 Forbidden.
+A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter). If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
 
-More complex description of the middleware's authorization flow:<br>
-  * if precedence function resolves
-    *  give control to next request handler (i.e. call `next()`)
-  * if precedenceFunction rejects and
-    * if token scopes from the request has at least the scopes specified in the `scopes` parameter
-      * give control to next request handler (i.e. call `next()`)
-    * if token scopes from the request has less scopes then specified in the `scopes` parameter
-      * __reject request__
-        * if custom handler is configured call: `options.onAuthorizationFailedHandler`
-        * if no custom handler is configured, respond with status Forbidden(403)
+* ⚠️&nbsp;&nbsp;This middleware requires scope information to be attached to the `Express.request` object. The `authenticationMiddleware` can do this job. Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
 
-* ⚠️&nbsp;&nbsp;This middleware requires that scope information is attached to the `request` object. The `authenticationMiddleware` can do this job. Otherwise `req.$$tokeninfo.scope: string[]` has to be set manually.
+There may apply cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function returns with anything else than resolved state normal scope validation is applied afterwards.
 
-Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
-If the the requested scopes are not matched request is rejected (with _403 Forbidden_).
+Detailed middleware authorization flow:
+
+```
++-----------------------------------+
+|   is precedenceFunction defined?  |
++-----------------------------------+
+        |             |
+        |             | yes
+        |             v
+        |    +----------------------+    resolve   +--------+       +---------------+
+     no |    | precedenceFunction() |------------->| next() | ----->| call endpoint |
+        |    +----------------------+              +--------+       +---------------+
+        |             |
+        |             | reject
+        v             v
++-----------------------------------+      yes     +--------+       +---------------+
+| scopes match with requiredScopes? |------------->| next() |------>| call endpoint |
++-----------------------------------+              +--------+       +---------------+
+        |
+    no/ |
+  throw v
++----------------------------------+       yes     +--------------------------------+
+| is onAuthorizationFailedHandler  |-------------->| onAuthorizationFailedHandler() |
+| configured?                      |               +--------------------------------+
++----------------------------------+
+        |
+        |               no                         +--------------------------------+
+        +----------------------------------------->|    response.sendStatus(403)    |
+                                                   +--------------------------------+
+```
 
 #### Usage
 
@@ -200,6 +219,7 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
   * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
   * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
 
+---
 
 ## Mock Tooling
 
