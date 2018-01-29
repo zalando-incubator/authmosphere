@@ -36,7 +36,7 @@ getAccessToken(config)
 
 #### Signature
 
-`getAccessToken(config[, logger]): Promise<Token>`
+`getAccessToken(config[, logger]) => Promise<Token>`
 
 #### Arguments
 
@@ -96,7 +96,7 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 
 #### Signature
 
-`createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId[, queryParams]): string`
+`createAuthCodeRequestUri(authorizationEndpoint, redirectUri, clientId[, queryParams]) => string`
 
 #### Arguments
 
@@ -109,7 +109,119 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 
 `string` of the created request URI.
 
-## Mock tooling
+----
+
+## Express Tooling
+
+Authmosphere provides two middleware factories to secure [Express](http://expressjs.com/) based http services.
+
+### authenticationMiddleware
+
+Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
+
+If configured as a global middleware (see usage section), all requests need to provide a valid token to access the endpoint.
+<br>
+If some endpoints should be excluded from this restriction, they need to be added to the `options.publicEndpoints` array to be whitelisted.
+
+If validation of the provided token fails the middleware rejects the request with status _401 UNAUTHORIZED_. <br>
+To overwrite this behavior a custom handler can be specified by passing in `options.onNotAuthenticatedHandler` (see [`onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts)).
+
+* ⚠️&nbsp;&nbsp;While this middleware could also be configured per endpoint (i.e. `app.get(authenticationMiddleware(...), endpoint)` it is not recommended as using it as global middleware will force you into a whitelist setup.
+  * Make sure `authenticationMiddleware` is at the top of the registered request handlers. This is essential to guarantee the enforceability of the whitelist strategy.
+* ⚠️&nbsp;&nbsp;The middleware attaches metadata (scopes of the token) to the express request object. The `requireScopesMiddleware` relies on this information.
+
+
+#### Usage
+
+```typescript
+import {
+  authenticationMiddleware
+} from 'authmosphere';
+
+app.use(authenticationMiddleware({
+  publicEndpoints: ['/heartbeat', '/status'],
+  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
+});
+```
+
+#### Signature
+
+`authenticationMiddleware(options) => express.RequestHandler`
+
+#### Arguments
+
+* [`options`](./src/types/AuthenticationMiddlewareOptions.ts):
+  * `tokenInfoEndpoint: string` - url of the Token validation endpoint
+  * `publicEndpoints?: string[] - list of whitelisted API paths`
+  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
+
+### requireScopesMiddleware
+
+A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter). If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
+
+* ⚠️&nbsp;&nbsp;This middleware requires scope information to be attached to the `Express.request` object. The `authenticationMiddleware` can do this job. Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
+
+There may occur cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function resolves with anything else than 'true', normal scope validation is applied afterwards.
+
+Detailed middleware authorization flow:
+
+```
++-----------------------------------+
+|   is precedenceFunction defined?  |
++-----------------------------------+
+        |             |
+        |             | yes
+        |             v
+        |    +----------------------+  resolve(true)  +--------+       +---------------+
+     no |    | precedenceFunction() |---------------->| next() | ----->| call endpoint |
+        |    +----------------------+                 +--------+       +---------------+
+        |             |
+        |             | reject
+        v             v
++-----------------------------------+        yes      +--------+       +---------------+
+| scopes match with requiredScopes? |---------------->| next() |------>| call endpoint |
++-----------------------------------+                 +--------+       +---------------+
+        |
+    no/ |
+  throw v
++----------------------------------+         yes      +--------------------------------+
+| is onAuthorizationFailedHandler  |----------------->| onAuthorizationFailedHandler() |
+| configured?                      |                  +--------------------------------+
++----------------------------------+
+        |
+        |               no                            +--------------------------------+
+        +-------------------------------------------->|    response.sendStatus(403)    |
+                                                      +--------------------------------+
+```
+
+#### Usage
+
+```typescript
+import {
+  requireScopesMiddleware
+} from 'authmosphere';
+
+app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
+  // handle request
+});
+```
+
+#### Signature
+
+`(scopes: string[], options?: ScopeMiddlewareOptions) => express.RequestHandler`
+
+#### Arguments
+
+* `scopes: string`
+* [`options`](./src/types/ScopeMiddlewareOptions.ts) -
+  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
+  * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
+
+---
+
+## Mock Tooling
 
 This tooling provides an abstraction to easily mock OAuth 2.0 [RFC 6749](https://tools.ietf.org/html/rfc6749) related endpoints.
 
@@ -119,13 +231,13 @@ This tooling is based on Nock, a HTTP mocking library. For more information abou
 
 ### mockAccessTokenEndpoint
 
-Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
+Creates a *very basic* mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
 
 The mocked endpoint will return a [token](./src/types/Token.ts) with the scopes specified in the request.
 
-* ⚠️ The mock does not validate the request
-* ⚠️ The mock holds a state that contains the created tokens
-* ⚠️ `cleanMock` resets the state and removes all nocks
+* ⚠️&nbsp;&nbsp;The mock does not validate the request
+* ⚠️&nbsp;&nbsp;The mock holds a state that contains the created tokens
+* ⚠️&nbsp;&nbsp;`cleanMock` resets the state and removes __all__ nocks
 
 #### Usage
 
