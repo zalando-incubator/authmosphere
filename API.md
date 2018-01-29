@@ -41,7 +41,7 @@ getAccessToken(config)
 #### Arguments
 
 * [`config: OAuthConfig`](#tbd) - OAuth configuration for the request (specify grant type and corresponding parameters)
-* [`logger?: Logger`](#tbd) - Optional logger
+* [`logger?: Logger`](#tbd) - optional logger
 
 #### Returns
 
@@ -75,8 +75,8 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 #### Arguments
 
 * `tokenInfoUrl: string` - OAuth endpoint for validating tokens
-* `accessToken: string` - Token to be validated
-* [`logger?: Logger`](#tbd) - Optional logger
+* `accessToken: string` - access token to be validated
+* [`logger?: Logger`](#tbd) - optional logger
 
 #### Returns
 
