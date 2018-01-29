@@ -109,7 +109,65 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 
 `string` of the created request URI.
 
-## Mock tooling
+----
+
+## Express Tooling
+
+Authmosphere provides two middleware factories to secure Express based http services.
+
+### authenticationMiddleware
+
+Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
+
+If configured as a global middleware(see usage section), all request need to provide a valid token to access the endpoint.
+<br>
+If some endpoints should be excluded from this restriction, they need to be added to the `options.publicEndpoints` array to be whitelisted.
+
+If validation of the provided token fails the middleware rejects the request with status _401 UNAUTHORIZED_. <br>
+To overwrite this behavior a custom handler can be specified by passing in `options.onNotAuthenticatedHandler` (see [`onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts)).
+
+* ⚠️&nbsp;&nbsp;While this middleware could also be configured per endpoint (i.e. `app.get(authenticationMiddleware(...), endpoint)` it is not recommended as using it as global middleware will force you into a whitelist setup.
+  * Make sure `authenticationMiddleware` is at the top of the registered request handlers. This is essential to gurantee the enforceability of the whitelist strategy.
+* ⚠️&nbsp;&nbsp;The middleware attaches metadata (scopes of the token) to the express request object. The `requireScopesMiddleware` relies on this information.
+
+
+#### Usage
+
+```typescript
+import {
+  authenticationMiddleware
+} from 'authmosphere';
+
+app.use(authenticationMiddleware({
+  publicEndpoints: ['/heartbeat', '/status'],
+  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
+});
+```
+
+#### Signature
+
+`authenticationMiddleware(options) => express.RequestHandler`
+
+#### Arguments
+
+* [`options`](./src/types/AuthenticationMiddlewareOptions.ts):
+  * `tokenInfoEndpoint: string` - url of the Token validation endpoint
+  * `publicEndpoints?: string[] - list of whitelisted API paths`
+  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
+
+### requireScopesMiddleware
+
+Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
+If the the requested scopes are not matched request is rejected (with 403 Forbidden).
+
+```typescript
+app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
+  // do your work...
+})
+```
+
+## Mock Tooling
 
 This tooling provides an abstraction to easily mock OAuth 2.0 [RFC 6749](https://tools.ietf.org/html/rfc6749) related endpoints.
 
@@ -119,13 +177,13 @@ This tooling is based on Nock, a HTTP mocking library. For more information abou
 
 ### mockAccessTokenEndpoint
 
-Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
+Creates a *very basic* mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
 
 The mocked endpoint will return a [token](./src/types/Token.ts) with the scopes specified in the request.
 
-* ⚠️ The mock does not validate the request
-* ⚠️ The mock holds a state that contains the created tokens
-* ⚠️ `cleanMock` resets the state and removes all nocks
+* ⚠️&nbsp;&nbsp;The mock does not validate the request
+* ⚠️&nbsp;&nbsp;The mock holds a state that contains the created tokens
+* ⚠️&nbsp;&nbsp;`cleanMock` resets the state and removes __all__ nocks
 
 #### Usage
 
