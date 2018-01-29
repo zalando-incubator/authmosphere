@@ -41,7 +41,7 @@ getAccessToken(config)
 #### Arguments
 
 * [`config: OAuthConfig`](#tbd) - OAuth configuration for the request (specify grant type and corresponding parameters)
-* [`logger?: Logger`](#tbd) - optional logger
+* [`logger?: Logger`](#tbd) - logger
 
 #### Returns
 
@@ -76,7 +76,7 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 
 * `tokenInfoUrl: string` - OAuth endpoint for validating tokens
 * `accessToken: string` - access token to be validated
-* [`logger?: Logger`](#tbd) - optional logger
+* [`logger?: Logger`](#tbd) - logger
 
 #### Returns
 
@@ -103,7 +103,7 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 * `authorizationEndpoint: string` - [OAuth authorization endpoint](https://tools.ietf.org/html/rfc6749#page-18)
 * `redirectUri: string` - absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
 * `clientId: string` - [client id]((https://tools.ietf.org/html/rfc6749#section-2.2)) of the requesting application
-* `queryParams?: { [index: string]: string }` - optional set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
+* `queryParams?: { [index: string]: string }` - set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
 
 #### Returns
 
@@ -298,7 +298,7 @@ mockTokeninfoEndpoint(
 * [`options`](./src/types/MockOptions.ts):
   * `url: string` - url of the Token validation endpoint
   * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
-* `tokens: Token[]` -  optional list of valid tokens and their scopes.
+* `tokens?: Token[]` - list of valid tokens and their scopes.
 
 ### cleanMock()
 

@@ -142,7 +142,7 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
 
 /**
  * Makes a request to the `tokenInfoUrl` to validate the given `accessToken`.
- * Resolves with an object containing token validation information in case of success.
+ * In case of success resolves with a token.
  * Otherwise, rejects with an error message.
  *
  * Specify `T` to extend the type `Token`.
