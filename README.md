@@ -11,7 +11,7 @@
 
 It's implemented in TypeScript which improves the development experience via implicit documentation with types, first-class IDE support and provides mock tooling for local development. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
 
-Currently the following flows are supported:
+Currently the following OAuth flows are supported:
 
 * [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-4.1)
 * [Client Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.4)

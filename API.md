@@ -1,5 +1,23 @@
 # Authmosphere API Documentation
 
+## TOC
+
+1. [`TokenCache`](#token-cache) service to manage access tokens in your application
+2. OAuth tooling
+    * [`getAccessToken`](./API.md#getaccesstoken) - helper to request access tokens
+    * [`getTokenInfo`](./API.md#gettokeninfo) - help to validate access tokens
+3. [Express middlewares](./API.md#express-tooling) to simplify authentication and authorization
+4. [Types](#types)
+    * [OAuthConfig](#oauthconfig)
+    * [ClientCredentialsGrantConfig](clientcredentialsgrantconfig)
+    * [AuthorizationCodeGrantConfig](clientcredentialsgrantconfig)
+    * [PasswordCredentialsGrantConfig](clientcredentialsgrantconfig)
+    * [RefreshGrantConfig](refreshgrantconfig)
+5. [Mock tooling](./API.md#mock-tooling) for OAuth2.0 endpoints to enable decent unit and integration tests
+    * [mockAccessTokenEndpoint](#mockaccesstokenendpoint)
+    * [mockTokenInfoEndpoint](#mocktokeninfoendpoint)
+    * [cleanMock](#cleanmock)
+
 ## Token Cache
 
 Class to request and cache tokens on client-side.
@@ -76,7 +94,7 @@ get(tokenName) => Promise<Token>
 
 ### refreshToken
 
-Triggers the request of a new token. Invalidates the old the cache entry.
+Triggers the request of a new token. Invalidates the old cache entry.
 
 #### Signature
 
@@ -94,7 +112,7 @@ refreshToken(tokenName: string) => Promise<Token>
 
 ### refreshAllTokens
 
-Triggers the request of a new token. Invalidates the old the cache entry.
+Triggers the request of a new token for all configured ones. Invalidates all cache entries.
 
 #### Signature
 
