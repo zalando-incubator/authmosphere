@@ -4,13 +4,13 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   getTokenInfo,
   getAccessToken,
-  PASSWORD_CREDENTIALS_GRANT,
   mockTokeninfoEndpoint,
   mockAccessTokenEndpoint,
-  cleanMock
-} from '../../src/index';
-
-import { Token } from '../../src/types';
+  cleanMock,
+  Token,
+  OAuthGrantType,
+  PasswordCredentialsGrantConfig
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -45,7 +45,7 @@ describe('mock tooling', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should return the tokeninfo if token is valid', function () {
+    it('should return the tokeninfo if token is valid', () => {
 
       // given
       const validAuthToken = {
@@ -53,11 +53,13 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken],
-        times: 1
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 1
+        },
+        [validAuthToken]
+      );
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, 'foo');
@@ -66,7 +68,7 @@ describe('mock tooling', () => {
       return expect(promise).to.become(validAuthToken);
     });
 
-    it('should return the tokeninfo as often as defined', function () {
+    it('should return 400 if requested token is empty', () => {
 
       // given
       const validAuthToken = {
@@ -74,11 +76,36 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken],
-        times: 3
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 1
+        },
+        [validAuthToken]
+      );
+
+      // when
+      const promise = getTokenInfo(tokeninfoEndpoint, '');
+
+      // then
+      return expect(promise).to.rejected;
+    });
+
+    it('should return the tokeninfo as often as defined', () => {
+
+      // given
+      const validAuthToken = {
+        'expires_in': 3600,
+        'scope': ['uid'],
+        'access_token': 'foo'
+      };
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 3
+        },
+        [validAuthToken]
+      );
 
       // when
       const promise = getTokenInfo(tokeninfoEndpoint, 'foo')
@@ -102,7 +129,7 @@ describe('mock tooling', () => {
       return expect(promise).to.rejected;
     });
 
-    it('should return the tokeninfo Number.MAX_SAFE_INTEGER times when `times` option not defined', function () {
+    it('should return the tokeninfo Number.MAX_SAFE_INTEGER times when `times` option not defined', () => {
 
       // given
       const validAuthToken = {
@@ -110,10 +137,12 @@ describe('mock tooling', () => {
         'scope': ['uid'],
         'access_token': 'foo'
       };
-      mockTokeninfoEndpoint({
-        url: tokeninfoEndpoint,
-        tokens: [validAuthToken]
-      });
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+        },
+        [validAuthToken]
+      );
 
       // when
       return getTokenInfo(tokeninfoEndpoint, 'foo')
@@ -146,14 +175,14 @@ describe('mock tooling', () => {
       cleanMock();
     });
 
-    it('accessToken endpoint should return valid token', function () {
+    it('accessToken endpoint should return valid token', () => {
 
       // given
-      const options = {
+      const options: PasswordCredentialsGrantConfig = {
         scopes: ['uid'],
         accessTokenEndpoint: accessTokenEndpoint,
         credentialsDir: 'integration-test/data/credentials',
-        grantType: PASSWORD_CREDENTIALS_GRANT
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
       };
       mockAccessTokenEndpoint({
         url: accessTokenEndpoint
@@ -165,6 +194,62 @@ describe('mock tooling', () => {
       // when
       const promise = getAccessToken(options)
       .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
+
+        return getTokenInfo(tokeninfoEndpoint, token.access_token);
+      });
+
+      // then
+      return expect(promise).to.eventually.haveOwnProperty('access_token');
+    });
+
+    it('accessToken endpoint should return valid token if multiple scopes are defined', () => {
+
+      // given
+      const options: PasswordCredentialsGrantConfig = {
+        scopes: ['read_service', 'write_service'],
+        accessTokenEndpoint: accessTokenEndpoint,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+      };
+      mockAccessTokenEndpoint({
+        url: accessTokenEndpoint
+      });
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint
+      });
+
+      // when
+      const promise = getAccessToken(options)
+      .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
+
+        return getTokenInfo(tokeninfoEndpoint, token.access_token);
+      });
+
+      // then
+      return expect(promise).to.eventually.haveOwnProperty('access_token');
+    });
+
+    it('accessToken endpoint should return valid token if scope is undefined', () => {
+
+      // given
+      const options: PasswordCredentialsGrantConfig = {
+        accessTokenEndpoint: accessTokenEndpoint,
+        credentialsDir: 'integration-test/data/credentials',
+        grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
+      };
+      mockAccessTokenEndpoint({
+        url: accessTokenEndpoint
+      });
+      mockTokeninfoEndpoint({
+        url: tokeninfoEndpoint
+      });
+
+      // when
+      const promise = getAccessToken(options)
+      .then((token: Token) => {
+        expect(token.scope).to.deep.equal(options.scopes);
 
         return getTokenInfo(tokeninfoEndpoint, token.access_token);
       });

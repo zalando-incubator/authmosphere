@@ -1,24 +1,32 @@
 import * as qs from 'querystring';
 import * as HttpStatus from 'http-status';
 import fetch from 'node-fetch';
-import * as formurlencoded from 'form-urlencoded';
+import * as querystring from 'querystring';
 
 import {
-  getFileData,
+  getFileDataAsObject,
   getBasicAuthHeaderValue,
-  validateOAuthConfig
+  validateOAuthConfig,
+  isAuthorizationCodeGrantConfig,
+  isCredentialsDirConfig,
+  isRefreshGrantConfig,
+  extractUserCredentials,
+  extractClientCredentials,
+  isPasswordGrantNoCredentialsDir
 } from './utils';
 
 import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT,
-  CLIENT_CREDENTIALS_GRANT
-} from './constants';
+  BodyParameters,
+  CredentialsUserClientConfig,
+  CredentialsClientConfig,
+  CredentialsUserConfig,
+  Logger,
+  OAuthConfig,
+  OAuthGrantType,
+  Token
+} from './types';
 
-import { OAuthConfig } from './types/OAuthConfig';
-import { Token } from './types';
-import { BodyParameters } from './types/BodyParameters';
+import { safeLogger } from './safe-logger';
 
 const USER_JSON = 'user.json';
 const CLIENT_JSON = 'client.json';
@@ -27,16 +35,16 @@ const OAUTH_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 /**
  * Returns URI to request authorization code with the given parameters.
  *
- * @param authorizationEndpoint string
- * @param redirectUri string
- * @param clientId string
- * @param queryParams {} optional
+ * @param authorizationEndpoint - OAuth authorization endpoint
+ * @param redirectUri - absolute URI specifying the endpoint the authorization code is responded
+ * @param clientId - client id of requesting application
+ * @param queryParams - optional set of key-value pairs which will be added as query parameters to the request
  * @returns {string}
  */
 function createAuthCodeRequestUri(authorizationEndpoint: string,
                                   redirectUri: string,
                                   clientId: string,
-                                  queryParams?: {}): string {
+                                  queryParams?: { [index: string]: string }): string {
 
   const _queryParams = {
     'client_id': clientId,
@@ -54,26 +62,28 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
 
 /**
  * Makes a request to the `accessTokenEndpoint` with the given parameters.
- * Resolves with object containing property `accessToken` with the access token
- * (in case of success). Otherwise, rejects with error message.
+ * Resolves with an access token in case of success.
+ * Otherwise, rejects with error message.
  *
- * @param bodyObject an object of values put in the body
+ * @param bodyObject
  * @param authorizationHeaderValue
  * @param accessTokenEndpoint
- * @param queryParams optional
+ * @param logger
+ * @param queryParams
  * @returns {Promise<Token>}
  */
-function requestAccessToken(bodyObject: any,
+function requestAccessToken(bodyObject: object,
                             authorizationHeaderValue: string,
                             accessTokenEndpoint: string,
-                            queryParams?: Object): Promise<Token> {
+                            logger: Logger,
+                            queryParams?: { [index: string]: string }): Promise<Token> {
 
   const url = buildRequestAccessTokenUrl(accessTokenEndpoint, queryParams);
 
   const promise =
     fetch(url, {
       method: 'POST',
-      body: formurlencoded(bodyObject),
+      body: querystring.stringify(bodyObject),
       headers: {
         'Authorization': authorizationHeaderValue,
         'Content-Type': OAUTH_CONTENT_TYPE
@@ -84,15 +94,25 @@ function requestAccessToken(bodyObject: any,
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
-        return Promise.reject(`Response failed with status code ${status}`);
+        return response.json()
+        .catch((error) => Promise.reject(error))
+        .then((error) => Promise.reject({
+          // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
+          // but do fall back if for some reason the definition is not satisfied
+          error: (error && error.error) ? error.error : error,
+          errorDescription: (error && error.error_description) ? error.error_description : undefined,
+          status
+        }));
       }
 
+      logger.debug(`Successful request to ${accessTokenEndpoint}`);
       return response.json();
     })
-    .catch((err) => {
+    .catch((error) => {
+      logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
       return Promise.reject({
-        msg: `Error requesting access token from ${accessTokenEndpoint}`,
-        err
+        message: `Error requesting access token from ${accessTokenEndpoint}`,
+        error
       });
     });
 
@@ -102,8 +122,8 @@ function requestAccessToken(bodyObject: any,
 /**
  * Build url string to request access token, optionally with given query parameters.
  *
- * @param accessTokenEndpoint string
- * @param queryParams Object key value paris which will be added as query parameters
+ * @param accessTokenEndpoint
+ * @param queryParams - key-value pairs which will be added as query parameters
  * @returns {string}
  */
 function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: Object): string {
@@ -122,100 +142,91 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
 
 /**
  * Makes a request to the `tokenInfoUrl` to validate the given `accessToken`.
- * Resolves with an object containing access token information in case of success.
+ * In case of success resolves with a token.
  * Otherwise, rejects with an error message.
  *
- * @param tokenInfoUrl
- * @param accessToken
- * @returns {Promise<Token>}
+ * Specify `T` to extend the type `Token`.
+ *
+ * @param tokenInfoUrl - OAuth endpoint for validating tokens
+ * @param accessToken - access token to be validated
+ * @param logger - optional logger
+ *
+ * @returns { Promise<Token<T>> }
  */
-function getTokenInfo(tokenInfoUrl: string, accessToken: string): Promise<Token> {
+function getTokenInfo<T>(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token<T>> {
 
-    const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-    .then((response) => {
+  const logOrNothing = safeLogger(logger);
 
-      const status = response.status;
+  const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+  .then((response) => {
 
-      return response.json()
-      .then((data) => {
+    const status = response.status;
 
-        if (response.status === HttpStatus.OK) {
-          return data;
-        } else {
-          return Promise.reject({ status, data });
-        }
-      });
-    })
-    .catch((err) => Promise.reject({
-      msg: `Error requesting tokeninfo from ${tokenInfoUrl}`,
-      err
-    }));
+    return response.json()
+    .then((data) => {
+
+      if (status === HttpStatus.OK) {
+        logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
+        return data;
+      } else {
+        logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+        return Promise.reject({ status, data });
+      }
+    });
+  })
+  .catch((error) => {
+
+    logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
+
+    return Promise.reject({
+      message: `Error validating token via ${tokenInfoUrl}`,
+      error
+    });
+  });
 
   return promise;
 }
 
 /**
- * Helper function to get an access token for the specified scopes.
- * Reads client and user credentials (to build a valid authorization header) and makes a
- * request to the `accessTokenEndpoint`.
+ * Requests a token based on the given configuration (which specifies the grant type and corresponding parameters).
  *
- * Resolves with object containing property `accessToken` with the access token
- * (in case of success). Otherwise, rejects with error message.
+ * Resolves with object of type `Token` (in case of success).
+ * Otherwise, rejects with error message.
  *
- * Currently supports the following OAuth flows (specified by the `grantType` property):
- *  - Resource Owner Password Credentials Grant (PASSWORD_CREDENTIALS_GRANT)
- *  - Authorization Code Grant (AUTHORIZATION_CODE_GRANT)
- *  - Refresh Token Grant (REFRESH_TOKEN_GRANT)
- *
- *  The `options` object can have the following properties:
- *  - credentialsDir string
- *  - grantType string
- *  - accessTokenEndpoint string
- *  - scopes string[] optional
- *  - queryParams {} optional
- *  - redirect_uri string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - code string optional (required with AUTHORIZATION_CODE_GRANT)
- *  - refreshToken string optional (required with REFRESH_TOKEN_GRANT)
- *
- * @param options
+ * @param options - OAuthConfig
+ * @param logger - optional logger
  * @returns {Promise<T>}
  */
-function getAccessToken(options: OAuthConfig): Promise<Token> {
+function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
+
+  const logOrNothing = safeLogger(logger);
 
   validateOAuthConfig(options);
 
-  const credentialsPromises = [getFileData(options.credentialsDir, CLIENT_JSON)];
-
-  // For PASSWORD_CREDENTIALS_GRANT wen need user credentials as well
-  if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
-    credentialsPromises.push(getFileData(options.credentialsDir, USER_JSON));
-  }
+  const credentialsPromises = getCredentials(options);
 
   return Promise.all(credentialsPromises)
-  .then((credentials) => {
-
-    const clientData = JSON.parse(credentials[0]);
+  .then(([clientData, userData]) => {
 
     let bodyParameters: BodyParameters;
 
-    if (options.grantType === PASSWORD_CREDENTIALS_GRANT) {
-      const userData = JSON.parse(credentials[1]);
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType,
-        'username': userData.application_username,
-        'password': userData.application_password
+        'username': userData.applicationUsername,
+        'password': userData.applicationPassword
       };
-    } else if (options.grantType === CLIENT_CREDENTIALS_GRANT) {
+    } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
       bodyParameters = {
         'grant_type': options.grantType
       };
-    }  else if (options.grantType === AUTHORIZATION_CODE_GRANT) {
+    } else if (isAuthorizationCodeGrantConfig(options)) {
       bodyParameters = {
         'grant_type': options.grantType,
         'code': options.code,
         'redirect_uri': options.redirectUri
       };
-    } else if (options.grantType === REFRESH_TOKEN_GRANT) {
+    } else if (isRefreshGrantConfig(options)) {
       bodyParameters = {
         'grant_type': options.grantType,
         'refresh_token': options.refreshToken
@@ -230,12 +241,50 @@ function getAccessToken(options: OAuthConfig): Promise<Token> {
       });
     }
 
-    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.client_id, clientData.client_secret);
+    if (options.bodyParams) {
+      Object.assign(bodyParameters, options.bodyParams);
+    }
+
+    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
 
     return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, options.queryParams);
+      options.accessTokenEndpoint, logOrNothing, options.queryParams);
   });
 }
+
+type convertSnakeCredentialsToCamel = (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
+const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => ({
+  clientId: options.client_id,
+  clientSecret: options.client_secret,
+  applicationUsername: options.application_username,
+  applicationPassword: options.application_password
+});
+
+const getCredentials = (options: OAuthConfig): Promise<any>[] => {
+
+  let getClientData;
+  let getUserData;
+
+  if (isCredentialsDirConfig(options)) {
+    getClientData = getFileDataAsObject(options.credentialsDir, CLIENT_JSON)
+      .then(convertSnakeCredentialsToCamel);
+
+    // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+      getUserData = getFileDataAsObject(options.credentialsDir, USER_JSON)
+        .then(convertSnakeCredentialsToCamel);
+    }
+  } else {
+    getClientData = Promise.resolve(extractClientCredentials(options));
+
+    // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
+    if (isPasswordGrantNoCredentialsDir(options)) {
+      getUserData = Promise.resolve(extractUserCredentials(options));
+    }
+  }
+
+  return getUserData ? [getClientData, getUserData] : [getClientData];
+};
 
 export {
   getTokenInfo,
