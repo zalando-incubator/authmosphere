@@ -38,7 +38,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
 
       return [HttpStatus.OK, newToken];
     });
-}
+};
 
 /**
  * Creates a __very basic__ mock of a token validation endpoint.
@@ -80,17 +80,17 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 
       return [HttpStatus.BAD_REQUEST, { error: 'invalid_request' }];
     });
-}
+};
 
 const mockAccessTokenEndpointWithErrorResponse =
   (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
-  }
+  };
 
 const mockTokeninfoEndpointWithErrorResponse =
   (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
-  }
+  };
 
 const mockEndpointWithErrorResponse =
   (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
@@ -104,7 +104,7 @@ const mockEndpointWithErrorResponse =
     .reply(() => {
       return [httpStatus, responseBody || {}];
     });
-  }
+  };
 
 /**
  * Removes generated tokens and mocked endpoints.
@@ -113,7 +113,7 @@ const cleanMock = (): void => {
 
   nock.cleanAll();
   _tokens = [];
-}
+};
 
 const generateToken = (scopes?: string[]): Token => {
 
@@ -122,7 +122,7 @@ const generateToken = (scopes?: string[]): Token => {
     scope: scopes,
     access_token: uuid.v4()
   };
-}
+};
 
 /**
  * Parses URL and throws, if URL is neither string nor object
@@ -138,7 +138,7 @@ const parseUrlOrThrow = (options: MockOptions) => {
     throw new Error(`Error parsing '${options.url}'`);
   }
   return parsedUrl;
-}
+};
 
 export {
   cleanMock,
@@ -146,4 +146,4 @@ export {
   mockAccessTokenEndpointWithErrorResponse,
   mockTokeninfoEndpoint,
   mockTokeninfoEndpointWithErrorResponse
-}
+};
