@@ -65,6 +65,9 @@ tokenCache
 
 ### constructor
 
+<details>
+<summary>Hide / Show details</summary>
+
 #### Signature
 
 ```ts
@@ -81,7 +84,12 @@ constructor(tokenConfig, oauthConfig, options)
     * `percentageLeft: number` - To determine when a token is expired locally (means when to issue a new token): if the token exists for `((1 - percentageLeft) * lifetime)` then issue a new one.
   * [`logger?: Logger`](#logging)
 
+</details>
+
 ### get
+
+<details>
+<summary>Hide / Show details</summary>
 
 Returns cached token or requests a new one if lifetime (as configured in `cacheOptions.cacheConfig`) is expired.
 
@@ -98,6 +106,8 @@ get(tokenName) => Promise<Token>
 #### Returns
 
 [`Promise<Token>`](./src/types/Token.ts) that resolves with a token with configured scopes. In case of error rejects with an error message.
+
+</details>
 
 ### refreshToken
 
