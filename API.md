@@ -2,18 +2,18 @@
 
 ## TOC
 
-1. [`TokenCache`](#token-cache) service to manage access tokens in your application
-2. OAuth tooling
-    * [`getAccessToken`](./API.md#getaccesstoken) - helper to request access tokens
-    * [`getTokenInfo`](./API.md#gettokeninfo) - help to validate access tokens
-3. [Express middlewares](./API.md#express-tooling) to simplify authentication and authorization
+1. [`TokenCache`](#token-cache)
+2. [OAuth tooling](#oauth-tooling)
+    * [`getAccessToken`](#getaccesstoken)
+    * [`getTokenInfo`](#gettokeninfo)
+3. [Express middlewares](#express-tooling)
 4. [Types](#types)
     * [OAuthConfig](#oauthconfig)
-    * [ClientCredentialsGrantConfig](clientcredentialsgrantconfig)
-    * [AuthorizationCodeGrantConfig](clientcredentialsgrantconfig)
-    * [PasswordCredentialsGrantConfig](clientcredentialsgrantconfig)
-    * [RefreshGrantConfig](refreshgrantconfig)
-5. [Mock tooling](./API.md#mock-tooling) for OAuth2.0 endpoints to enable decent unit and integration tests
+    * [ClientCredentialsGrantConfig](#clientcredentialsgrantconfig)
+    * [AuthorizationCodeGrantConfig](#clientcredentialsgrantconfig)
+    * [PasswordCredentialsGrantConfig](#clientcredentialsgrantconfig)
+    * [RefreshGrantConfig](#refreshgrantconfig)
+5. [Mock tooling](#mock-tooling)
     * [mockAccessTokenEndpoint](#mockaccesstokenendpoint)
     * [mockTokenInfoEndpoint](#mocktokeninfoendpoint)
     * [cleanMock](#cleanmock)
@@ -25,9 +25,13 @@ Class to request and cache tokens on client-side.
 #### Usage
 
 ```typescript
+import {
+  TokenCache,
+  OAuthGrantType,
+  Token
+} from 'authmosphere';
 
-// TokenCacheOptions
-const cacheOptions = {
+const options = {
   cacheConfig: {
     percentageLeft: 0.75
   },
@@ -36,7 +40,7 @@ const cacheOptions = {
 
 const oAuthConfig = {
   grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
-  accessTokenEndpoint: 'https://....',
+  accessTokenEndpoint: 'https://example.com/access_token',
   credentialsDir: './credentialsDir'
 };
 
@@ -45,14 +49,14 @@ const tokenConfig = {
   'service-bar': ['bar.read']
 };
 
-// create a new cache
-const tokenCache = new TokenCache(tokenConfig, oAuthConfig, cacheOptions);
+// create a new TokenCache instance
+const tokenCache = new TokenCache(tokenConfig, oAuthConfig, options);
 
-// Get a token from cache
+// request and resolve a token from the cache
 tokenCache
-  .get('service-foo') // Needs to match with a key from 'tokenConfig'
+  .get('service-foo') // needs to match with a key from 'tokenConfig'
   .then((token: Token) => {
-    console.log(token.access_token);
+    // ...use the token...
   });
 ```
 
@@ -61,14 +65,14 @@ tokenCache
 #### Signature
 
 ```ts
-constructor(tokenConfig, oauthConfig: TokenCacheOAuthConfig, options)
+constructor(tokenConfig, oauthConfig, options)
 ```
 
 #### Arguments
 
-* `tokenConfig: [key: string]: string[]` - the token cache is able to handle multiple tokens. The string array should contain the scopes attached to the token.
+* `tokenConfig: [key: string]: string[]` - Mapping between a name (representing a token) and the scopes requested for the corresponding token.
 * `oauthConfig: TokenCacheOAuthConfig` -
-  Either [`ClientCredentialsGrantConfig`](#clientcredentialsgrantconfig) or [`PasswordCredentialsGrantConfig`](#passwordcredentialsgrantconfig)` plus the additional `tokenInfoEndpoint: string` property that specifies the URL of the token validation endpoint.
+  Either [`ClientCredentialsGrantConfig`](#clientcredentialsgrantconfig) or [`PasswordCredentialsGrantConfig`](#passwordcredentialsgrantconfig) plus the additional `tokenInfoEndpoint: string` property that specifies the URL of the token validation endpoint.
 * [`options?: TokenCacheOptions`](./src/types/TokenCacheConfig.ts)
   * [`cacheConfig?: CacheConfig`](./src/types/TokenCacheConfig.ts)
     * `percentageLeft: number` - To determine when a token is expired locally (means when to issue a new token): if the token exists for `((1 - percentageLeft) * lifetime)` then issue a new one.
@@ -76,7 +80,7 @@ constructor(tokenConfig, oauthConfig: TokenCacheOAuthConfig, options)
 
 ### get
 
-Returns cached token or requests a new one if lifetime as configured in `cacheOptions.cacheConfig` is expired.
+Returns cached token or requests a new one if lifetime (as configured in `cacheOptions.cacheConfig`) is expired.
 
 #### Signature
 
@@ -86,11 +90,11 @@ get(tokenName) => Promise<Token>
 
 #### Arguments
 
-* `tokenName: string` - key of the token as configured in `tokenConfig`
+* `tokenName: string` - Key of the token as configured in `tokenConfig`
 
 #### Returns
 
-`Promise<Token>` that resolves with a token with configured scopes. In case of error rejects with an error message.
+[`Promise<Token>`](./src/types/Token.ts) that resolves with a token with configured scopes. In case of error rejects with an error message.
 
 ### refreshToken
 
@@ -104,7 +108,7 @@ refreshToken(tokenName: string) => Promise<Token>
 
 #### Arguments
 
-* `tokenName: string` - key of the token as configured in `tokenConfig`
+* `tokenName: string` - Key of the token as configured in `tokenConfig`
 
 #### Returns
 
@@ -117,7 +121,7 @@ Triggers the request of a new token for all configured ones. Invalidates all cac
 #### Signature
 
 ```ts
-refreshAllTokens(): Promise<TokenMap>
+refreshAllTokens() => Promise<TokenMap>
 ```
 
 #### Returns
@@ -147,7 +151,7 @@ import {
 const config: ClientCredentialsGrantConfig = {
   grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
   credentialsDir: './crendentials',
-  accessTokenEndpoint: 'example.com/token',
+  accessTokenEndpoint: 'https://example.com/token_validation',
   scopes: ['my-app.read', 'my-app.write'];
 };
 
@@ -167,7 +171,7 @@ getAccessToken(config)
 #### Arguments
 
 * [`config: OAuthConfig`](#types) - OAuth configuration for the request (specify grant type and corresponding parameters)
-* [`logger?: Logger`](#logging) - logger
+* [`logger?: Logger`](#logging)
 
 #### Returns
 
@@ -185,7 +189,7 @@ import {
   getTokenInfo
 } from 'authmosphere';
 
-getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
+getTokenInfo('https://example.com/token_validation', '1234-5678-9000')
   .then((token: Token) => {
     // ...token is valid...
   })
@@ -202,7 +206,7 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 
 * `tokenInfoUrl: string` - OAuth endpoint for validating tokens
 * `accessToken: string` - access token to be validated
-* [`logger?: Logger`](#logging) - logger
+* [`logger?: Logger`](#logging)
 
 #### Returns
 
@@ -217,7 +221,7 @@ Helper function to create the URI to request an authorization code when using th
 #### Usage
 
 ```ts
-const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.com/handle-auth-code', '1234-client-id');
+const uri = createAuthCodeRequestUri('https://example.com/authorize', 'http://your-app.com/handle-auth-code', '1234-client-id');
 ```
 
 #### Signature
@@ -227,9 +231,9 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 #### Arguments
 
 * `authorizationEndpoint: string` - [OAuth authorization endpoint](https://tools.ietf.org/html/rfc6749#page-18)
-* `redirectUri: string` - absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
+* `redirectUri: string` - Absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
 * `clientId: string` - [client id]((https://tools.ietf.org/html/rfc6749#section-2.2)) of the requesting application
-* `queryParams?: { [index: string]: string }` - set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
+* `queryParams?: { [index: string]: string }` - Set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
 
 #### Returns
 
@@ -266,7 +270,7 @@ import {
 
 app.use(authenticationMiddleware({
   publicEndpoints: ['/heartbeat', '/status'],
-  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
+  tokenInfoEndpoint: 'https://example.com/token_validation'
 });
 ```
 
@@ -277,9 +281,9 @@ app.use(authenticationMiddleware({
 #### Arguments
 
 * [`options`](./src/types/AuthenticationMiddlewareOptions.ts):
-  * `tokenInfoEndpoint: string` - url of the Token validation endpoint
-  * `publicEndpoints?: string[] - list of whitelisted API paths`
-  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * `tokenInfoEndpoint: string` - URL of the Token validation endpoint
+  * `publicEndpoints?: string[] - List of whitelisted API paths`
+  * [`logger?: Logger`](./src/types/Logger.ts)
   * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
 
 ### requireScopesMiddleware
@@ -341,8 +345,8 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 
 * `scopes: string`
 * [`options`](./src/types/ScopeMiddlewareOptions.ts) -
-  * `logger?: Logger` - [logger](./src/types/Logger.ts)
-  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
+  * [`logger?: Logger`](./src/types/Logger.ts)
+  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - Custom handler for failed authorizations
   * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
 
 
@@ -450,6 +454,27 @@ type ClientCredentialsGrantConfig = {
 
 Client credentials can be passed in via `clientId` and `clientSecrect`, user credentials via `applicationUsername` and `applicationPassword`;
 
+### Token
+
+```ts
+type Token<CustomTokenPart = {}> = CustomTokenPart & {
+  access_token: string;
+  expires_in?: number;
+  scope?: string[];
+  token_type?: string;
+  local_expiry?: number;
+};
+```
+
+Token type it can be extend to satisfy special needs:
+
+```ts
+const mytoken: Token<{ id: number }> = {
+  access_token: 'abcToken',
+  id: 2424242828
+}
+```
+
 ---
 
 ## Mock Tooling
@@ -474,7 +499,7 @@ The mocked endpoint will return a [token](./src/types/Token.ts) with the scopes 
 
 ```typescript
 mockAccessTokenEndpoint({
-  url: 'http://some.oauth.endpoint/access_token',
+  url: 'https://example.com/access_token',
   times: 1
 });
 ```
@@ -486,8 +511,8 @@ mockAccessTokenEndpoint({
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
 
 ### mockTokenInfoEndpoint
 
@@ -508,7 +533,7 @@ The optional `tokens` property in `MockOptions` can be used to restrict the list
 ```typescript
 mockTokeninfoEndpoint(
   {
-    url: 'http://some.oauth.endpoint/tokeninfo',
+    url: 'https://example.com//token_validation',
     times: 1
   },
   tokens: [
@@ -527,9 +552,9 @@ mockTokeninfoEndpoint(
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
-* `tokens?: Token[]` - list of valid tokens and their scopes.
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+* `tokens?: Token[]` - List of valid tokens and their scopes.
 
 ### cleanMock()
 
@@ -557,7 +582,7 @@ Two mock failing OAuth Endpoints use this mocks:
 
 ```typescript
 mockAccessTokenEndpointWithErrorResponse({
-  url: 'http://some.oauth.endpoint/access_token',
+  url: 'https://example.com/access_token',
   times: 1
 }, 401, {status: 'foo'});
 ```
@@ -568,9 +593,9 @@ mockAccessTokenEndpointWithErrorResponse({
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
-* `httpStatus: number` - statusCode of the response
-* `responseBody?: object`- body of the response
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+* `httpStatus: number` - StatusCode of the response
+* `responseBody?: object`- Body of the response
 
 ----

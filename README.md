@@ -11,43 +11,74 @@
 
 It's implemented in TypeScript which improves the development experience via implicit documentation with types, first-class IDE support and provides mock tooling for local development. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
 
-Currently the following OAuth flows are supported:
+The following OAuth flows are supported:
 
 * [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-4.1)
 * [Client Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.4)
 * [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
 * [Refresh Token Grant](https://tools.ietf.org/html/rfc6749#section-6)
 
-Currently the [Authmosphere JavaScript API](./API.md) supports:
+The [Authmosphere JavaScript API](./API.md) supports:
 
-* [Express middlewares](./API.md#express-tooling) to simplify authentication/authorization
-* [`TokenCache`](./API.md#token-cache) service to manage access tokens in your application
-* OAuth tooling
+* [Express middlewares](./API.md#express-tooling) to simplify authentication and authorization
+* [`TokenCache`](./API.md#token-cache) service to manage access tokens
+* [OAuth tooling](./API.md#oauth-tooling)
   * [`getAccessToken`](./API.md#getaccesstoken) - helper to request access tokens
-  * [`getTokenInfo`](./API.md#gettokeninfo) - help to validate access tokens
+  * [`getTokenInfo`](./API.md#gettokeninfo) - helper to validate access tokens
 * [Mock tooling](./API.md#mock-tooling) for OAuth2.0 endpoints to enable decent unit and integration tests
 
-See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
+## Usage
 
+For a comprehensive documentation checkout out the [API documentation](./API.md).
 
+### Cache and request tokens
+
+```typescript
+import { TokenCache, OAuthGrantType } from 'authmosphere';
+
+const oAuthConfig = {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
+  accessTokenEndpoint: 'https://example.com/access_token',
+  credentialsDir: './credentialsDir'
+};
+
+const tokenConfig = {
+  'service-foo': ['foo.read', 'foo.write'],
+  'service-bar': ['bar.read']
+};
+
+// create a new TokenCache instance
+const tokenCache = new TokenCache(tokenConfig, oAuthConfig);
+
+// request and resolve a token from the cache
+tokenCache
+  .get('service-foo') // needs to match with a key from 'tokenConfig'
+  .then((token) => { /* ...use the token... */ });
+```
+
+### Secure express endpoints
+
+```typescript
+import { authenticationMiddleware, requireScopesMiddleware } from 'authmosphere';
+
+// extract and validate access token (authorization header)
+// and reject requests without valid access token
+app.use(authenticationMiddleware({ tokenInfoEndpoint: 'https://example.com/token_validation' });
+
+// only allow access for requests with tokens that have scopeA and scopeB
+app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
+  // handle request
+});
+```
 
 ## Setup
 
 * `node >= 6.0.0` required to consume this library
 * `npm install authmosphere`
 
-Importing from this library works like this:
+## OAuth documentation
 
-```typescript
-import {
-  TokenCache,
-  handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  ...
-} from 'authmosphere';
-```
-
-[API](./API.md)
+* See [OAuth2 RFC](https://tools.ietf.org/html/rfc6749) for more information.
 
 ## Changelog and Migration
 
