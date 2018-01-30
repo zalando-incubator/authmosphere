@@ -139,7 +139,7 @@ describe('mock tooling', () => {
       };
       mockTokeninfoEndpoint(
         {
-          url: tokeninfoEndpoint,
+          url: tokeninfoEndpoint
         },
         [validAuthToken]
       );
