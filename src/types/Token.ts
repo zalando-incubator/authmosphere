@@ -8,4 +8,4 @@ type Token<CustomTokenPart = {}> = CustomTokenPart & {
 
 export {
   Token
- };
+};

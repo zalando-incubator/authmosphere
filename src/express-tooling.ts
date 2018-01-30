@@ -15,136 +15,215 @@ import {
 import { getTokenInfo } from './oauth-tooling';
 
 import {
-  MiddlewareOptions,
+  AuthenticationMiddlewareOptions,
   ExtendedRequest,
+  onAuthorizationFailedHandler,
   PrecedenceFunction,
-  PrecedenceErrorHandler,
-  PrecedenceOptions
+  PrecedenceOptions,
+  ScopeMiddlewareOptions
 } from './types';
+
+import { safeLogger } from './safe-logger';
 
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
 /**
- * Returns a function (express middleware) that validates the scopes against the user scopes
- * attached to the request (for example by `handleOAuthRequestMiddleware`).
- * If the the requested scopes are not matched request is rejected (with 403 Forbidden).
+ * A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter).
+ * If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
+ *
+ * * ⚠️&nbsp;&nbsp;This middleware requires scope information to be attached to the `Express.request` object.
+ * The `authenticationMiddleware` can do this job. Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
+ *
+ * There may apply cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function returns with anything else than resolved state normal scope validation is applied afterwards.
+ *
+ * Detailed middleware authorization flow:
+ *
+ * ```
+ * +-----------------------------------+
+ * |   is precedenceFunction defined?  |
+ * +-----------------------------------+
+ *         |             |
+ *         |             | yes
+ *         |             v
+ *         |    +----------------------+    resolve   +--------+       +---------------+
+ *      no |    | precedenceFunction() |------------->| next() | ----->| call endpoint |
+ *         |    +----------------------+              +--------+       +---------------+
+ *         |             |
+ *         |             | reject
+ *         v             v
+ * +-----------------------------------+      yes     +--------+       +---------------+
+ * | scopes match with requiredScopes? |------------->| next() |------>| call endpoint |
+ * +-----------------------------------+              +--------+       +---------------+
+ *         |
+ *     no/ |
+ *   throw v
+ * +----------------------------------+       yes     +--------------------------------+
+ * | is onAuthorizationFailedHandler  |-------------->| onAuthorizationFailedHandler() |
+ * | configured?                      |               +--------------------------------+
+ * +----------------------------------+
+ *         |
+ *         |               no                         +--------------------------------+
+ *         +----------------------------------------->|    response.sendStatus(403)    |
+ *                                                    +--------------------------------+
+ * ```
+ *
+ * The options object can have the following properties:
+ * - optional logger
+ * - onAuthorizationFailedHandler - a customer handler method that
+ *                                  is executed if callee is not authorized,
+ *                                  If not provided, `response.sendStatus(403)` is called.
+ * - precedenceOptions - Let consumers define a handler to overrule scope checking.
+ *                       ⚠️ If precedence function throws or return `false`,
+ *                        the standard scope validation is applied afterwards.
+ *
  *
  * Usage:
- *  app.get('/path', requireScopesMiddleware['scopeA', 'scopeB'], (req, res) => { // Do route work })
+ *  app.get('/path', requireScopesMiddleware(['scopeA', 'scopeB']), (req, res) => { // handle request })
  *
  * @param scopes - array of scopes that are needed to access the endpoint
- * @param precedenceOptions - This options let consumers define a way to over rule scope checking. The parameter is optional.
+ * @param options: ScopeMiddlewareOptions
  *
  * @returns { function(any, any, any): undefined }
  */
-function requireScopesMiddleware(scopes: string[],
-                                 precedenceOptions?: PrecedenceOptions): RequestHandler {
+type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
+const requireScopesMiddleware: requireScopesMiddleware =
+  (scopes, options = {}) =>
+    (request: ExtendedRequest, response: Response, nextFunction: NextFunction) => {
 
-  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
+      const {
+        logger,
+        precedenceOptions
+      } = options;
+      // Need to do this to not shadow the symbol
+      const _onAuthorizationFailedHandler = options.onAuthorizationFailedHandler;
 
-    if (precedenceOptions && precedenceOptions.precedenceFunction) {
-      const { precedenceFunction, precedenceErrorHandler, logger } = precedenceOptions;
+      const logOrNothing = safeLogger(logger);
 
-      precedenceFunction(req, res, next)
-      .then(result => {
-        if (result) {
-          next();
-        } else {
-          validateScopes(req, res, next, scopes);
-        }
+      const authorizationFailedHandler: onAuthorizationFailedHandler =
+        typeof _onAuthorizationFailedHandler === 'function' ?
+          (req, res, next, _scopes, _logger) =>
+            _onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
+          (req, res, next, _scopes, _logger) =>
+            rejectRequest(res, _logger, HttpStatus.FORBIDDEN);
+
+      const precedenceFunction =
+        precedenceOptions && typeof precedenceOptions.precedenceFunction === 'function' ?
+          precedenceOptions.precedenceFunction :
+          () => Promise.resolve(false);
+
+      precedenceFunction(request, response, nextFunction)
+      .catch(error => {
+        logOrNothing.warn(`Error while executing precedenceFunction: ${error}`);
+        // PrecedencFunction was not successful
+        //  false -> trigger fallback to default scope validation
+        return false;
       })
-      .catch(err => {
-        try {
-          precedenceErrorHandler(err, logger);
-        } catch (err) {
-          logger.error('Error while executing precedenceErrorHandler: ', err);
+      .then(isAllowed => {
+        if (isAllowed) { // precedenceFunction grants access
+          logOrNothing.debug('PrecedenceFunction grants access');
+          nextFunction();
+        } else if (validateScopes(request, scopes)) {  // scope validation grants access
+          logOrNothing.debug('Scopes validated successfully');
+          nextFunction();
+        } else {
+          logOrNothing.warn(`Scope validation failed for ${scopes}`);
+          authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
         }
       });
-      return; // skip normal scope validation
-    }
-
-    validateScopes(req, res, next, scopes);
-  };
-}
+    };
 
 /**
  * Returns a function (middleware) to extract and validate an access token from a request.
  * Furthermore, it attaches the scopes granted by the token to the request for further usage.
- * If the token is not valid the request is rejected (with 401 Unauthorized).
+ *
+ * If the token is not valid the onNotAuthenticatedHandler is called.
  *
  * The options object can have the following properties:
  *  - publicEndpoints string[]
  *  - tokenInfoEndpoint string
+ *  - optional logger
+ *  - onNotAuthenticatedHandler - a customer handler method that
+ *                                is executed if callee is not authorized,
+ *                                If not provided, `response.sendStatus(401)` is called.
  *
  * Usage:
  * app.use(handleOAuthRequestMiddleware(options))
  *
- * @param options
+ * @param options: AuthenticationMiddlewareOptions
  * @returns express middleware
  */
-function handleOAuthRequestMiddleware(options: MiddlewareOptions): RequestHandler {
+type authenticationMiddleware = (options: AuthenticationMiddlewareOptions) => RequestHandler;
+const authenticationMiddleware: authenticationMiddleware = (options) => {
 
   const {
     tokenInfoEndpoint,
-    publicEndpoints
+    publicEndpoints,
+    logger
   } = options;
 
+  const logOrNothing = safeLogger(logger);
+
   if (!tokenInfoEndpoint) {
+    logOrNothing.error('tokenInfoEndpoint must be defined');
     throw TypeError('tokenInfoEndpoint must be defined');
   }
 
-  return function(req: ExtendedRequest, res: Response, next: NextFunction) {
+  const oAuthMiddleware: RequestHandler = (req, res, next) => {
+
+    const customNotAuthenticatedHandler = options.onNotAuthenticatedHandler;
+
+    const notAuthenticatedHandler: rejectRequest =
+      typeof customNotAuthenticatedHandler === 'function' ?
+        (_req, _logger, status) => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
+        rejectRequest;
 
     const originalUrl = req.originalUrl;
 
     // Skip OAuth validation for paths marked as public
     if (publicEndpoints && publicEndpoints.some(pattern => originalUrl.startsWith(pattern))) {
-      return next();
+      next();
+      return;
     }
 
     const authHeader = getHeaderValue(req, AUTHORIZATION_HEADER_FIELD_NAME);
 
     if (!authHeader) {
-      rejectRequest(res);
+      logOrNothing.warn('No authorization field in header');
+      notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     }
 
     const accessToken = extractAccessToken(authHeader);
     if (!accessToken) {
-      rejectRequest(res);
+      logOrNothing.warn('access_token is empty');
+      notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     } else {
       getTokenInfo(tokenInfoEndpoint, accessToken)
-      .then(setTokeninfo(req))
-      .then(next)
-      .catch(err => rejectRequest(res, err.status));
+        .then(setTokeninfo(req))
+        .then(next)
+        // TODO we should send 500 for issues with network etc.
+        //      we should send HttpStatus.UNAUTHORIZED for invalid token
+        .catch(err => notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED));
     }
   };
-}
 
-function validateScopes(req: ExtendedRequest,
-                        res: Response,
-                        next: NextFunction,
-                        scopes: string[] = []): void {
+  return oAuthMiddleware;
+};
+
+const validateScopes = (req: ExtendedRequest, scopes: string[]): boolean => {
 
   const requestScopes = req.$$tokeninfo && req.$$tokeninfo.scope;
   const userScopes = Array.isArray(requestScopes) ? requestScopes : [];
 
-  const filteredScopes = scopes.filter((scope) => {
-    return !userScopes.includes(scope);
-  });
+  const filteredScopes = scopes.filter((scope) => !userScopes.includes(scope));
 
-  if (filteredScopes.length === 0) {
-    next();
-  } else {
-    rejectRequest(res, HttpStatus.FORBIDDEN);
-  }
-}
+  return filteredScopes.length === 0;
+};
 
 export {
   PrecedenceFunction,
-  PrecedenceErrorHandler,
   PrecedenceOptions,
   requireScopesMiddleware,
-  handleOAuthRequestMiddleware
+  authenticationMiddleware
 };

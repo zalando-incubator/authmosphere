@@ -1,13 +1,18 @@
 import { getAccessToken, getTokenInfo } from './oauth-tooling';
 
 import { validateOAuthConfig } from './utils';
+
 import {
   TokenCacheOAuthConfig,
   Token,
-  TokenCacheConfig
+  TokenCacheOptions,
+  Logger,
+  CacheConfig
 } from './types';
 
-const defaultTokenCacheConfig: TokenCacheConfig = {
+import { safeLogger } from './safe-logger';
+
+const defaultCacheConfig: CacheConfig = {
   /**
    * To determine when a token is expired locally (means
    * when to issue a new token): if the token exists for
@@ -24,7 +29,7 @@ type TokenMap = { [key: string]: Token | undefined };
  * Usage:
  *  const tokenCache = new TokenCache({
  *    'nucleus': ['write.all', 'read.all']
- *  }, oAuthConfig);
+ *  }, oAuthConfig, options);
  *
  *  tokenCache.get('nucleus')
  *  .then((token) => {
@@ -35,31 +40,32 @@ type TokenMap = { [key: string]: Token | undefined };
 class TokenCache {
 
   private _tokens: TokenMap = {};
+  private logger: Logger;
+
+  private cacheConfig: CacheConfig = defaultCacheConfig;
 
   /**
-   * `oauthConfig`:
-   * `credentialsDir` string
-   * `grantType` string
-   * `accessTokenEndpoint` string
-   * `tokenInfoEndpoint` string
-   * `realm` string
-   * `scopes` string[] optional
-   * `queryParams` {} optional
-   * `redirect_uri` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-   * `code` string optional (required with `AUTHORIZATION_CODE_GRANT`)
-   *
    * @param tokenConfig
    * @param oauthConfig
    */
   constructor(private tokenConfig: { [key: string]: string[] },
               private oauthConfig: TokenCacheOAuthConfig,
-              private tokenCacheConfig: TokenCacheConfig = defaultTokenCacheConfig) {
+              options: TokenCacheOptions = {}) {
 
     validateOAuthConfig(oauthConfig);
+
+    this.logger = safeLogger(options.logger);
+
+    this.cacheConfig = {
+      ...this.cacheConfig,
+      ...options.cacheConfig
+    };
 
     if (!oauthConfig.tokenInfoEndpoint) {
       throw TypeError('tokenInfoEndpoint must be defined');
     }
+
+    this.logger.debug('TokenCache initilialised successfully');
   }
 
   /**
@@ -84,7 +90,14 @@ class TokenCache {
    */
   get(tokenName: string): Promise<Token> {
 
-    const promise = this.validateToken(tokenName)
+    if (!this.isTokenConfigured(tokenName)) {
+      const msg = `TokenCache miss: ${tokenName} does not exist`;
+      this.logger.debug(msg);
+
+      return Promise.reject(msg);
+    }
+
+    const promise = this.getCachedToken(tokenName)
       .catch(() => {
 
         const config = {
@@ -97,7 +110,7 @@ class TokenCache {
 
             const expiresIn = token.expires_in || 0;
 
-            const localExpiry = Date.now() + (expiresIn * 1000 * (1 - this.tokenCacheConfig.percentageLeft));
+            const localExpiry = Date.now() + (expiresIn * 1000 * (1 - this.cacheConfig.percentageLeft));
 
             this._tokens[tokenName] = {
               ...token,
@@ -121,6 +134,8 @@ class TokenCache {
    * @returns {Promise<Token>}
    */
   refreshToken(tokenName: string): Promise<Token> {
+
+    this.logger.debug(`TokenCache: refresh of ${tokenName} triggered`);
 
     this._tokens[tokenName] = undefined;
 
@@ -147,6 +162,10 @@ class TokenCache {
       .then(() => this._tokens);
   }
 
+  private isTokenConfigured(tokenName: string): boolean {
+    return this.tokenConfig[tokenName] !== undefined;
+  }
+
   /**
    * Checks whether a valid token for the given name is present.
    * Resolves with that token if that is the case.
@@ -155,24 +174,25 @@ class TokenCache {
    * @param tokenName
    * @returns {Promise<Token>}
    */
-  private validateToken(tokenName: string): Promise<Token> {
-
-    if (this.tokenConfig[tokenName] === undefined) {
-      return Promise.reject(`Token ${tokenName} does not exist.`);
-    }
+  private getCachedToken(tokenName: string): Promise<Token> {
 
     const token = this._tokens[tokenName];
 
     if (token === undefined) {
-      return Promise.reject(`No token available for ${tokenName}`);
+      const msg = `TokenCache miss: ${tokenName}`;
+      this.logger.debug(msg);
+      return Promise.reject(msg);
     }
 
     const localExpiry = token.local_expiry || 0;
 
     if (localExpiry < Date.now()) {
-      return Promise.reject(`Token ${tokenName} expired locally.`);
+      const msg = `TokenCache miss: ${tokenName} expired locally`;
+      this.logger.debug(msg);
+      return Promise.reject(msg);
     }
 
+    this.logger.debug(`TokenCache hit: ${tokenName}`);
     return Promise.resolve(token);
   }
 }
@@ -180,5 +200,5 @@ class TokenCache {
 export {
   TokenMap,
   TokenCache,
-  defaultTokenCacheConfig
+  defaultCacheConfig
 };
