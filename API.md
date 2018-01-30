@@ -1,12 +1,168 @@
 # Authmosphere API Documentation
 
+## Table of contents
+
+1. [TokenCache](#token-cache)
+2. [OAuth tooling](#oauth-tooling)
+    * [getAccessToken](#getaccesstoken)
+    * [getTokenInfo](#gettokeninfo)
+3. [Express middlewares](#express-tooling)
+    * [authenticationMiddleware](#authenticationmiddleware)
+    * [requireScopesMiddleware](#requirescopesmiddleware)
+4. [Types](#types)
+    * [OAuthConfig](#oauthconfig)
+    * [ClientCredentialsGrantConfig](#clientcredentialsgrantconfig)
+    * [AuthorizationCodeGrantConfig](#clientcredentialsgrantconfig)
+    * [PasswordCredentialsGrantConfig](#clientcredentialsgrantconfig)
+    * [RefreshGrantConfig](#refreshgrantconfig)
+    * [Token](#token)
+5. [Mock tooling](#mock-tooling)
+    * [mockAccessTokenEndpoint](#mockaccesstokenendpoint)
+    * [mockTokenInfoEndpoint](#mocktokeninfoendpoint)
+    * [cleanMock](#cleanmock)
+
+## Token Cache
+
+Class to request and cache tokens on client-side.
+
+#### Usage
+
+```typescript
+import {
+  TokenCache,
+  OAuthGrantType,
+  Token
+} from 'authmosphere';
+
+const options = {
+  cacheConfig: {
+    percentageLeft: 0.75
+  },
+  logger: someExternalLogger
+};
+
+const oAuthConfig = {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
+  accessTokenEndpoint: 'https://example.com/access_token',
+  credentialsDir: './credentialsDir'
+};
+
+const tokenConfig = {
+  'service-foo': ['foo.read', 'foo.write'],
+  'service-bar': ['bar.read']
+};
+
+// create a new TokenCache instance
+const tokenCache = new TokenCache(tokenConfig, oAuthConfig, options);
+
+// request and resolve a token from the cache
+tokenCache
+  .get('service-foo') // needs to match with a key from 'tokenConfig'
+  .then((token: Token) => {
+    // ...use the token...
+  });
+```
+
+### constructor
+
+<details>
+<summary>Toggle description</summary>
+
+#### Signature
+
+```ts
+constructor(tokenConfig, oauthConfig, options)
+```
+
+#### Arguments
+
+* `tokenConfig: [key: string]: string[]` - Mapping between a name (representing a token) and the scopes requested for the corresponding token.
+* `oauthConfig: TokenCacheOAuthConfig` -
+  Either [`ClientCredentialsGrantConfig`](#clientcredentialsgrantconfig) or [`PasswordCredentialsGrantConfig`](#passwordcredentialsgrantconfig) plus the additional `tokenInfoEndpoint: string` property that specifies the URL of the token validation endpoint.
+* [`options?: TokenCacheOptions`](./src/types/TokenCacheConfig.ts)
+  * [`cacheConfig?: CacheConfig`](./src/types/TokenCacheConfig.ts)
+    * `percentageLeft: number` - To determine when a token is expired locally (means when to issue a new token): if the token exists for `((1 - percentageLeft) * lifetime)` then issue a new one.
+  * [`logger?: Logger`](#logging)
+
+</details>
+
+### get
+
+<details>
+<summary>Toggle description</summary>
+
+Returns cached token or requests a new one if lifetime (as configured in `cacheOptions.cacheConfig`) is expired.
+
+#### Signature
+
+```ts
+get(tokenName) => Promise<Token>
+```
+
+#### Arguments
+
+* `tokenName: string` - Key of the token as configured in `tokenConfig`
+
+#### Returns
+
+[`Promise<Token>`](./src/types/Token.ts) that resolves with a token with configured scopes. In case of error rejects with an error message.
+
+</details>
+
+### refreshToken
+
+<details>
+<summary>Toggle description</summary>
+
+Triggers the request of a new token. Invalidates the old cache entry.
+
+#### Signature
+
+```ts
+refreshToken(tokenName: string) => Promise<Token>
+```
+
+#### Arguments
+
+* `tokenName: string` - Key of the token as configured in `tokenConfig`
+
+#### Returns
+
+`Promise<Token>` that resolves with a token with configured scopes. In case of error rejects with an error message.
+
+</details>
+
+### refreshAllTokens
+
+<details>
+<summary>Toggle description</summary>
+
+Triggers the request of a new token for all configured ones. Invalidates all cache entries.
+
+#### Signature
+
+```ts
+refreshAllTokens() => Promise<TokenMap>
+```
+
+#### Returns
+
+`Promise<TokenMap>` that resolves with a map of tokens with configured scopes. In case of error rejects with an error message.
+
+</details>
+
+---
+
 ## OAuth Tooling
 
 This tooling provides helper functions to request and validate tokens based on the OAuth 2.0 [RFC 6749](https://tools.ietf.org/html/rfc6749) specification.
 
 ### getAccessToken
 
-Requests a token based on the given configuration (which specifies the grant type and corresponding parameters). See the [`OAuthConfig` documentation](#tbd) for details.
+<details>
+<summary>Toggle description</summary>
+
+Requests a token based on the given configuration (which specifies the grant type and corresponding parameters). See the [`OAuthConfig` documentation](#types) for details.
 
 #### Usage
 
@@ -21,7 +177,7 @@ import {
 const config: ClientCredentialsGrantConfig = {
   grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
   credentialsDir: './crendentials',
-  accessTokenEndpoint: 'example.com/token',
+  accessTokenEndpoint: 'https://example.com/token_validation',
   scopes: ['my-app.read', 'my-app.write'];
 };
 
@@ -40,14 +196,19 @@ getAccessToken(config)
 
 #### Arguments
 
-* [`config: OAuthConfig`](#tbd) - OAuth configuration for the request (specify grant type and corresponding parameters)
-* [`logger?: Logger`](#tbd) - logger
+* [`config: OAuthConfig`](#types) - OAuth configuration for the request (specify grant type and corresponding parameters)
+* [`logger?: Logger`](#logging)
 
 #### Returns
 
 `Promise<Token>` which resolves with the token if the request was successful. Otherwise, rejects with an error message.
 
+</details>
+
 ### getTokenInfo
+
+<details>
+<summary>Toggle description</summary>
 
 Requests validation information from the specified `tokenInfoUrl` and returns a `Promise` that resolves with these information, if the token is valid. Otherwise, it rejects with an error.
 
@@ -59,7 +220,7 @@ import {
   getTokenInfo
 } from 'authmosphere';
 
-getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
+getTokenInfo('https://example.com/token_validation', '1234-5678-9000')
   .then((token: Token) => {
     // ...token is valid...
   })
@@ -76,13 +237,18 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 
 * `tokenInfoUrl: string` - OAuth endpoint for validating tokens
 * `accessToken: string` - access token to be validated
-* [`logger?: Logger`](#tbd) - logger
+* [`logger?: Logger`](#logging)
 
 #### Returns
 
 `Promise<Token>` which resolves with the validated token if it is valid. Otherwise, rejects with an error message.
 
+</details>
+
 ### createAuthCodeRequestUri
+
+<details>
+<summary>Toggle description</summary>
 
 Helper function to create the URI to request an authorization code when using the [Authorization Code Grant](https://tools.ietf.org/html/rfc6749#page-24).
 
@@ -91,7 +257,7 @@ Helper function to create the URI to request an authorization code when using th
 #### Usage
 
 ```ts
-const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.com/handle-auth-code', '1234-client-id');
+const uri = createAuthCodeRequestUri('https://example.com/authorize', 'http://your-app.com/handle-auth-code', '1234-client-id');
 ```
 
 #### Signature
@@ -101,13 +267,15 @@ const uri = createAuthCodeRequestUri('example.com/authorize', 'http://your-app.c
 #### Arguments
 
 * `authorizationEndpoint: string` - [OAuth authorization endpoint](https://tools.ietf.org/html/rfc6749#page-18)
-* `redirectUri: string` - absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
+* `redirectUri: string` - Absolute URI specifying the endpoint the authorization code is responded to (see [OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749#section-3.1.2) for details)
 * `clientId: string` - [client id]((https://tools.ietf.org/html/rfc6749#section-2.2)) of the requesting application
-* `queryParams?: { [index: string]: string }` - set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
+* `queryParams?: { [index: string]: string }` - Set of key-value pairs which will be added as query parameters to the request (for example to add [`state` or `scopes`](https://tools.ietf.org/html/rfc6749#section-4.1.1))
 
 #### Returns
 
 `string` of the created request URI.
+
+</details>
 
 ----
 
@@ -117,7 +285,10 @@ Authmosphere provides two middleware factories to secure [Express](http://expres
 
 ### authenticationMiddleware
 
-Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
+<details>
+<summary>Toggle description</summary>
+
+Middleware that handles OAuth authentication for API endpoints. It extracts and validates the access token from the request.
 
 If configured as a global middleware (see usage section), all requests need to provide a valid token to access the endpoint.
 <br>
@@ -140,7 +311,7 @@ import {
 
 app.use(authenticationMiddleware({
   publicEndpoints: ['/heartbeat', '/status'],
-  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
+  tokenInfoEndpoint: 'https://example.com/token_validation'
 });
 ```
 
@@ -151,12 +322,17 @@ app.use(authenticationMiddleware({
 #### Arguments
 
 * [`options`](./src/types/AuthenticationMiddlewareOptions.ts):
-  * `tokenInfoEndpoint: string` - url of the Token validation endpoint
-  * `publicEndpoints?: string[] - list of whitelisted API paths`
-  * `logger?: Logger` - [logger](./src/types/Logger.ts)
+  * `tokenInfoEndpoint: string` - URL of the Token validation endpoint
+  * `publicEndpoints?: string[]` - List of whitelisted API paths
+  * [`logger?: Logger`](./src/types/Logger.ts)
   * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
 
+</details>
+
 ### requireScopesMiddleware
+
+<details>
+<summary>Toggle description</summary>
 
 A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter). If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
 
@@ -215,9 +391,177 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 
 * `scopes: string`
 * [`options`](./src/types/ScopeMiddlewareOptions.ts) -
-  * `logger?: Logger` - [logger](./src/types/Logger.ts)
-  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
+  * [`logger?: Logger`](./src/types/Logger.ts)
+  * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - Custom handler for failed authorizations
   * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
+
+</details>
+
+---
+
+## Logging
+
+<details>
+<summary>Toggle description</summary>
+
+Logging is an essential part of Authmosphere's tooling. Authmosphere does not rely on `console` or any other specific logger library, instead every function expects a (optional) reference to an external logger. The logger must fulfill this interface:
+
+```ts
+interface Logger {
+  info(message: string, error?: any): void;
+  debug(message: string, error?: any): void;
+  error(message: string, error?: any): void;
+  fatal(message: string, error?: any): void;
+  trace(message: string, error?: any): void;
+  warn(message: string, error?: any): void;
+}
+```
+
+</details>
+
+---
+
+## Types
+
+
+<details>
+<summary>Toggle description</summary>
+
+### OAuthConfig
+
+```ts
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+```
+
+</details>
+
+### [ClientCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.4)
+
+<details>
+<summary>Toggle description</summary>
+
+```ts
+type ClientCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+}
+```
+
+</details>
+
+### [AuthorizationCodeGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.1)
+
+<details>
+<summary>Toggle description</summary>
+
+```ts
+type AuthorizationCodeGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+  code: string;
+  redirectUri: string;
+}
+```
+
+</details>
+
+### [PasswordCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.3)
+
+<details>
+<summary>Toggle description</summary>
+
+```ts
+type PasswordCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+}
+```
+
+</details>
+
+### [RefreshGrantConfig](https://tools.ietf.org/html/rfc6749#section-1.5)
+
+<details>
+<summary>Toggle description</summary>
+
+```ts
+type RefreshGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+  refreshToken: string;
+}
+```
+
+</details>
+
+### Passing credentials explicitly
+
+<details>
+<summary>Toggle description</summary>
+
+Instead of providing a credentials directory (`credentialsDir`) client and user credentials can be passed explicitly.
+
+```ts
+type ClientCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  clientId: string,
+  clientSecret: string
+}
+```
+
+Client credentials can be passed in via `clientId` and `clientSecrect`, user credentials via `applicationUsername` and `applicationPassword`;
+
+</details>
+
+### Token
+
+<details>
+<summary>Toggle description</summary>
+
+```ts
+type Token<CustomTokenPart = {}> = CustomTokenPart & {
+  access_token: string;
+  expires_in?: number;
+  scope?: string[];
+  token_type?: string;
+  local_expiry?: number;
+};
+```
+
+Token type it can be extend to satisfy special needs:
+
+```ts
+const mytoken: Token<{ id: number }> = {
+  access_token: 'abcToken',
+  id: 2424242828
+}
+```
+
+</details>
 
 ---
 
@@ -231,6 +575,9 @@ This tooling is based on Nock, a HTTP mocking library. For more information abou
 
 ### mockAccessTokenEndpoint
 
+<details>
+<summary>Toggle description</summary>
+
 Creates a *very basic* mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
 
 The mocked endpoint will return a [token](./src/types/Token.ts) with the scopes specified in the request.
@@ -243,7 +590,7 @@ The mocked endpoint will return a [token](./src/types/Token.ts) with the scopes 
 
 ```typescript
 mockAccessTokenEndpoint({
-  url: 'http://some.oauth.endpoint/access_token',
+  url: 'https://example.com/access_token',
   times: 1
 });
 ```
@@ -255,10 +602,15 @@ mockAccessTokenEndpoint({
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+
+</details>
 
 ### mockTokenInfoEndpoint
+
+<details>
+<summary>Toggle description</summary>
 
 Creates a __very basic__ mock of a token validation endpoint.
 
@@ -277,7 +629,7 @@ The optional `tokens` property in `MockOptions` can be used to restrict the list
 ```typescript
 mockTokeninfoEndpoint(
   {
-    url: 'http://some.oauth.endpoint/tokeninfo',
+    url: 'https://example.com//token_validation',
     times: 1
   },
   tokens: [
@@ -296,11 +648,16 @@ mockTokeninfoEndpoint(
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
-* `tokens?: Token[]` - list of valid tokens and their scopes.
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+* `tokens?: Token[]` - List of valid tokens and their scopes.
+
+</details>
 
 ### cleanMock()
+
+<details>
+<summary>Toggle description</summary>
 
 * Remove all `nock` mocks (not only from this lib, really __ALL__)
 * Resets the tocken state object used by `mockTokeninfoEndpoint` and `mockAccessTokenEndpoint`
@@ -315,9 +672,14 @@ Helpful when having multiple tests in a test suite, you can call `cleanMock()` i
 cleanMock();
 ```
 
+</details>
+
 ### Mock error endpoints
 
-Two mock failing OAuth Endpoints use this mocks:
+<details>
+<summary>Toggle description</summary>
+
+To mock failing OAuth Endpoints use this mocks:
 
 * `mockAccessTokenEndpointWithErrorResponse`
 * `mockTokeninfoEndpointWithErrorResponse`
@@ -326,9 +688,9 @@ Two mock failing OAuth Endpoints use this mocks:
 
 ```typescript
 mockAccessTokenEndpointWithErrorResponse({
-  url: 'http://some.oauth.endpoint/access_token',
+  url: 'https://example.com/access_token',
   times: 1
-}, 401, {status: 'foo'});
+}, 401, { status: 'foo' });
 ```
 
 #### Signature
@@ -337,9 +699,11 @@ mockAccessTokenEndpointWithErrorResponse({
 #### Arguments
 
 * [`options`](./src/types/MockOptions.ts):
-  * `url: string` - url of the Token validation endpoint
-  * `times?: number` - defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
-* `httpStatus: number` - statusCode of the response
-* `responseBody?: object`- body of the response
+  * `url: string` - URL of the Token validation endpoint
+  * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
+* `httpStatus: number` - StatusCode of the response
+* `responseBody?: object`- Body of the response
+
+</details>
 
 ----
