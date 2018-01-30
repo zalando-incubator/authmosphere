@@ -6,10 +6,10 @@ import * as Http from 'http';
 import fetch from 'node-fetch';
 
 import {
-  handleOAuthRequestMiddleware,
+  authenticationMiddleware,
   requireScopesMiddleware,
-  PASSWORD_CREDENTIALS_GRANT
-} from '../../src/index';
+  OAuthGrantType
+} from '../../src';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -24,7 +24,7 @@ describe('middlewares', () => {
   beforeEach(() => {
     const app = Express();
 
-    app.use(handleOAuthRequestMiddleware({
+    app.use(authenticationMiddleware({
       publicEndpoints: [ '/public', '/healthcheck' ],
       tokenInfoEndpoint: 'http://127.0.0.1:30001/oauth2/tokeninfo'
     }));
@@ -67,7 +67,7 @@ describe('middlewares', () => {
             'campaign.editall',
             'campaign.readall'
           ],
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });
@@ -94,7 +94,7 @@ describe('middlewares', () => {
           'scope': [
             'campaign.readall'
           ],
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });
@@ -119,7 +119,7 @@ describe('middlewares', () => {
           'token_type': 'Bearer',
           'realm': 'employees',
           'scope': '',
-          'grant_type': PASSWORD_CREDENTIALS_GRANT,
+          'grant_type': OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
           'uid': 'services',
           'access_token': '4b70510f-be1d-4f0f-b4cb-edbca2c79d41'
         });

@@ -1,7 +1,7 @@
 # authmosphere {🌍}
 
-[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere)
-[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg)](https://coveralls.io/github/zalando-incubator/authmosphere)
+[![Build Status](https://travis-ci.org/zalando-incubator/authmosphere.svg)](https://travis-ci.org/zalando-incubator/authmosphere?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/zalando-incubator/authmosphere/badge.svg?branch=master)](https://coveralls.io/github/zalando-incubator/authmosphere)
 [![npm download](https://img.shields.io/npm/dm/authmosphere.svg?style=flat-square)](https://www.npmjs.com/package/authmosphere)
 [![npm version](https://img.shields.io/npm/v/authmosphere.svg?style=flat)](https://www.npmjs.com/package/authmosphere)
 
@@ -11,296 +11,79 @@
 
 It's implemented in TypeScript which improves the development experience via implicit documentation with types, first-class IDE support and provides mock tooling for local development. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
 
-Currently the following flows are supported:
+The following OAuth flows are supported:
 
 * [Authorization Code Flow](https://tools.ietf.org/html/rfc6749#section-4.1)
 * [Client Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.4)
 * [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3)
 * [Refresh Token Grant](https://tools.ietf.org/html/rfc6749#section-6)
-* Express middlewares to simplify authentication/authorization
-* `TokenCache` service to manage access tokens in your application
 
-See [STUPS documentation](http://stups.readthedocs.org/en/latest/user-guide/access-control.html#implementing-a-client-asking-resource-owners-for-permission) and [OAuth2 documentation](https://tools.ietf.org/html/rfc6749) for more information.
+The [Authmosphere JavaScript API](./API.md) supports:
 
-## Project renaming
-
-The project was renamed from `lib-oauth-tooling` to `authmosphere`. In the course of this renaming versioning was restarted at `0.1.0`. Version `1.0.0` is soon to be released, keep track of the progess in [#92](https://github.com/zalando-incubator/lib-oauth-tooling/issues/92), this release will contain breaking changes.
-
-## Migrate from `lib-oauth-tooling@2.x.` to `authmosphere@1.x.x`
-
-* call `npm uninstall --save lib-oauth-tooling`
-* call `npm install --save authmosphere`
-
-The signature of the function `createAuthCodeRequestUri` was changed to be better suitable for partial application. The `authorizationEndpoint` parameter was moved to the first position.
-It's important to manually adjust your code to this change, since the type system is not helpful in this special case.
-
-```typescript
-function createAuthCodeRequestUri(authorizationEndpoint: string,
-                                  redirectUri: string,
-                                  clientId: string,
-                                  queryParams?: {}): string
-```
-
-## Migrating from `lib-oauth-tooling@1.x.` to `lib-oauth-tooling@2.x.x`
-
-If you depend on the `realm` property you now have to pass the value via the `queryParams` parameters in `OAuthConfig`:
-
-```typescript
-// will NOT work anymore:
-getAccessToken({
-  // all the other config
-  // ...
-  realm: EMPLOYEES_REALM,
-})
-.then(token: Token => {
-  // ...
-});
-
-// instead use this:
-getAccessToken({
-  // all the other config
-  // ...
-  queryParams: { realm: '/employees' }
-})
-.then(token: Token => {
-  // ...
-});
-```
-
-See the [changelog](#changelog) for more information.
+* [Express middlewares](./API.md#express-tooling) to simplify authentication and authorization
+* [`TokenCache`](./API.md#token-cache) service to manage access tokens
+* [OAuth tooling](./API.md#oauth-tooling)
+  * [`getAccessToken`](./API.md#getaccesstoken) - helper to request access tokens
+  * [`getTokenInfo`](./API.md#gettokeninfo) - helper to validate access tokens
+* [Mock tooling](./API.md#mock-tooling) for OAuth2.0 endpoints to enable decent unit and integration tests
 
 ## Usage
 
-Note: `node >= 6.0.0` required to consume this library.
+For a comprehensive documentation checkout out the [API documentation](./API.md).
 
-Run `npm install authmosphere`.
-
-Import a member of this lib like so (of course ES5 syntax is working as well...):
-
+### Cache and request tokens
 
 ```typescript
-import {
-  TokenCache,
-  handleOAuthRequestMiddleware,
-  requireScopesMiddleware,
-  ...
-} from 'authmosphere';
-```
+import { TokenCache, OAuthGrantType } from 'authmosphere';
 
-#### TokenCache(tokenConfig: { [key: string]: string[] }, oAuthConfig: OAuthConfig, tokenCacheConfig?: TokenCacheConfig)
+const oAuthConfig = {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
+  accessTokenEndpoint: 'https://example.com/access_token',
+  credentialsDir: './credentialsDir'
+};
 
-Class to request and cache tokens on client-side.
-
-```typescript
-const tokenCache = new TokenCache({
+const tokenConfig = {
   'service-foo': ['foo.read', 'foo.write'],
   'service-bar': ['bar.read']
-}, oAuthConfig);
-
-tokenCache.get('service-foo')
-.then((token: Token) => {
-  console.log(token.access_token);
-});
-```
-
-Where `OAuthConfig` is defined like:
-
-```typescript
-type OAuthConfig = {
-  credentialsDir: string;
-  grantType: string;
-  accessTokenEndpoint: string;
-  tokenInfoEndpoint?: string; // mandatory for TokenCache
-  scopes?: string[];
-  redirect_uri?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  code?: string; // (required with `AUTHORIZATION_CODE_GRANT`)
-  redirectUri?: string;
-  refreshToken?: string;
-  queryParams?: {};
 };
+
+// create a new TokenCache instance
+const tokenCache = new TokenCache(tokenConfig, oAuthConfig);
+
+// request and resolve a token from the cache
+tokenCache
+  .get('service-foo') // needs to match with a key from 'tokenConfig'
+  .then((token) => { /* ...use the token... */ });
 ```
 
-Valid `grantTypes`s are:
-* `'authorization_code'`
-* `'password'`
-* `'client_credentials'`
-* `'refresh_token'`
-
-You can also import the constants from the lib:
-```typescript
-import {
-  AUTHORIZATION_CODE_GRANT,
-  PASSWORD_CREDENTIALS_GRANT,
-  CLIENT_CREDENTIALS_GRANT,
-  REFRESH_TOKEN_GRANT
-} from 'authmosphere';
-```
-
-Optionally, you can pass a third parameter of type `TokenCacheConfig` to the `TokenCache` constructor to configure the cache behaviour.
+### Secure express endpoints
 
 ```typescript
-const tokenCache = new TokenCache({
-  'service-foo': ['foo.read', 'foo.write'],
-  'service-bar': ['bar.read']
-}, oAuthConfig, cacheConfig);
-```
+import { authenticationMiddleware, requireScopesMiddleware } from 'authmosphere';
 
-Where`TokenCacheConfig` is defined like:
+// extract and validate access token (authorization header)
+// and reject requests without valid access token
+app.use(authenticationMiddleware({ tokenInfoEndpoint: 'https://example.com/token_validation' });
 
-```typescript
-type TokenCacheConfig = {
-  /**
-   * To determine when a token is expired locally (means
-   * when to issue a new token): if the token exists for
-   * ((1 - percentageLeft) * lifetime) then issue a new one.
-   * Default value: 0.75
-   */
-  percentageLeft: number
-};
-```
-
-#### handleOAuthRequestMiddleware(options: MiddlewareOptions)
-
-Express middleware to extract and validate an access token. It attaches the scopes matched by the token to the request (`request.scopes`) for further usage.
-If the token is not valid the request is rejected (with 401 Unauthorized).
-
-```typescript
-app.use(handleOAuthRequestMiddleware({
-  publicEndpoints: ['/heartbeat', '/status'],
-  tokenInfoEndpoint: 'auth.example.com/tokeninfo'
-});
-```
-
-`options`:
-* `publicEndpoints` string[]
-* `tokenInfoEndpoint` string
-
-#### requireScopesMiddleware(scopes: string[])
-
-Specifies the scopes needed to access an endpoint. Assumes that there is an `request.scopes` property (as attached by `handleOAuthRequestMiddleware`) to match the required scopes against.
-If the the requested scopes are not matched request is rejected (with 403 Forbidden).
-
-```typescript
+// only allow access for requests with tokens that have scopeA and scopeB
 app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (request, response) => {
-  // do your work...
-})
-```
-
-#### getTokenInfo(tokenInfoEndpoint: string, accessToken: string): Promise<Token>
-
-Makes a request to the `tokenInfoEndpoint` to validate the given `accessToken`.
-
-```typescript
-getTokenInfo(tokenInfoEndpoint, accessToken)
-.then((token: Token) => {
-  console.log(token.access_token);
-})
-.catch((err) => {
-  console.log(err);
+  // handle request
 });
 ```
 
-Type `Token` is defined as following:
+## Setup
 
-```typescript
-type Token<CustomTokenPart = any> = CustomTokenPart & {
-  access_token: string;
-  expires_in?: number;
-  scope?: string[];
-  token_type?: string;
-  local_expiry?: number;
-};
-```
+* `node >= 6.0.0` required to consume this library
+* `npm install authmosphere`
 
-The `Token` type is designed to be extensible. By default the generic type parameter `CustomTokenPart` defaults to `any`. One can provide an additional type to extend the known properties for the Token type:
+## OAuth documentation
 
-```typescript
+* See [OAuth2 RFC](https://tools.ietf.org/html/rfc6749) for more information.
 
-  type CustomDataType = {
-    uid: "user",
-    ...
-  };
+## Changelog and Migration
 
-  const myCustomToken: Token<CustomDataType> = {
-   ...
-  };
-```
-
-
-#### getAccessToken(options: OAuthConfig): Promise<Token>
-
-Helper function to get an access token for the specified scopes.
-
-```typescript
-getAccessToken(options)
-.then((token: Token) => {
-  console.log(token.access_token);
-})
-.catch((err) => {
-  console.log(err);
-});
-```
-
-#### AUTHORIZATION_CODE_GRANT
-
-String constant specifying the Authorization Code Grant type.
-
-#### PASSWORD_CREDENTIALS_GRANT
-
-String constant specifying the Resource Owner Password Credentials Grant type.
-
-#### REFRESH_TOKEN_GRANT
-
-String constant specifying the Refresh Token Grant type.
-
-## Mock tooling
-
-If you want to test oAuth locally without being able to actually call real endpoints this library provides some tooling.
-
-#### mockTokenInfoEndpoint(options: MockOptions)
-
-Mocks a `tokeninfo` endpoint.
-
-```typescript
-mockTokeninfoEndpoint({
-  url: 'http://some.oauth.endpoint/tokeninfo',
-  tokens: [{
-    access_token: 'someToken123',
-    scope: ['uid', 'something.read', 'something.write']
-  }],
-  times: 1
-});
-```
-
-`options`:
-* `url` string (url of the `tokeninfo` endpoint)
-* `tokens` any optional (list of valid tokens)
-* `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
-
-#### mockAccessTokenEndpoint(options: MockOptions)
-
-Mocks a `access_token` endpoint.
-
-```typescript
-mockAccessTokenEndpoint({
-  url: 'http://some.oauth.endpoint/access_token',
-  times: 1
-});
-```
-
-`options`:
-* `url` string (url of the `access_token` endpoint)
-* `times` number optional (for how many times/calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`)
-
-#### cleanMock()
-
-Cleans all `nock` mocks (not only from this lib, really ALL) and given tokens.
-Helpful when having multiple tests in a test suite, you can call `cleanMock()` in the `afterEach()` callback for example.
-
-```typescript
-cleanMock();
-```
-
+* See the [changelog](./CHANGELOG.md) for more information.
+* See the [migration guide](./MIGRATION_GUIDE.md) for more information.
 
 ## Development
 
@@ -309,29 +92,11 @@ cleanMock();
 * to build: `npm run build`
 * to lint: `npm run tslint`
 
-
 ## Testing
 
 * `npm test` - runs all tests
 * `npm run unit-test` - runs unit tests
 * `npm run integration-test` - runs integration tests
-
-## Changelog
-
----
-#### `authmosphere 1.0.0` - **BREAKING**
-
-Modified signature of `createAuthCodeRequestUri`, see migration guide for more information.
-
----
-
-#### `lib-oauth-tooling 2.0.0` - **BREAKING**
-
-The (zalando-specific) `realm` property was removed from `OAuthConfig`. Also, the corresponding constants (`SERVICES_REALM` and `EMPLYEES_REALM`) were removed. Instead, you can add the realm (and arbitrary other query parameters) via the `queryParams` property in `OAuthConfig`.
-
-#### `lib-oauth-tooling 1.0.0` - **BREAKING**
-
-The signature of `requireScopesMiddleware` is now incompatible with previous versions, `precedenceFunction?` is now part of `precedenceOptions?`.
 
 ---
 

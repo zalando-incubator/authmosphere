@@ -1,14 +1,25 @@
 export * from './oauth-tooling';
 export * from './express-tooling';
-export * from './TokenCache';
-export * from './constants';
+export * from './token-cache';
 export * from './mock-tooling/index';
+export * from './safe-logger';
 export {
+  AuthenticationMiddlewareOptions,
+  AuthorizationCodeGrantConfig,
+  ClientCredentialsGrantConfig,
+  ExtendedRequest,
   Logger,
-  Token,
-  MiddlewareOptions,
+  MockOptions,
+  OAuthConfig,
+  OAuthGrantType,
+  onAuthorizationFailedHandler,
+  onNotAuthenticatedHandler,
+  PasswordCredentialsGrantConfig,
   PrecedenceFunction,
-  PrecedenceErrorHandler,
   PrecedenceOptions,
-  ExtendedRequest
+  RefreshGrantConfig,
+  ScopeMiddlewareOptions,
+  Token,
+  TokenCacheOptions,
+  TokenCacheOAuthConfig
 } from './types';
