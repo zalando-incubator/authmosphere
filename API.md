@@ -2,17 +2,20 @@
 
 ## TOC
 
-1. [`TokenCache`](#token-cache)
+1. [TokenCache](#token-cache)
 2. [OAuth tooling](#oauth-tooling)
-    * [`getAccessToken`](#getaccesstoken)
-    * [`getTokenInfo`](#gettokeninfo)
+    * [getAccessToken](#getaccesstoken)
+    * [getTokenInfo](#gettokeninfo)
 3. [Express middlewares](#express-tooling)
+    * [authenticationMiddleware](#authenticationMiddleware)
+    * [requireScopesMiddleware](#requireScopesMiddleware)
 4. [Types](#types)
     * [OAuthConfig](#oauthconfig)
     * [ClientCredentialsGrantConfig](#clientcredentialsgrantconfig)
     * [AuthorizationCodeGrantConfig](#clientcredentialsgrantconfig)
     * [PasswordCredentialsGrantConfig](#clientcredentialsgrantconfig)
     * [RefreshGrantConfig](#refreshgrantconfig)
+    * [Token](#token)
 5. [Mock tooling](#mock-tooling)
     * [mockAccessTokenEndpoint](#mockaccesstokenendpoint)
     * [mockTokenInfoEndpoint](#mocktokeninfoendpoint)
@@ -584,7 +587,7 @@ Two mock failing OAuth Endpoints use this mocks:
 mockAccessTokenEndpointWithErrorResponse({
   url: 'https://example.com/access_token',
   times: 1
-}, 401, {status: 'foo'});
+}, 401, { status: 'foo' });
 ```
 
 #### Signature
