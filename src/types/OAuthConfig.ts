@@ -44,9 +44,10 @@ type OAuthConfig =
   PasswordCredentialsGrantConfig |
   RefreshGrantConfig;
 
-type TokenCacheOAuthConfig = OAuthConfig & {
-  tokenInfoEndpoint: string; // mandatory for TokenCache
-};
+type TokenCacheOAuthConfig =
+  (ClientCredentialsGrantConfig | PasswordCredentialsGrantConfig) & {
+    tokenInfoEndpoint: string; // mandatory for TokenCache
+  };
 
 export {
   CredentialsDirConfig,

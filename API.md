@@ -1,12 +1,120 @@
 # Authmosphere API Documentation
 
+## Token Cache
+
+Class to request and cache tokens on client-side.
+
+#### Usage
+
+```typescript
+
+// TokenCacheOptions
+const cacheOptions = {
+  cacheConfig: {
+    percentageLeft: 0.75
+  },
+  logger: someExternalLogger
+};
+
+const oAuthConfig = {
+  grantType: OAuthGrantType.CLIENT_CREDENTIALS_GRANT,
+  accessTokenEndpoint: 'https://....',
+  credentialsDir: './credentialsDir'
+};
+
+const tokenConfig = {
+  'service-foo': ['foo.read', 'foo.write'],
+  'service-bar': ['bar.read']
+};
+
+// create a new cache
+const tokenCache = new TokenCache(tokenConfig, oAuthConfig, cacheOptions);
+
+// Get a token from cache
+tokenCache
+  .get('service-foo') // Needs to match with a key from 'tokenConfig'
+  .then((token: Token) => {
+    console.log(token.access_token);
+  });
+```
+
+### constructor
+
+#### Signature
+
+```ts
+constructor(tokenConfig, oauthConfig: TokenCacheOAuthConfig, options)
+```
+
+#### Arguments
+
+* `tokenConfig: [key: string]: string[]` - the token cache is able to handle multiple tokens. The string array should contain the scopes attached to the token.
+* `oauthConfig: TokenCacheOAuthConfig` -
+  Either [`ClientCredentialsGrantConfig`](#clientcredentialsgrantconfig) or [`PasswordCredentialsGrantConfig`](#passwordcredentialsgrantconfig)` plus the additional `tokenInfoEndpoint: string` property that specifies the URL of the token validation endpoint.
+* [`options?: TokenCacheOptions`](./src/types/TokenCacheConfig.ts)
+  * [`cacheConfig?: CacheConfig`](./src/types/TokenCacheConfig.ts)
+    * `percentageLeft: number` - To determine when a token is expired locally (means when to issue a new token): if the token exists for `((1 - percentageLeft) * lifetime)` then issue a new one.
+  * [`logger?: Logger`](#logging)
+
+### get
+
+Returns cached token or requests a new one if lifetime as configured in `cacheOptions.cacheConfig` is expired.
+
+#### Signature
+
+```ts
+get(tokenName) => Promise<Token>
+```
+
+#### Arguments
+
+* `tokenName: string` - key of the token as configured in `tokenConfig`
+
+#### Returns
+
+`Promise<Token>` that resolves with a token with configured scopes. In case of error rejects with an error message.
+
+### refreshToken
+
+Triggers the request of a new token. Invalidates the old the cache entry.
+
+#### Signature
+
+```ts
+refreshToken(tokenName: string) => Promise<Token>
+```
+
+#### Arguments
+
+* `tokenName: string` - key of the token as configured in `tokenConfig`
+
+#### Returns
+
+`Promise<Token>` that resolves with a token with configured scopes. In case of error rejects with an error message.
+
+### refreshAllTokens
+
+Triggers the request of a new token. Invalidates the old the cache entry.
+
+#### Signature
+
+```ts
+refreshAllTokens(): Promise<TokenMap>
+```
+
+#### Returns
+
+`Promise<TokenMap>` that resolves with a map of tokens with configured scopes. In case of error rejects with an error message.
+
+---
+
 ## OAuth Tooling
 
 This tooling provides helper functions to request and validate tokens based on the OAuth 2.0 [RFC 6749](https://tools.ietf.org/html/rfc6749) specification.
 
 ### getAccessToken
 
-Requests a token based on the given configuration (which specifies the grant type and corresponding parameters). See the [`OAuthConfig` documentation](#tbd) for details.
+Requests a token based on the given configuration (which specifies the grant type and corresponding parameters). See the [`OAuthConfig` documentation](#types) for details.
 
 #### Usage
 
@@ -40,8 +148,8 @@ getAccessToken(config)
 
 #### Arguments
 
-* [`config: OAuthConfig`](#tbd) - OAuth configuration for the request (specify grant type and corresponding parameters)
-* [`logger?: Logger`](#tbd) - logger
+* [`config: OAuthConfig`](#types) - OAuth configuration for the request (specify grant type and corresponding parameters)
+* [`logger?: Logger`](#logging) - logger
 
 #### Returns
 
@@ -76,7 +184,7 @@ getTokenInfo('example.com/tokeninfo', '1234-5678-9000')
 
 * `tokenInfoUrl: string` - OAuth endpoint for validating tokens
 * `accessToken: string` - access token to be validated
-* [`logger?: Logger`](#tbd) - logger
+* [`logger?: Logger`](#logging) - logger
 
 #### Returns
 
@@ -218,6 +326,111 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
   * `logger?: Logger` - [logger](./src/types/Logger.ts)
   * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - custom handler for failed authorizations
   * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
+
+
+---
+
+## Logging
+
+Logging is an essential part of Authmosphere's tooling. Authmosphere does not rely on `console` or any other specific logger library, instead every function expects a (optional) reference to an external logger. The logger must fulfill this interface:
+
+```ts
+interface Logger {
+  info(message: string, error?: any): void;
+  debug(message: string, error?: any): void;
+  error(message: string, error?: any): void;
+  fatal(message: string, error?: any): void;
+  trace(message: string, error?: any): void;
+  warn(message: string, error?: any): void;
+}
+```
+
+---
+
+## Types
+
+### OAuthConfig
+
+```ts
+type OAuthConfig =
+  ClientCredentialsGrantConfig   |
+  AuthorizationCodeGrantConfig   |
+  PasswordCredentialsGrantConfig |
+  RefreshGrantConfig;
+```
+
+### [ClientCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.4)
+
+```ts
+type ClientCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+}
+```
+
+### [AuthorizationCodeGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.1)
+
+```ts
+type AuthorizationCodeGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+  code: string;
+  redirectUri: string;
+}
+```
+
+### [PasswordCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.3)
+
+```ts
+type PasswordCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+}
+```
+
+### [RefreshGrantConfig](https://tools.ietf.org/html/rfc6749#section-1.5)
+
+```ts
+type RefreshGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  credentialsDir: string;
+  refreshToken: string;
+}
+```
+
+### Passing credentials explicitly
+
+Instead of providing a credentials directory (`credentialsDir`) client and user credentials can be passed explicitly.
+
+```ts
+type ClientCredentialsGrantConfig = {
+  grantType: string;
+  accessTokenEndpoint: string;
+  queryParams?: { [index: string]: string };
+  bodyParams?: { [index: string]: string };
+  scopes?: string[];
+  clientId: string,
+  clientSecret: string
+}
+```
+
+Client credentials can be passed in via `clientId` and `clientSecrect`, user credentials via `applicationUsername` and `applicationPassword`;
 
 ---
 
