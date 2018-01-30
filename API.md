@@ -66,7 +66,7 @@ tokenCache
 ### constructor
 
 <details>
-<summary>Hide / Show details</summary>
+<summary>Toggle description</summary>
 
 #### Signature
 
@@ -89,7 +89,7 @@ constructor(tokenConfig, oauthConfig, options)
 ### get
 
 <details>
-<summary>Hide / Show details</summary>
+<summary>Toggle description</summary>
 
 Returns cached token or requests a new one if lifetime (as configured in `cacheOptions.cacheConfig`) is expired.
 
@@ -111,6 +111,9 @@ get(tokenName) => Promise<Token>
 
 ### refreshToken
 
+<details>
+<summary>Toggle description</summary>
+
 Triggers the request of a new token. Invalidates the old cache entry.
 
 #### Signature
@@ -127,7 +130,12 @@ refreshToken(tokenName: string) => Promise<Token>
 
 `Promise<Token>` that resolves with a token with configured scopes. In case of error rejects with an error message.
 
+</details>
+
 ### refreshAllTokens
+
+<details>
+<summary>Toggle description</summary>
 
 Triggers the request of a new token for all configured ones. Invalidates all cache entries.
 
@@ -141,6 +149,8 @@ refreshAllTokens() => Promise<TokenMap>
 
 `Promise<TokenMap>` that resolves with a map of tokens with configured scopes. In case of error rejects with an error message.
 
+</details>
+
 ---
 
 ## OAuth Tooling
@@ -148,6 +158,9 @@ refreshAllTokens() => Promise<TokenMap>
 This tooling provides helper functions to request and validate tokens based on the OAuth 2.0 [RFC 6749](https://tools.ietf.org/html/rfc6749) specification.
 
 ### getAccessToken
+
+<details>
+<summary>Toggle description</summary>
 
 Requests a token based on the given configuration (which specifies the grant type and corresponding parameters). See the [`OAuthConfig` documentation](#types) for details.
 
@@ -190,7 +203,12 @@ getAccessToken(config)
 
 `Promise<Token>` which resolves with the token if the request was successful. Otherwise, rejects with an error message.
 
+</details>
+
 ### getTokenInfo
+
+<details>
+<summary>Toggle description</summary>
 
 Requests validation information from the specified `tokenInfoUrl` and returns a `Promise` that resolves with these information, if the token is valid. Otherwise, it rejects with an error.
 
@@ -225,7 +243,12 @@ getTokenInfo('https://example.com/token_validation', '1234-5678-9000')
 
 `Promise<Token>` which resolves with the validated token if it is valid. Otherwise, rejects with an error message.
 
+</details>
+
 ### createAuthCodeRequestUri
+
+<details>
+<summary>Toggle description</summary>
 
 Helper function to create the URI to request an authorization code when using the [Authorization Code Grant](https://tools.ietf.org/html/rfc6749#page-24).
 
@@ -252,6 +275,8 @@ const uri = createAuthCodeRequestUri('https://example.com/authorize', 'http://yo
 
 `string` of the created request URI.
 
+</details>
+
 ----
 
 ## Express Tooling
@@ -259,6 +284,9 @@ const uri = createAuthCodeRequestUri('https://example.com/authorize', 'http://yo
 Authmosphere provides two middleware factories to secure [Express](http://expressjs.com/) based http services.
 
 ### authenticationMiddleware
+
+<details>
+<summary>Toggle description</summary>
 
 Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
 
@@ -299,7 +327,12 @@ app.use(authenticationMiddleware({
   * [`logger?: Logger`](./src/types/Logger.ts)
   * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
 
+</details>
+
 ### requireScopesMiddleware
+
+<details>
+<summary>Toggle description</summary>
 
 A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter). If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
 
@@ -362,10 +395,14 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
   * [onAuthorizationFailedHandler?: onAuthorizationFailedHandler](./src/types/AuthenticationMiddlewareOptions.ts) - Custom handler for failed authorizations
   * [`precedenceOptions?: precedenceOptions`](./src/types/PrecedenceFunction) - Function
 
+</details>
 
 ---
 
 ## Logging
+
+<details>
+<summary>Toggle description</summary>
 
 Logging is an essential part of Authmosphere's tooling. Authmosphere does not rely on `console` or any other specific logger library, instead every function expects a (optional) reference to an external logger. The logger must fulfill this interface:
 
@@ -380,9 +417,15 @@ interface Logger {
 }
 ```
 
+</details>
+
 ---
 
 ## Types
+
+
+<details>
+<summary>Toggle description</summary>
 
 ### OAuthConfig
 
@@ -394,7 +437,12 @@ type OAuthConfig =
   RefreshGrantConfig;
 ```
 
+</details>
+
 ### [ClientCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.4)
+
+<details>
+<summary>Toggle description</summary>
 
 ```ts
 type ClientCredentialsGrantConfig = {
@@ -407,7 +455,12 @@ type ClientCredentialsGrantConfig = {
 }
 ```
 
+</details>
+
 ### [AuthorizationCodeGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.1)
+
+<details>
+<summary>Toggle description</summary>
 
 ```ts
 type AuthorizationCodeGrantConfig = {
@@ -422,7 +475,12 @@ type AuthorizationCodeGrantConfig = {
 }
 ```
 
+</details>
+
 ### [PasswordCredentialsGrantConfig](https://tools.ietf.org/html/rfc6749#section-4.3)
+
+<details>
+<summary>Toggle description</summary>
 
 ```ts
 type PasswordCredentialsGrantConfig = {
@@ -435,7 +493,12 @@ type PasswordCredentialsGrantConfig = {
 }
 ```
 
+</details>
+
 ### [RefreshGrantConfig](https://tools.ietf.org/html/rfc6749#section-1.5)
+
+<details>
+<summary>Toggle description</summary>
 
 ```ts
 type RefreshGrantConfig = {
@@ -449,7 +512,12 @@ type RefreshGrantConfig = {
 }
 ```
 
+</details>
+
 ### Passing credentials explicitly
+
+<details>
+<summary>Toggle description</summary>
 
 Instead of providing a credentials directory (`credentialsDir`) client and user credentials can be passed explicitly.
 
@@ -467,7 +535,12 @@ type ClientCredentialsGrantConfig = {
 
 Client credentials can be passed in via `clientId` and `clientSecrect`, user credentials via `applicationUsername` and `applicationPassword`;
 
+</details>
+
 ### Token
+
+<details>
+<summary>Toggle description</summary>
 
 ```ts
 type Token<CustomTokenPart = {}> = CustomTokenPart & {
@@ -488,6 +561,8 @@ const mytoken: Token<{ id: number }> = {
 }
 ```
 
+</details>
+
 ---
 
 ## Mock Tooling
@@ -499,6 +574,9 @@ It helps to easily write integration tests without writing extensive boilerplate
 This tooling is based on Nock, a HTTP mocking library. For more information about Nock see [Nock documentation](https://github.com/node-nock/nock).
 
 ### mockAccessTokenEndpoint
+
+<details>
+<summary>Toggle description</summary>
 
 Creates a *very basic* mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
 
@@ -527,7 +605,12 @@ mockAccessTokenEndpoint({
   * `url: string` - URL of the Token validation endpoint
   * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
 
+</details>
+
 ### mockTokenInfoEndpoint
+
+<details>
+<summary>Toggle description</summary>
 
 Creates a __very basic__ mock of a token validation endpoint.
 
@@ -569,7 +652,12 @@ mockTokeninfoEndpoint(
   * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
 * `tokens?: Token[]` - List of valid tokens and their scopes.
 
+</details>
+
 ### cleanMock()
+
+<details>
+<summary>Toggle description</summary>
 
 * Remove all `nock` mocks (not only from this lib, really __ALL__)
 * Resets the tocken state object used by `mockTokeninfoEndpoint` and `mockAccessTokenEndpoint`
@@ -584,9 +672,14 @@ Helpful when having multiple tests in a test suite, you can call `cleanMock()` i
 cleanMock();
 ```
 
+</details>
+
 ### Mock error endpoints
 
-Two mock failing OAuth Endpoints use this mocks:
+<details>
+<summary>Toggle description</summary>
+
+To mock failing OAuth Endpoints use this mocks:
 
 * `mockAccessTokenEndpointWithErrorResponse`
 * `mockTokeninfoEndpointWithErrorResponse`
@@ -610,5 +703,7 @@ mockAccessTokenEndpointWithErrorResponse({
   * `times?: number` - Defines number of calls the endpoint is mocked, default is `Number.MAX_SAFE_INTEGER`
 * `httpStatus: number` - StatusCode of the response
 * `responseBody?: object`- Body of the response
+
+</details>
 
 ----
