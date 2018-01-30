@@ -1,6 +1,6 @@
 # Authmosphere API Documentation
 
-## TOC
+## Table of contents
 
 1. [TokenCache](#token-cache)
 2. [OAuth tooling](#oauth-tooling)
@@ -288,7 +288,7 @@ Authmosphere provides two middleware factories to secure [Express](http://expres
 <details>
 <summary>Toggle description</summary>
 
-Middleware that handles OAuth authentication for API endpoints. It extracts and validates the `access token` from the request.
+Middleware that handles OAuth authentication for API endpoints. It extracts and validates the access token from the request.
 
 If configured as a global middleware (see usage section), all requests need to provide a valid token to access the endpoint.
 <br>
@@ -323,7 +323,7 @@ app.use(authenticationMiddleware({
 
 * [`options`](./src/types/AuthenticationMiddlewareOptions.ts):
   * `tokenInfoEndpoint: string` - URL of the Token validation endpoint
-  * `publicEndpoints?: string[] - List of whitelisted API paths`
+  * `publicEndpoints?: string[]` - List of whitelisted API paths
   * [`logger?: Logger`](./src/types/Logger.ts)
   * [`onNotAuthenticatedHandler?: onNotAuthenticatedHandler`](./src/types/AuthenticationMiddlewareOptions.ts) - custom response handler
 
