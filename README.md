@@ -7,9 +7,9 @@
 
 ## Introduction
 
-`{authmosphere}` is a library to support OAuth2 workflows in JavaScript projects.
+`{authmosphere}` is a library to support and test [OAuth 2.0](https://tools.ietf.org/html/rfc6749) workflows in JavaScript projects.
 
-It's implemented in TypeScript which improves the development experience via implicit documentation with types, first-class IDE support and provides mock tooling for local development. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
+It's implemented in TypeScript which improves the development experience via implicit documentation with types and first-class IDE support. The library itself is transpiled to JavaScript (ES6) so there is no need for a TypeScript compiler to use authmosphere in JavaScript projects.
 
 The following OAuth flows are supported:
 
@@ -25,13 +25,13 @@ The [Authmosphere JavaScript API](./API.md) supports:
 * [OAuth tooling](./API.md#oauth-tooling)
   * [`getAccessToken`](./API.md#getaccesstoken) - helper to request access tokens
   * [`getTokenInfo`](./API.md#gettokeninfo) - helper to validate access tokens
-* [Mock tooling](./API.md#mock-tooling) for OAuth2.0 endpoints to enable decent unit and integration tests
+* [Mock tooling](./API.md#mock-tooling) for OAuth 2.0 endpoints to enable decent unit and integration tests
 
 ## Usage
 
 For a comprehensive documentation checkout out the [API documentation](./API.md).
 
-### Cache and request tokens
+### Request and cache tokens
 
 ```typescript
 import { TokenCache, OAuthGrantType } from 'authmosphere';
@@ -78,7 +78,7 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 
 ## OAuth documentation
 
-* See [OAuth2 RFC](https://tools.ietf.org/html/rfc6749) for more information.
+* See [OAuth 2.0 RFC](https://tools.ietf.org/html/rfc6749) for more information.
 
 ## Changelog and Migration
 

@@ -123,11 +123,11 @@ getAccessToken({
 
 ...will lead to a response with a token which includes the scopes `uid` and `test`. If no `scopes` are requested, the `scopes` property of the token will be `undefined`.
 
+#### `mockTokeninfoEndpoint` parameters
+
+Token was moved out of `MockOptions` into a separate parameter: `mockTokeninfoEndpoint(options: MockOptions, tokens?: Token[]): nock.Scope`.
+
 #### New functionality to test OAuth behavior in case of error
-
-##### mockTokeninfoEndpoint
-
-Token was moved out of MockOptions into a separate parameter: `mockTokeninfoEndpoint(options: MockOptions, tokens?: Token[]): nock.Scope`.
 
 ##### mockWithErrorResponse
 
