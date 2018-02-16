@@ -104,7 +104,7 @@ enum OAuthGrantType {
 }
 ```
 
-### More speicfic typing in `createAuthCodeRequestUri`
+### More specific typing in `createAuthCodeRequestUri`
 
 The type for the optional parameter `queryParams` is changed from `{}` to the more specific `{ [index: string]: string }`.
 
