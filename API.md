@@ -660,7 +660,7 @@ mockTokeninfoEndpoint(
 <summary>Toggle description</summary>
 
 * Remove all `nock` mocks (not only from this lib, really __ALL__)
-* Resets the tocken state object used by `mockTokeninfoEndpoint` and `mockAccessTokenEndpoint`
+* Resets the token state object used by `mockTokeninfoEndpoint` and `mockAccessTokenEndpoint`
 and given tokens.
 
 Hint:
