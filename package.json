@@ -61,7 +61,7 @@
     "integration-test": "npm run build && mocha lib/integration-test --recursive",
     "test:debug": "npm run build && mocha lib/test lib/integration-test --recursive --inspect-brk",
     "test:coverage": "nyc npm run test",
-    "coverage": "npm run test:coverage && nyc report --reporter=text-lcov | coveralls",
+    "coverage": "npm run test:coverage && nyc report --reporter=text-lcov | coveralls -v",
     "tslint": "tslint --exclude 'src/**/*.d.ts' --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
     "build": "rm -rf lib && tsc",
     "prepublishOnly": "npm run build && npm run test && npm run tslint",
