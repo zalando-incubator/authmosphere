@@ -12,7 +12,7 @@ import {
 let _tokens: Token[] = [];
 
 /**
- * Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
+ * Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749)
  *
  * @param options
  * @returns {nock.Scope}
