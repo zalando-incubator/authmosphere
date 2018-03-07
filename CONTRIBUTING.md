@@ -21,7 +21,7 @@ To report a new bug, open an issue that summarizes the bug and set the label to 
 If you want to provide a fix along with your bug report: That is great! In this case please send us a pull request as
 described in section [Contribute Code](#contribute-code).
 
-If it is a security relevant bug, please follow the [Security](https://github.com/zalando-incubator/authmosphere/blob/master/Security.md) process.
+If it is a security relevant bug, please follow the [Security](https://github.com/zalando-incubator/authmosphere/blob/master/Security.md) instructions.
 
 ## Suggest a Feature
 To request a new feature, open an [issue](https://github.com/zalando-incubator/authmosphere/issues/new) and summarize the desired
