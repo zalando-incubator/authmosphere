@@ -12,7 +12,6 @@ import {
   RefreshGrantConfig,
   OAuthConfig
 } from '../../src';
-// import { equal } from 'assert';
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -296,7 +295,7 @@ describe('getAccessToken', () => {
       //then
       const promise = getAccessToken(passwordCredentialsOAuthOptions)
 
-      // Workaround, as deep equal on error objects is nor reliable in chai at the moment
+      // Workaround, as deep equal on error objects is not reliable in chai at the moment
         .catch((e) => {
           const equalResult = e.message === expectedResult.message &&
             e.error.message === expectedResult.error.message &&
