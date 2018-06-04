@@ -1,6 +1,6 @@
 {
   "name": "authmosphere",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "authmosphere is a library to support OAuth2 workflows in JavaScript projects.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -25,9 +25,9 @@
     "node": ">=6.0"
   },
   "dependencies": {
-    "http-status": "1.1.0",
-    "nock": "9.2.5",
-    "node-fetch": "1.7.3",
+    "http-status": "1.1.2",
+    "nock": "9.3.0",
+    "node-fetch": "2.1.2",
     "uuid": "3.2.1"
   },
   "devDependencies": {
@@ -38,23 +38,21 @@
     "@types/lolex": "2.1.2",
     "@types/mocha": "2.2.48",
     "@types/nock": "9.1.3",
-    "@types/node-fetch": "1.6.9",
-    "@types/sinon": "4.3.1",
-    "@types/sinon-chai": "2.7.29",
+    "@types/node-fetch": "2.1.1",
+    "@types/sinon": "5.0.1",
+    "@types/sinon-chai": "2.7.32",
     "@types/uuid": "3.4.3",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "coveralls": "3.0.1",
     "express": "4.16.3",
-    "hoek": "4.2.1",
-    "lolex": "2.3.2",
-    "mocha": "5.1.1",
-    "nsp": "3.2.1",
-    "nyc": "11.7.1",
-    "sinon": "5.0.3",
-    "sinon-chai": "3.0.0",
-    "tslint": "5.9.1",
-    "typescript": "2.8.3"
+    "lolex": "2.7.0",
+    "mocha": "5.2.0",
+    "nyc": "12.0.2",
+    "sinon": "5.0.10",
+    "sinon-chai": "3.1.0",
+    "tslint": "5.10.0",
+    "typescript": "2.9.1"
   },
   "scripts": {
     "test": "npm run build && mocha lib/test lib/integration-test --recursive",
@@ -65,8 +63,7 @@
     "coverage": "npm run test:coverage && nyc report --reporter=text-lcov | coveralls -v",
     "tslint": "tslint --exclude 'src/**/*.d.ts' --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
     "build": "rm -rf lib && tsc",
-    "prepublishOnly": "npm run build && npm run test && npm run tslint",
-    "nsp": "nsp check"
+    "prepublishOnly": "npm run build && npm run test && npm run tslint"
   },
   "repository": {
     "type": "git",

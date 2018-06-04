@@ -284,17 +284,26 @@ describe('getAccessToken', () => {
         .reply(status);
 
       // when
-      const promise = getAccessToken(passwordCredentialsOAuthOptions);
-
-      // then
-      return expect(promise).to.be.rejected.and.to.eventually.deep.equal({
+      const expectedResult = {
         error: {
           message: `invalid json response body at ${oAuthServerHost}${accessTokenEndpoint} reason: Unexpected end of JSON input`,
-          name: 'FetchError',
           type: 'invalid-json'
         },
         message: `Error requesting access token from ${oAuthServerHost}${accessTokenEndpoint}`
-      });
+      };
+
+      //then
+      const promise = getAccessToken(passwordCredentialsOAuthOptions)
+
+      // Workaround, as deep equal on error objects is not reliable in chai at the moment
+        .catch((e) => {
+          const equalResult = e.message === expectedResult.message &&
+            e.error.message === expectedResult.error.message &&
+            e.error.type === expectedResult.error.type;
+          return Promise.reject(equalResult);
+        });
+
+      return expect(promise).to.be.rejected.become(true);
     });
   });
 

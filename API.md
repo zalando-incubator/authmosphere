@@ -533,7 +533,7 @@ type ClientCredentialsGrantConfig = {
 }
 ```
 
-Client credentials can be passed in via `clientId` and `clientSecrect`, user credentials via `applicationUsername` and `applicationPassword`;
+Client credentials can be passed in via `clientId` and `clientSecret`, user credentials via `applicationUsername` and `applicationPassword`;
 
 </details>
 
