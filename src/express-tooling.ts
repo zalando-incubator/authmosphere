@@ -199,12 +199,15 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
       notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     } else {
-      getTokenInfo(tokenInfoEndpoint, accessToken)
+      getTokenInfo(tokenInfoEndpoint, accessToken, logger)
         .then(setTokeninfo(req))
         .then(next)
         // TODO we should send 500 for issues with network etc.
         //      we should send HttpStatus.UNAUTHORIZED for invalid token
-        .catch(err => notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED));
+        .catch(err => {
+          logOrNothing.warn(`Error while getting token info: ${err}`);
+          notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
+        });
     }
   };
 
