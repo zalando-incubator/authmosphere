@@ -9,3 +9,4 @@ export * from './Precedence';
 export * from './ScopeMiddlewareOptions';
 export * from './Token';
 export * from './TokenCacheConfig';
+export * from './GetTokenInfo';
