@@ -113,7 +113,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
 
       precedenceFunction(request, response, nextFunction)
       .catch(error => {
-        logOrNothing.warn(`Error while executing precedenceFunction: ${error}`);
+        logOrNothing.warn('Error while executing precedenceFunction', error);
         // PrecedencFunction was not successful
         //  false -> trigger fallback to default scope validation
         return false;
@@ -199,12 +199,15 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
       notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
       return;
     } else {
-      getTokenInfo(tokenInfoEndpoint, accessToken)
+      getTokenInfo(tokenInfoEndpoint, accessToken, logger)
         .then(setTokeninfo(req))
         .then(next)
         // TODO we should send 500 for issues with network etc.
         //      we should send HttpStatus.UNAUTHORIZED for invalid token
-        .catch(err => notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED));
+        .catch(error => {
+          logOrNothing.warn('Error while getting token info', error);
+          notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
+        });
     }
   };
 
