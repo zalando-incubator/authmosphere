@@ -12,7 +12,9 @@ import {
   setTokeninfo
 } from './utils';
 
-import { getTokenInfo } from './oauth-tooling';
+import {
+  getTokenInfo as defaultGetTokenInfo
+} from './oauth-tooling';
 
 import {
   AuthenticationMiddlewareOptions,
@@ -20,7 +22,8 @@ import {
   onAuthorizationFailedHandler,
   PrecedenceFunction,
   PrecedenceOptions,
-  ScopeMiddlewareOptions
+  ScopeMiddlewareOptions,
+  GetTokenInfo
 } from './types';
 
 import { safeLogger } from './safe-logger';
@@ -142,6 +145,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
  *  - publicEndpoints string[]
  *  - tokenInfoEndpoint string
  *  - optional logger
+ *  - optional getTokenInfo
  *  - onNotAuthenticatedHandler - a customer handler method that
  *                                is executed if callee is not authorized,
  *                                If not provided, `response.sendStatus(401)` is called.
@@ -158,10 +162,12 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
   const {
     tokenInfoEndpoint,
     publicEndpoints,
-    logger
+    logger,
+    getTokenInfo: customGetTokenInfo
   } = options;
 
   const logOrNothing = safeLogger(logger);
+  const getTokenInfo: GetTokenInfo<{}> = customGetTokenInfo || defaultGetTokenInfo;
 
   if (!tokenInfoEndpoint) {
     logOrNothing.error('tokenInfoEndpoint must be defined');
