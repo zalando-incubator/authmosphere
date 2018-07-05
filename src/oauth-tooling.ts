@@ -23,7 +23,8 @@ import {
   Logger,
   OAuthConfig,
   OAuthGrantType,
-  Token
+  Token,
+  GetTokenInfo
 } from './types';
 
 import { safeLogger } from './safe-logger';
@@ -153,7 +154,7 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: O
  *
  * @returns { Promise<Token<T>> }
  */
-function getTokenInfo<T>(tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token<T>> {
+const getTokenInfo: GetTokenInfo = (tokenInfoUrl: string, accessToken: string, logger?: Logger) => {
 
   const logOrNothing = safeLogger(logger);
 
@@ -185,7 +186,7 @@ function getTokenInfo<T>(tokenInfoUrl: string, accessToken: string, logger?: Log
   });
 
   return promise;
-}
+};
 
 /**
  * Requests a token based on the given configuration (which specifies the grant type and corresponding parameters).
