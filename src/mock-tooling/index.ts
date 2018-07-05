@@ -8,6 +8,7 @@ import {
   MockOptions,
   Token
 } from '../types';
+import { extractAccessToken } from '../utils';
 
 let _tokens: Token[] = [];
 
@@ -56,10 +57,14 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
     .get(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
-    .reply((uri: string) => {
+    .reply(function(this: any, uri: string) {
 
       // token to validate
-      const givenToken = uri.split('=')[1];
+      const givenToken =
+        // either use token from query parameter...
+        uri.split('=')[1] ? uri.split('=')[1] :
+        // ...or from authorization header
+        this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
 
       if (givenToken) {
 
