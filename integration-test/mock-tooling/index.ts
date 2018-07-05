@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import fetch from 'node-fetch';
 
 import {
   getTokenInfo,
@@ -45,7 +46,35 @@ describe('mock tooling', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should return the tokeninfo if token is valid', () => {
+    it('should return the tokeninfo if token is valid and passed via header', () => {
+
+      // given
+      const validAuthToken = {
+        'expires_in': 3600,
+        'scope': ['uid'],
+        'access_token': 'foo'
+      };
+      mockTokeninfoEndpoint(
+        {
+          url: tokeninfoEndpoint,
+          times: 1
+        },
+        [validAuthToken]
+      );
+
+      // when
+      const promise = fetch(tokeninfoEndpoint, {
+        headers: {
+          'Authorization': 'Bearer foo'
+        }
+      })
+        .then((response) => response.json());
+
+      // then
+      return expect(promise).to.become(validAuthToken);
+    });
+
+    it('should return the tokeninfo if token is valid and passed via query parameter', () => {
 
       // given
       const validAuthToken = {
