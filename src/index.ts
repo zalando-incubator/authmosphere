@@ -8,6 +8,7 @@ export {
   AuthorizationCodeGrantConfig,
   ClientCredentialsGrantConfig,
   ExtendedRequest,
+  GetTokenInfo,
   Logger,
   MockOptions,
   OAuthConfig,
