@@ -1,6 +1,6 @@
 {
   "name": "authmosphere",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "authmosphere is a library to support OAuth2 workflows in JavaScript projects.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
