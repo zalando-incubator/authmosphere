@@ -209,7 +209,7 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
         // TODO we should send 500 for issues with network etc.
         //      we should send HttpStatus.UNAUTHORIZED for invalid token
         .catch(error => {
-          logOrNothing.warn('Error while getting token info', error);
+          logOrNothing.warn('Error while getting token info', String(error).replace(/access_token=[^\s]+/, "access_token=XXX"));
           notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
         });
     }
