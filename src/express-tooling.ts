@@ -9,7 +9,8 @@ import {
   getHeaderValue,
   rejectRequest,
   extractAccessToken,
-  setTokeninfo
+  setTokeninfo,
+  transformError
 } from './utils';
 
 import { getTokenInfo as defaultGetTokenInfo } from './oauth-tooling';
@@ -209,7 +210,8 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
         // TODO we should send 500 for issues with network etc.
         //      we should send HttpStatus.UNAUTHORIZED for invalid token
         .catch(error => {
-          logOrNothing.warn('Error while getting token info', String(error).replace(/access_token=[^\s]+/, "access_token=XXX"));
+          const errorToLog = transformError(error); 
+          logOrNothing.warn('Error while getting token info', errorToLog);
           notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
         });
     }

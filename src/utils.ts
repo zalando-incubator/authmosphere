@@ -195,6 +195,16 @@ const isAuthorizationCodeGrantConfig = (config: OAuthConfig): config is Authoriz
 const isRefreshGrantConfig = (config: OAuthConfig): config is RefreshGrantConfig =>
   config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT;
 
+const transformError = (errorToTransform: any) => {
+  let transformedError;
+  try {
+    transformedError = JSON.stringify(errorToTransform).replace(/access_token=[^\s]+/, 'access_token=XXX');
+  } catch (error) {
+    transformedError = errorToTransform;
+  }
+  return transformedError;
+};
+
 export {
   extractAccessToken,
   extractUserCredentials,
@@ -209,5 +219,6 @@ export {
   isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
-  setTokeninfo
+  setTokeninfo,
+  transformError
 };
