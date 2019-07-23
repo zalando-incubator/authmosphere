@@ -210,8 +210,7 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
         // TODO we should send 500 for issues with network etc.
         //      we should send HttpStatus.UNAUTHORIZED for invalid token
         .catch(error => {
-          const errorToLog = transformError(error); 
-          logOrNothing.warn('Error while getting token info', errorToLog);
+          logOrNothing.warn('Error while getting token info', transformError(error));
           notAuthenticatedHandler(res, logOrNothing, HttpStatus.UNAUTHORIZED);
         });
     }

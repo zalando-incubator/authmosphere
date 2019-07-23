@@ -258,4 +258,14 @@ describe('utils', () => {
       return expect(transformedError).to.equal('{"error":"FetchError: request to http://oauth-mock:5001/tokeninfo?access_token=XXX failed","reason":"getaddrinfo ENOTFOUND oauth-mock oauth-mock:5001","message":"Error validating token via http://oauth-mock:5001/tokeninfo"}');
     });
   });
+
+  describe('transformError', () => {
+    it('should return original value on parsing errors', () => {
+      const originalError = undefined;
+
+      const transformedError = transformError(originalError);
+
+      return expect(transformedError).to.equal(undefined);
+    });
+  });
 });
