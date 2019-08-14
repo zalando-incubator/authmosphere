@@ -90,14 +90,13 @@ function requestAccessToken(bodyObject: object,
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
-    .catch((error) => Promise.reject({error: {status: error.status}}))
     .then((response) => {
 
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
         return response.json()
-        .catch((error) => Promise.reject({...error, status}))
+        .catch((error) => Promise.reject(error))
         .then((error) => Promise.reject({
           // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
           // but do fall back if for some reason the definition is not satisfied
@@ -160,6 +159,7 @@ const getTokenInfo: GetTokenInfo = (tokenInfoUrl: string, accessToken: string, l
   const logOrNothing = safeLogger(logger);
 
   const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+  .catch(() => Promise.reject({errorDescription: 'tokenInfo endpoint not reachable '}))
   .then((response) => {
 
     const status = response.status;

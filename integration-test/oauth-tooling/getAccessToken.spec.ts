@@ -287,8 +287,7 @@ describe('getAccessToken', () => {
       const expectedResult = {
         error: {
           message: `invalid json response body at ${oAuthServerHost}${accessTokenEndpoint} reason: Unexpected end of JSON input`,
-          type: 'invalid-json',
-          status: 400
+          type: 'invalid-json'
         },
         message: `Error requesting access token from ${oAuthServerHost}${accessTokenEndpoint}`
       };
@@ -300,8 +299,7 @@ describe('getAccessToken', () => {
         .catch((e) => {
           const equalResult = e.message === expectedResult.message &&
             e.error.message === expectedResult.error.message &&
-            e.error.type === expectedResult.error.type &&
-            e.error.status === expectedResult.error.status;
+            e.error.type === expectedResult.error.type;
           return Promise.reject(equalResult);
         });
 
