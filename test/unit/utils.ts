@@ -8,8 +8,7 @@ import {
   extractClientCredentials,
   isCredentialsDirConfig,
   isCredentialsClientConfig,
-  isPasswordGrantNoCredentialsDir,
-  transformError
+  isPasswordGrantNoCredentialsDir
 } from '../../src/utils';
 import { OAuthGrantType } from '../../src';
 
@@ -242,30 +241,6 @@ describe('utils', () => {
       const result = isPasswordGrantNoCredentialsDir(config);
 
       return expect(result).to.equal(true);
-    });
-  });
-
-  describe('transformError', () => {
-    it('should obfuscate access tokens', () => {
-      const originalError = {
-        error: 'FetchError: request to http://oauth-mock:5001/tokeninfo?access_token=b57ce20a-6010-476a-bfd3-342a1591b542 failed',
-        reason: 'getaddrinfo ENOTFOUND oauth-mock oauth-mock:5001',
-        message: 'Error validating token via http://oauth-mock:5001/tokeninfo'
-      };
-
-      const transformedError = transformError(originalError);
-
-      return expect(transformedError).to.equal('{"error":"FetchError: request to http://oauth-mock:5001/tokeninfo?access_token=XXX failed","reason":"getaddrinfo ENOTFOUND oauth-mock oauth-mock:5001","message":"Error validating token via http://oauth-mock:5001/tokeninfo"}');
-    });
-  });
-
-  describe('transformError', () => {
-    it('should return original value on parsing errors', () => {
-      const originalError = undefined;
-
-      const transformedError = transformError(originalError);
-
-      return expect(transformedError).to.equal(undefined);
     });
   });
 });

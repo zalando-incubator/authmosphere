@@ -90,13 +90,14 @@ function requestAccessToken(bodyObject: object,
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
+    .catch((error) => Promise.reject({error: {status: error.status}}))
     .then((response) => {
 
       const status = response.status;
 
       if (status !== HttpStatus.OK) {
         return response.json()
-        .catch((error) => Promise.reject(error))
+        .catch((error) => Promise.reject({...error, status}))
         .then((error) => Promise.reject({
           // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
           // but do fall back if for some reason the definition is not satisfied
