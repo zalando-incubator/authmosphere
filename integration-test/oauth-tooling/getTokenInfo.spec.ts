@@ -40,6 +40,23 @@ describe('getTokenInfo', () => {
     return expect(promise).to.be.rejected;
   });
 
+  it('should return no fetch error if call fails', () => {
+
+    // when
+    const promise = getTokenInfo(`http://oauth-mock:5001/tokeninfo`, validAccessToken);
+
+    // then
+    return expect(promise).to.be.rejected
+      .then((error) => {
+        expect(error).to.deep.equal({
+          message: 'Error validating token via http://oauth-mock:5001/tokeninfo',
+          error: {
+            errorDescription: 'tokenInfo endpoint not reachable '
+          }
+          });
+      });
+  });
+
   it('should return the token info if token is valid', function() {
 
     // given

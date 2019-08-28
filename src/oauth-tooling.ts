@@ -159,6 +159,7 @@ const getTokenInfo: GetTokenInfo = (tokenInfoUrl: string, accessToken: string, l
   const logOrNothing = safeLogger(logger);
 
   const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+  .catch(() => Promise.reject({errorDescription: 'tokenInfo endpoint not reachable '}))
   .then((response) => {
 
     const status = response.status;
