@@ -7,9 +7,14 @@
     "coverage/**/*.js",
     "lib/integration-test/**/*",
     "lib/src/index.js",
+    "lib/src/index.d.ts",
     "lib/test/**/*",
-    "lib/src/types"
+    "lib/src/types",
+    "src/types",
+    "test",
+    "integration-test"
   ],
+  "extension": [".ts"],
   "reporter": [
     "lcov",
     "text",
