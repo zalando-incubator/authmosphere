@@ -28,7 +28,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
     .post(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
-    .reply((uri: string, requestBody: string) => {
+    .reply(HttpStatus.OK, (uri: string, requestBody: string) => {
 
       const body = querystring.parse(requestBody);
 
@@ -37,7 +37,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
       const newToken = generateToken(scope);
       _tokens.push(newToken);
 
-      return [HttpStatus.OK, newToken];
+      return newToken;
     });
 };
 
