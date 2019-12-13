@@ -5,7 +5,8 @@ import {
   TokenCache,
   getAccessToken,
   createAuthCodeRequestUri,
-  OAuthGrantType
+  OAuthGrantType,
+  OAuthConfig
 } from '../../src';
 
 chai.use(chaiAsPromised);
@@ -24,45 +25,51 @@ describe('oauth tooling', () => {
     };
 
     it('if credentialsDir is not defined', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        credentialsDir: undefined
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, credentialsDir: undefined} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
 
     it('if accessTokenEndpoint is not defined', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        accessTokenEndpoint: undefined
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, accessTokenEndpoint: undefined} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
 
     it('if grantType is not defined', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        grantType: undefined
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, grantType: undefined} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
 
     it('if redirectUri is not defined (in case of Authorization Code Grant)', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        redirectUri: undefined
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, redirectUri: undefined} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
 
     it('if code is not defined (in case of Authorization Code Grant)', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        code: undefined
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, code: undefined} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
 
     it('if refreshToken is not defined (in case of Refresh Token Grant)', () => {
-      expect(getAccessToken.bind(undefined, {
-        ...config,
-        grantType: OAuthGrantType.REFRESH_TOKEN_GRANT
-      })).to.throw(TypeError);
+      const brokenConfig = {...config, grantType: OAuthGrantType.REFRESH_TOKEN_GRANT} as unknown as OAuthConfig;
+
+      expect(getAccessToken.bind(undefined,
+        brokenConfig
+        )).to.throw(TypeError);
     });
   });
 

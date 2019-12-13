@@ -222,6 +222,10 @@ describe('mock tooling', () => {
 
       // when
       const promise = getAccessToken(options)
+      .then((data) => {
+        console.log(data);
+        return data;
+      })
       .then((token: Token) => {
         expect(token.scope).to.deep.equal(options.scopes);
 
