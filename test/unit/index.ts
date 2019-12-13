@@ -27,49 +27,37 @@ describe('oauth tooling', () => {
     it('if credentialsDir is not defined', () => {
       const brokenConfig = {...config, credentialsDir: undefined} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
 
     it('if accessTokenEndpoint is not defined', () => {
       const brokenConfig = {...config, accessTokenEndpoint: undefined} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
 
     it('if grantType is not defined', () => {
       const brokenConfig = {...config, grantType: undefined} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
 
     it('if redirectUri is not defined (in case of Authorization Code Grant)', () => {
       const brokenConfig = {...config, redirectUri: undefined} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
 
     it('if code is not defined (in case of Authorization Code Grant)', () => {
       const brokenConfig = {...config, code: undefined} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
 
     it('if refreshToken is not defined (in case of Refresh Token Grant)', () => {
       const brokenConfig = {...config, grantType: OAuthGrantType.REFRESH_TOKEN_GRANT} as unknown as OAuthConfig;
 
-      expect(getAccessToken.bind(undefined,
-        brokenConfig
-        )).to.throw(TypeError);
+      expect(getAccessToken.bind(undefined, brokenConfig)).to.throw(TypeError);
     });
   });
 
