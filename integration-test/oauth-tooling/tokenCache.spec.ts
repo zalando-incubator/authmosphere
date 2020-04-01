@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as HttpStatus from 'http-status';
 import * as nock from 'nock';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {
   TokenCache,
@@ -112,7 +112,7 @@ describe('TokenCache', () => {
     it('should resolve with the cached token if there is a valid one', () => {
 
       // given
-      const clock = lolex.install();
+      const clock = fakeTimers.install();
       const initialLifetime = 3600;
       const timeBeforeExpiry = initialLifetime * (1 - defaultCacheConfig.percentageLeft) * 1000 - 1;
 
@@ -147,7 +147,7 @@ describe('TokenCache', () => {
     it('should resolve with a new token if the cached one is expired', () => {
 
       // given
-      const clock = lolex.install();
+      const clock = fakeTimers.install();
       const initialLifetime = 3600;
       const timeUntilExpiry = initialLifetime * (1 - defaultCacheConfig.percentageLeft) * 1000 + 1;
 
@@ -194,7 +194,7 @@ describe('TokenCache', () => {
     it('should resolve with a token that immediately expires if expires_in is not set', () => {
 
       // given
-      const clock = lolex.install();
+      const clock = fakeTimers.install();
       const timeUntilExpiry = 1;
 
       const otherAccessTokenValue = 'bar';
