@@ -7,7 +7,7 @@ import {
 } from '../../src';
 
 chai.use(chaiAsPromised);
-let expect = chai.expect;
+const expect = chai.expect;
 
 describe('safeLogger', () => {
   describe('logOrNothing', () => {

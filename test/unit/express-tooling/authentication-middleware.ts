@@ -17,7 +17,7 @@ const expect = chai.expect;
 
 describe('express tooling', () => {
 
-  const createRequestMock = (scopes: String[]): Request => ({
+  const createRequestMock = (scopes: string[]): Request => ({
     get: (name: string) => name,
     $$tokeninfo: {
       scope: scopes
@@ -25,7 +25,7 @@ describe('express tooling', () => {
   } as any as Request);
 
   const createResponseMock = (): Response => ({
-    sendStatus: sinon.spy((status: string) => undefined)
+    sendStatus: sinon.spy((status: string) => status)
   } as any as Response);
 
   describe('authenticationMiddleware', () => {
@@ -39,7 +39,9 @@ describe('express tooling', () => {
       };
 
       // then
-      expect(() => { authenticationMiddleware(config); }).to.throw(TypeError);
+      expect(() => {
+        authenticationMiddleware(config);
+      }).to.throw(TypeError);
     });
 
     it('should call #next on public endpoint', (done) => {

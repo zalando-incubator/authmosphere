@@ -389,5 +389,16 @@ module.exports = {
       }
     ]
   },
+// Excludes test from no-unused-expressions, to prevent errors due to the use of chai
+  overrides: [
+    {
+      "files": ["*.ts"],
+      excludedFiles: "*.test.ts",
+      rules: {
+        "no-unused-expressions": "off"
+      }
+    }
+  ],
+
   "settings": {}
 };
