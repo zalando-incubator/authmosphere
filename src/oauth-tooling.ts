@@ -47,14 +47,14 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
                                   clientId: string,
                                   queryParams?: { [index: string]: string }): string {
 
-  const _queryParams = {
+  const extendedQueryParams = {
+    ...queryParams,
     'client_id': clientId,
     'redirect_uri': redirectUri,
-    'response_type': 'code',
-    ...queryParams
+    'response_type': 'code'
   };
 
-  const queryString = qs.stringify(_queryParams);
+  const queryString = qs.stringify(extendedQueryParams);
   // we are unescaping again since we did not escape before using querystring and we do not want to break anything
   const unescapedQueryString = qs.unescape(queryString);
 
@@ -90,32 +90,32 @@ function requestAccessToken(bodyObject: BodyParameters,
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
-    .then((response) => {
+      .then((response) => {
 
-      const status = response.status;
+        const status = response.status;
 
-      if (status !== HttpStatus.OK) {
-        return response.json()
-        .catch((error) => Promise.reject(error))
-        .then((error) => Promise.reject({
-          // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
-          // but do fall back if for some reason the definition is not satisfied
-          error: (error && error.error) ? error.error : error,
-          errorDescription: (error && error.error_description) ? error.error_description : undefined,
-          status
-        }));
-      }
+        if (status !== HttpStatus.OK) {
+          return response.json()
+            .catch((error) => Promise.reject(error))
+            .then((error) => Promise.reject({
+              // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
+              // but do fall back if for some reason the definition is not satisfied
+              error: (error && error.error) ? error.error : error,
+              errorDescription: (error && error.error_description) ? error.error_description : undefined,
+              status
+            }));
+        }
 
-      logger.debug(`Successful request to ${accessTokenEndpoint}`);
-      return response.json();
-    })
-    .catch((error) => {
-      logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
-      return Promise.reject({
-        message: `Error requesting access token from ${accessTokenEndpoint}`,
-        error
+        logger.debug(`Successful request to ${accessTokenEndpoint}`);
+        return response.json();
+      })
+      .catch((error) => {
+        logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
+        return Promise.reject({
+          message: `Error requesting access token from ${accessTokenEndpoint}`,
+          error
+        });
       });
-    });
 
   return promise;
 }
@@ -159,32 +159,32 @@ const getTokenInfo: GetTokenInfo = (tokenInfoUrl: string, accessToken: string, l
   const logOrNothing = safeLogger(logger);
 
   const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-  .catch(() => Promise.reject({errorDescription: 'tokenInfo endpoint not reachable '}))
-  .then((response) => {
+    .catch(() => Promise.reject({errorDescription: 'tokenInfo endpoint not reachable '}))
+    .then((response) => {
 
-    const status = response.status;
+      const status = response.status;
 
-    return response.json()
-    .then((data) => {
+      return response.json()
+        .then((data) => {
 
-      if (status === HttpStatus.OK) {
-        logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
-        return data;
-      } else {
-        logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
-        return Promise.reject({ status, data });
-      }
+          if (status === HttpStatus.OK) {
+            logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
+            return data;
+          } else {
+            logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+            return Promise.reject({ status, data });
+          }
+        });
+    })
+    .catch((error) => {
+
+      logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
+
+      return Promise.reject({
+        message: `Error validating token via ${tokenInfoUrl}`,
+        error
+      });
     });
-  })
-  .catch((error) => {
-
-    logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
-
-    return Promise.reject({
-      message: `Error validating token via ${tokenInfoUrl}`,
-      error
-    });
-  });
 
   return promise;
 };
@@ -208,53 +208,54 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
   const credentialsPromises = getCredentials(options);
 
   return Promise.all(credentialsPromises)
-  .then(([clientData, userData]) => {
+    .then(([clientData, userData]) => {
 
-    let bodyParameters: BodyParameters;
+      let bodyParameters: BodyParameters;
 
-    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
-      bodyParameters = {
-        'grant_type': options.grantType,
-        'username': userData.applicationUsername,
-        'password': userData.applicationPassword
-      };
-    } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
-      bodyParameters = {
-        'grant_type': options.grantType
-      };
-    } else if (isAuthorizationCodeGrantConfig(options)) {
-      bodyParameters = {
-        'grant_type': options.grantType,
-        'code': options.code,
-        'redirect_uri': options.redirectUri
-      };
-    } else if (isRefreshGrantConfig(options)) {
-      bodyParameters = {
-        'grant_type': options.grantType,
-        'refresh_token': options.refreshToken
-      };
-    } else {
-      throw TypeError('invalid grantType');
-    }
+      if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+        bodyParameters = {
+          'grant_type': options.grantType,
+          'username': userData.applicationUsername,
+          'password': userData.applicationPassword
+        };
+      } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
+        bodyParameters = {
+          'grant_type': options.grantType
+        };
+      } else if (isAuthorizationCodeGrantConfig(options)) {
+        bodyParameters = {
+          'grant_type': options.grantType,
+          'code': options.code,
+          'redirect_uri': options.redirectUri
+        };
+      } else if (isRefreshGrantConfig(options)) {
+        bodyParameters = {
+          'grant_type': options.grantType,
+          'refresh_token': options.refreshToken
+        };
+      } else {
+        throw TypeError('invalid grantType');
+      }
 
-    if (options.scopes) {
-      Object.assign(bodyParameters, {
-        scope: options.scopes.join(' ')
-      });
-    }
+      if (options.scopes) {
+        Object.assign(bodyParameters, {
+          scope: options.scopes.join(' ')
+        });
+      }
 
-    if (options.bodyParams) {
-      Object.assign(bodyParameters, options.bodyParams);
-    }
+      if (options.bodyParams) {
+        Object.assign(bodyParameters, options.bodyParams);
+      }
 
-    const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
+      const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
 
-    return requestAccessToken(bodyParameters, authorizationHeaderValue,
-      options.accessTokenEndpoint, logOrNothing, options.queryParams);
-  });
+      return requestAccessToken(bodyParameters, authorizationHeaderValue,
+        options.accessTokenEndpoint, logOrNothing, options.queryParams);
+    });
 }
 
-type convertSnakeCredentialsToCamel = (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
+type convertSnakeCredentialsToCamel =
+  (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
 const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => ({
   clientId: options.client_id,
   clientSecret: options.client_secret,

@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { extractAccessToken } from '../utils';
 
-let _tokens: Token[] = [];
+let mockedTokens: Token[] = [];
 
 /**
  * Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
@@ -35,7 +35,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
       const scope = body.scope ? body.scope.toString().split(' ') : undefined;
 
       const newToken = generateToken(scope);
-      _tokens.push(newToken);
+      mockedTokens.push(newToken);
 
       return newToken;
     });
@@ -64,13 +64,13 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
         // either use token from query parameter...
         uri.split('=')[1] ? uri.split('=')[1] :
         // ...or from authorization header
-        this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
+          this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
 
       if (givenToken) {
 
         // concat all valid tokens (from this function call and potentially from
         // previous calls of `mockAccessTokenEndpoint`)
-        const validTokens = (tokens) ? _tokens.concat(tokens) : _tokens;
+        const validTokens = (tokens) ? mockedTokens.concat(tokens) : mockedTokens;
 
         // find token
         const foundIndex = validTokens.findIndex((token) => {
@@ -103,12 +103,12 @@ const mockEndpointWithErrorResponse =
     const parsedUrl = parseUrlOrThrow(options);
 
     return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-    .times(options.times || Number.MAX_SAFE_INTEGER)
-    .query(true)
-    .reply(() => {
-      return [httpStatus, responseBody || {}];
-    });
+      .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+      .times(options.times || Number.MAX_SAFE_INTEGER)
+      .query(true)
+      .reply(() => {
+        return [httpStatus, responseBody || {}];
+      });
   };
 
 /**
@@ -117,7 +117,7 @@ const mockEndpointWithErrorResponse =
 const cleanMock = (): void => {
 
   nock.cleanAll();
-  _tokens = [];
+  mockedTokens = [];
 };
 
 const generateToken = (scopes?: string[]): Token => {

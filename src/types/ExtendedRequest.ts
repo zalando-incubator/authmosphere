@@ -8,5 +8,5 @@ interface ExtendedRequest extends Request {
 }
 
 export {
-  ExtendedRequest​​
+  ExtendedRequest
 };

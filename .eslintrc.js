@@ -57,12 +57,12 @@ module.exports = {
           "requireLast": false
         },
         "overrides": {
-            "interface": {
-                "multiline": {
-                    "delimiter": "semi",
-                    "requireLast": true
-                }
+          "interface": {
+            "multiline": {
+              "delimiter": "semi",
+              "requireLast": true
             }
+          }
         }
       }
     ],
@@ -70,11 +70,12 @@ module.exports = {
       "error",
       {
         "selector": "property",
-        "format": ["camelCase", "snake_case"]
+        "format": ["camelCase", "snake_case", "PascalCase"]
       },
       {
         "selector": "variable",
-        "format": ["camelCase", "UPPER_CASE", "PascalCase"]
+        "format": ["camelCase", "UPPER_CASE", "PascalCase"],
+        leadingUnderscore: 'allow'
       },
       {
         "selector": "typeLike",
@@ -82,7 +83,7 @@ module.exports = {
       },
       {
         "selector": "enumMember",
-        "format": ["UPPER_CASE", "PascalCase"]
+        "format": ["camelCase", "UPPER_CASE", "PascalCase"]
       },
       {
         "selector": "parameter",
@@ -91,7 +92,8 @@ module.exports = {
       },
       {
         "selector": "default",
-        "format": ["camelCase"]
+        "format": ["camelCase"],
+        leadingUnderscore: 'allow'
       }
     ],
     "no-array-constructor": [
@@ -368,7 +370,13 @@ module.exports = {
       }
     ],
     "no-trailing-spaces": "error",
-    "no-underscore-dangle": "error",
+    "no-underscore-dangle":
+      [
+        "error",
+        {
+          "allowAfterThis": true
+        }
+      ],
     "no-unused-expressions": "error",
     "radix": "error",
     "spaced-comment": [

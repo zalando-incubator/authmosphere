@@ -39,7 +39,7 @@ type TokenMap = { [key: string]: Token | undefined };
  */
 class TokenCache {
 
-  private _tokens: TokenMap = {};
+  private tokenMap: TokenMap = {};
   private logger: Logger;
 
   private cacheConfig: CacheConfig = defaultCacheConfig;
@@ -112,7 +112,7 @@ class TokenCache {
 
             const localExpiry = Date.now() + (expiresIn * 1000 * (1 - this.cacheConfig.percentageLeft));
 
-            this._tokens[tokenName] = {
+            this.tokenMap[tokenName] = {
               ...token,
               local_expiry: localExpiry
             };
@@ -120,7 +120,7 @@ class TokenCache {
             return token;
           })
           .then((token) => getTokenInfo(this.oauthConfig.tokenInfoEndpoint, token.access_token));
-    });
+      });
 
     return promise;
   }
@@ -137,7 +137,7 @@ class TokenCache {
 
     this.logger.debug(`TokenCache: refresh of ${tokenName} triggered`);
 
-    this._tokens[tokenName] = undefined;
+    this.tokenMap[tokenName] = undefined;
 
     return this.get(tokenName);
   }
@@ -155,11 +155,11 @@ class TokenCache {
       .keys(this.tokenConfig)
       .map(tokenName => this.refreshToken(tokenName));
 
-    this._tokens = {};
+    this.tokenMap = {};
 
     return Promise
       .all(refreshPromises)
-      .then(() => this._tokens);
+      .then(() => this.tokenMap);
   }
 
   private isTokenConfigured(tokenName: string): boolean {
@@ -176,7 +176,7 @@ class TokenCache {
    */
   private getCachedToken(tokenName: string): Promise<Token> {
 
-    const token = this._tokens[tokenName];
+    const token = this.tokenMap[tokenName];
 
     if (token === undefined) {
       const msg = `TokenCache miss: ${tokenName}`;

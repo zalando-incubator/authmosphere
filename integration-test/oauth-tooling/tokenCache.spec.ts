@@ -22,13 +22,13 @@ describe('TokenCache', () => {
 
   const defaultAccessTokenValue = 'foo';
   const defaultTokenInfoResponse = {
-      expires_in: 3600,
-      token_type: 'Bearer',
-      scope: ['nucleus.write', 'nucleus.read'],
-      grant_type: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
-      uid: 'uid',
-      access_token: defaultAccessTokenValue
-    };
+    expires_in: 3600,
+    token_type: 'Bearer',
+    scope: ['nucleus.write', 'nucleus.read'],
+    grant_type: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT,
+    uid: 'uid',
+    access_token: defaultAccessTokenValue
+  };
 
   before(() => {
     oauthConfig = {
@@ -326,10 +326,10 @@ describe('TokenCache', () => {
 
   describe('resolveAccessTokenFactory', () => {
 
-      it('should return a promise, evaluating the token', () => {
+    it('should return a promise, evaluating the token', () => {
 
-        // given
-        nock(oauthHost)
+      // given
+      nock(oauthHost)
         .post('/access_token')
         .reply(HttpStatus.OK, {
           access_token: defaultAccessTokenValue
@@ -338,17 +338,17 @@ describe('TokenCache', () => {
         .query({ access_token: defaultAccessTokenValue })
         .reply(HttpStatus.OK, defaultTokenInfoResponse);
 
-        // when
-        const tokenService = new TokenCache({
-          'nucleus': ['nucleus.write', 'nucleus.read'],
-          'halo': ['all']
-        }, oauthConfig);
+      // when
+      const tokenService = new TokenCache({
+        'nucleus': ['nucleus.write', 'nucleus.read'],
+        'halo': ['all']
+      }, oauthConfig);
 
-        const evalFunction = tokenService.resolveAccessTokenFactory('nucleus');
-        const promise = evalFunction();
+      const evalFunction = tokenService.resolveAccessTokenFactory('nucleus');
+      const promise = evalFunction();
 
-        // then
-        return expect(promise).to.become(defaultAccessTokenValue);
-      });
+      // then
+      return expect(promise).to.become(defaultAccessTokenValue);
     });
+  });
 });

@@ -1,5 +1,5 @@
 type CredentialsDirConfig = {
-  credentialsDir: string;
+  credentialsDir: string
 };
 
 type CredentialsClientConfig = {
@@ -18,24 +18,24 @@ type CredentialsConfig = CredentialsDirConfig | CredentialsClientConfig;
 type CredentialsPasswordConfig = CredentialsDirConfig | CredentialsUserClientConfig;
 
 type GrantConfigBase = {
-  grantType: string;
-  accessTokenEndpoint: string;
-  queryParams?: { [index: string]: string };
-  bodyParams?: { [index: string]: string };
-  scopes?: string[];
+  grantType: string,
+  accessTokenEndpoint: string,
+  queryParams?: { [index: string]: string },
+  bodyParams?: { [index: string]: string },
+  scopes?: string[]
 };
 
 type ClientCredentialsGrantConfig = CredentialsConfig & GrantConfigBase;
 
 type AuthorizationCodeGrantConfig = CredentialsConfig & GrantConfigBase & {
-  code: string;
-  redirectUri: string;
+  code: string,
+  redirectUri: string
 };
 
 type PasswordCredentialsGrantConfig = CredentialsPasswordConfig & GrantConfigBase;
 
 type RefreshGrantConfig = CredentialsConfig & GrantConfigBase & {
-  refreshToken: string;
+  refreshToken: string
 };
 
 type OAuthConfig =
@@ -46,7 +46,7 @@ type OAuthConfig =
 
 type TokenCacheOAuthConfig =
   (ClientCredentialsGrantConfig | PasswordCredentialsGrantConfig) & {
-    tokenInfoEndpoint: string; // mandatory for TokenCache
+    tokenInfoEndpoint: string // mandatory for TokenCache
   };
 
 export {

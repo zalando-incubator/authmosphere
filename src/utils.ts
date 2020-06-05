@@ -2,16 +2,16 @@ import * as fs from 'fs';
 import { Request, Response } from 'express';
 
 import {
-   AuthorizationCodeGrantConfig,
-   Logger,
-   CredentialsDirConfig,
-   CredentialsClientConfig,
-   CredentialsUserConfig,
-   CredentialsUserClientConfig,
-   OAuthConfig,
-   OAuthGrantType,
-   RefreshGrantConfig,
-   Token
+  AuthorizationCodeGrantConfig,
+  Logger,
+  CredentialsDirConfig,
+  CredentialsClientConfig,
+  CredentialsUserConfig,
+  CredentialsUserClientConfig,
+  OAuthConfig,
+  OAuthGrantType,
+  RefreshGrantConfig,
+  Token
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -61,8 +61,8 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
   const headerValue = req && req.headers[fieldName];
 
   const normalizedHeaderValue = Array.isArray(headerValue) ?
-                                  headerValue.join(' ') :
-                                  headerValue;
+    headerValue.join(' ') :
+    headerValue;
 
   return normalizedHeaderValue;
 };
@@ -145,17 +145,18 @@ const isCredentialsUserConfig = (options: any): options is CredentialsUserConfig
   options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
 
 const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUserClientConfig =>
-   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+  options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
    isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
 
 const checkCredentialsSource = (options: OAuthConfig) =>
- isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
+  isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
 
 const extractUserCredentials = (options: CredentialsUserConfig | CredentialsUserClientConfig): CredentialsUserConfig =>
   ({ applicationPassword: options.applicationPassword, applicationUsername: options.applicationUsername });
 
-const extractClientCredentials = (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig =>
-  ({ clientId: options.clientId, clientSecret: options.clientSecret });
+const extractClientCredentials =
+  (options: CredentialsClientConfig | CredentialsUserClientConfig): CredentialsClientConfig =>
+    ({ clientId: options.clientId, clientSecret: options.clientSecret });
 
 /**
  * Validates options object and throws TypeError if mandatory options is not specified.
