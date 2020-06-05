@@ -52,9 +52,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/healthcheck',
-        headers: {},
-        ...createRequestMock([])
+        headers: {}
       } as any as Request;
 
       // when
@@ -78,9 +78,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: {},
-        ...createRequestMock([])
+        headers: {}
       } as any as Request;
 
       // when
@@ -104,9 +104,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['auth1'] }
       } as any as Request;
 
       // when
@@ -129,9 +129,9 @@ describe('express tooling', () => {
         onNotAuthenticatedHandler: sinon.spy()
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['invalid auth'] },
-        ...createRequestMock([])
+        headers: { authorization: ['invalid auth'] }
       } as any as Request;
 
       // when
@@ -163,9 +163,9 @@ describe('express tooling', () => {
         getTokenInfo
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['Bearer auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['Bearer auth1'] }
       } as any as Request;
 
       // when
@@ -203,9 +203,9 @@ describe('express tooling', () => {
         getTokenInfo
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['Bearer auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['Bearer auth1'] }
       } as any as Request;
 
       // when

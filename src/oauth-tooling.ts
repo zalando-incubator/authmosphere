@@ -73,7 +73,7 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
  * @param queryParams
  * @returns {Promise<Token>}
  */
-function requestAccessToken(bodyObject: object,
+function requestAccessToken(bodyObject: BodyParameters,
                             authorizationHeaderValue: string,
                             accessTokenEndpoint: string,
                             logger: Logger,
@@ -127,7 +127,7 @@ function requestAccessToken(bodyObject: object,
  * @param queryParams - key-value pairs which will be added as query parameters
  * @returns {string}
  */
-function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: Object): string {
+function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: { [index: string]: string }): string {
 
   if (queryParams !== undefined) {
     const queryString = qs.stringify(queryParams);

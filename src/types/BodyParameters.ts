@@ -1,4 +1,4 @@
-interface BodyParameters {
+interface BodyParameters extends NodeJS.Dict<string | number | boolean | string[] | number[] | boolean[] | null> {
   grant_type: string;
   username?: string;
   password?: string;
