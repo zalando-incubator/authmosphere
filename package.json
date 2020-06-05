@@ -40,8 +40,14 @@
     "@types/sinon": "9.0.4",
     "@types/sinon-chai": "3.2.4",
     "@types/uuid": "8.0.0",
+    "@typescript-eslint/eslint-plugin": "3.1.0",
+    "@typescript-eslint/eslint-plugin-tslint": "3.1.0",
+    "@typescript-eslint/parser": "3.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
+    "eslint": "7.1.0",
+    "eslint-plugin-mocha": "7.0.1",
+    "eslint-plugin-node": "11.1.0",
     "coveralls": "3.1.0",
     "express": "4.17.1",
     "@sinonjs/fake-timers": "6.0.1",
@@ -49,7 +55,6 @@
     "nyc": "15.1.0",
     "sinon": "9.0.2",
     "sinon-chai": "3.5.0",
-    "tslint": "6.1.2",
     "typescript": "3.9.5"
   },
   "scripts": {
@@ -60,6 +65,8 @@
     "test:coverage": "nyc npm run test",
     "coverage": "npm run test:coverage && nyc report --reporter=text-lcov | coveralls -v",
     "tslint": "tslint --exclude 'src/**/*.d.ts' --project ./tsconfig.json 'src/**/*.ts' 'test/**/*.ts' 'integration-test/**/*.ts'",
+    "lint": "eslint -c .eslintrc.js --ext .ts ./src/",
+    "lint:fix": "eslint --fix -c .eslintrc.js --ext .ts ./src/",
     "build": "rm -rf lib && tsc",
     "prepublishOnly": "npm run build && npm run test && npm run tslint"
   },
