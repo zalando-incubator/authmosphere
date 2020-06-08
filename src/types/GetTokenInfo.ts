@@ -1,6 +1,7 @@
 import { Logger, Token } from '.';
 
-type GetTokenInfo<T = {}> = (tokenInfoUrl: string, accessToken: string, logger?: Logger) => Promise<Token<T>>;
+type GetTokenInfo<T = Record<string, unknown>> =
+  (tokenInfoUrl: string, accessToken: string, logger?: Logger) => Promise<Token<T>>;
 
 export {
   GetTokenInfo

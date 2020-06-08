@@ -11,7 +11,8 @@ import {
   OAuthConfig,
   OAuthGrantType,
   RefreshGrantConfig,
-  Token
+  Token,
+  PasswordCredentialsGrantConfig
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -38,7 +39,7 @@ const AUTHORIZATION_BASIC_PREFIX = 'Basic';
  * @param fileName
  * @returns {Promise<any>}
  */
-const getFileDataAsObject = (filePath: string, fileName: string) => {
+const getFileDataAsObject = (filePath: string, fileName: string): Promise<any> => {
   if (filePath.substr(-1) !== '/') { // substr operates with the length of the string
     filePath += '/';
   }
@@ -135,16 +136,16 @@ const rejectRequest: rejectRequest = (res, logger, status) => {
   res.sendStatus(status);
 };
 
-const isCredentialsDirConfig = (options: any): options is CredentialsDirConfig =>
+const isCredentialsDirConfig = (options: Record<string, unknown>): options is CredentialsDirConfig =>
   options.credentialsDir !== undefined;
 
-const isCredentialsClientConfig = (options: any): options is CredentialsClientConfig =>
+const isCredentialsClientConfig = (options: Record<string, unknown>): options is CredentialsClientConfig =>
   options.clientId !== undefined && options.clientSecret !== undefined;
 
-const isCredentialsUserConfig = (options: any): options is CredentialsUserConfig =>
+const isCredentialsUserConfig = (options: Record<string, unknown>): options is CredentialsUserConfig =>
   options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
 
-const isPasswordGrantNoCredentialsDir = (options: any): options is CredentialsUserClientConfig =>
+const isPasswordGrantNoCredentialsDir = (options: Record<string, unknown>): options is CredentialsUserClientConfig =>
   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
    isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
 
@@ -196,6 +197,9 @@ const isAuthorizationCodeGrantConfig = (config: OAuthConfig): config is Authoriz
 const isRefreshGrantConfig = (config: OAuthConfig): config is RefreshGrantConfig =>
   config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT;
 
+const isCredentialsPasswordConfig = (config: OAuthConfig): config is PasswordCredentialsGrantConfig =>
+  config.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
+
 export {
   extractAccessToken,
   extractUserCredentials,
@@ -205,8 +209,10 @@ export {
   getHeaderValue,
   isAuthorizationCodeGrantConfig,
   isCredentialsDirConfig,
+  isCredentialsUserConfig,
   isCredentialsClientConfig,
   isRefreshGrantConfig,
+  isCredentialsPasswordConfig,
   isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,

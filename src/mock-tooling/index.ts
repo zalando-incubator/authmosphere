@@ -24,7 +24,10 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+  const protocol = parsedUrl.protocol || '';
+  const host = parsedUrl.host || '';
+
+  return nock(`${protocol}//${host}`)
     .post(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
@@ -53,11 +56,14 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+  const protocol = parsedUrl.protocol || '';
+  const host = parsedUrl.host || '';
+
+  return nock(`${protocol}//${host}`)
     .get(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
-    .reply(function(this: any, uri: string) {
+    .reply(function(this, uri) {
 
       // token to validate
       const givenToken =
@@ -88,21 +94,24 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 };
 
 const mockAccessTokenEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockTokeninfoEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
 
     const parsedUrl = parseUrlOrThrow(options);
 
-    return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+    const protocol = parsedUrl.protocol || '';
+    const host = parsedUrl.host || '';
+
+    return nock(`${protocol}//${host}`)
       .post(parsedUrl.path as string) // checked by parseUrlOrThrow
       .times(options.times || Number.MAX_SAFE_INTEGER)
       .query(true)

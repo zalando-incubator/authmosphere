@@ -97,19 +97,20 @@ function requestAccessToken(bodyObject: BodyParameters,
         if (status !== HttpStatus.OK) {
           return response.json()
             .catch((error) => Promise.reject(error))
-            .then((error) => Promise.reject({
-              // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
-              // but do fall back if for some reason the definition is not satisfied
-              error: (error && error.error) ? error.error : error,
-              errorDescription: (error && error.error_description) ? error.error_description : undefined,
-              status
-            }));
+            .then((error: Error & { error?: Error, error_description?: string }) =>
+              Promise.reject({
+                // support error shape defined in https://tools.ietf.org/html/rfc6749#section-5.2
+                // but do fall back if for some reason the definition is not satisfied
+                error: (error && error.error) ? error.error : error,
+                errorDescription: (error && error.error_description) ? error.error_description : undefined,
+                status
+              }));
         }
 
         logger.debug(`Successful request to ${accessTokenEndpoint}`);
-        return response.json();
+        return response.json() as unknown as Token;
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         logger.error(`Unsuccessful request to ${accessTokenEndpoint}`, error);
         return Promise.reject({
           message: `Error requesting access token from ${accessTokenEndpoint}`,
@@ -154,40 +155,41 @@ function buildRequestAccessTokenUrl(accessTokenEndpoint: string, queryParams?: {
  *
  * @returns { Promise<Token<T>> }
  */
-const getTokenInfo: GetTokenInfo = (tokenInfoUrl: string, accessToken: string, logger?: Logger) => {
+const getTokenInfo: GetTokenInfo =
+  (tokenInfoUrl: string, accessToken: string, logger?: Logger): Promise<Token> => {
 
-  const logOrNothing = safeLogger(logger);
+    const logOrNothing = safeLogger(logger);
 
-  const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
-    .catch(() => Promise.reject({errorDescription: 'tokenInfo endpoint not reachable '}))
-    .then((response) => {
+    const promise = fetch(`${tokenInfoUrl}?access_token=${accessToken}`)
+      .catch(() => Promise.reject({ errorDescription: 'tokenInfo endpoint not reachable ' }))
+      .then((response) => {
 
-      const status = response.status;
+        const status = response.status;
 
-      return response.json()
-        .then((data) => {
+        return response.json()
+          .then((data: Record<string, unknown>) => {
 
-          if (status === HttpStatus.OK) {
-            logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
-            return data;
-          } else {
-            logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
-            return Promise.reject({ status, data });
-          }
+            if (status === HttpStatus.OK) {
+              logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
+              return data as Token;
+            } else {
+              logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+              return Promise.reject({ status, data });
+            }
+          });
+      })
+      .catch((error: Error) => {
+
+        logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
+
+        return Promise.reject({
+          message: `Error validating token via ${tokenInfoUrl}`,
+          error
         });
-    })
-    .catch((error) => {
-
-      logOrNothing.warn(`Error validating token via ${tokenInfoUrl}`);
-
-      return Promise.reject({
-        message: `Error validating token via ${tokenInfoUrl}`,
-        error
       });
-    });
 
-  return promise;
-};
+    return promise;
+  };
 
 /**
  * Requests a token based on the given configuration (which specifies the grant type and corresponding parameters).

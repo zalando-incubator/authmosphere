@@ -1,4 +1,4 @@
-type Token<CustomTokenPart = {}> = CustomTokenPart & {
+type Token<CustomTokenPart = Record<string, unknown>> = CustomTokenPart & {
   access_token: string,
   expires_in?: number,
   scope?: string[],

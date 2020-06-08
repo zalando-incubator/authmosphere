@@ -6,7 +6,7 @@ module.exports = {
   },
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:chai-friendly/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
@@ -18,22 +18,17 @@ module.exports = {
   },
   "plugins": [
     "@typescript-eslint",
-    "mocha"
+    "mocha",
+    "chai-friendly"
   ],
   "rules": {
     "@typescript-eslint/adjacent-overload-signatures": [
       "error"
     ],
-    "@typescript-eslint/ban-ts-ignore": [
+    "@typescript-eslint/ban-ts-comment": [
       "error"
     ],
     "@typescript-eslint/ban-types": [
-      "error"
-    ],
-    "@typescript-eslint/camelcase": [
-      "off"
-    ],
-    "@typescript-eslint/class-name-casing": [
       "error"
     ],
     "@typescript-eslint/consistent-type-assertions": [
@@ -41,9 +36,6 @@ module.exports = {
     ],
     "@typescript-eslint/explicit-function-return-type": [
       "off"
-    ],
-    "@typescript-eslint/interface-name-prefix": [
-      "error"
     ],
     "@typescript-eslint/member-delimiter-style": [
       "error",
@@ -377,7 +369,8 @@ module.exports = {
           "allowAfterThis": true
         }
       ],
-    "no-unused-expressions": "error",
+      "no-unused-expressions": 0,
+      "chai-friendly/no-unused-expressions": 2,
     "radix": "error",
     "spaced-comment": [
       "error",
@@ -389,16 +382,5 @@ module.exports = {
       }
     ]
   },
-// Excludes test from no-unused-expressions, to prevent errors due to the use of chai
-  overrides: [
-    {
-      "files": ["*.ts"],
-      excludedFiles: "*.test.ts",
-      rules: {
-        "no-unused-expressions": "off"
-      }
-    }
-  ],
-
   "settings": {}
 };

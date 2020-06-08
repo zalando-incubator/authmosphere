@@ -95,7 +95,7 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
 const requireScopesMiddleware: requireScopesMiddleware =
   (scopes, options = {}) =>
-    (request: ExtendedRequest, response: Response, nextFunction: NextFunction) => {
+    (request: ExtendedRequest, response: Response, nextFunction: NextFunction): Promise<unknown> => {
 
       const {
         logger,
@@ -118,7 +118,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
           precedenceOptions.precedenceFunction :
           () => Promise.resolve(false);
 
-      precedenceFunction(request, response, nextFunction)
+      return precedenceFunction(request, response, nextFunction)
         .catch(error => {
           logOrNothing.warn('Error while executing precedenceFunction', error);
           // PrecedencFunction was not successful
@@ -133,7 +133,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
             logOrNothing.debug('Scopes validated successfully');
             nextFunction();
           } else {
-            logOrNothing.warn(`Scope validation failed for ${scopes}`);
+            logOrNothing.warn(`Scope validation failed for ${scopes.join()}`);
             authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
           }
         });
@@ -171,7 +171,7 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
   } = options;
 
   const logOrNothing = safeLogger(logger);
-  const getTokenInfo: GetTokenInfo<{}> = customGetTokenInfo || defaultGetTokenInfo;
+  const getTokenInfo: GetTokenInfo = customGetTokenInfo || defaultGetTokenInfo;
 
   if (!tokenInfoEndpoint) {
     logOrNothing.error('tokenInfoEndpoint must be defined');
