@@ -11,8 +11,7 @@ import {
   OAuthConfig,
   OAuthGrantType,
   RefreshGrantConfig,
-  Token,
-  PasswordCredentialsGrantConfig
+  Token
 } from './types';
 
 const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
@@ -197,9 +196,6 @@ const isAuthorizationCodeGrantConfig = (config: OAuthConfig): config is Authoriz
 const isRefreshGrantConfig = (config: OAuthConfig): config is RefreshGrantConfig =>
   config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT;
 
-const isCredentialsPasswordConfig = (config: OAuthConfig): config is PasswordCredentialsGrantConfig =>
-  config.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT;
-
 export {
   extractAccessToken,
   extractUserCredentials,
@@ -212,7 +208,6 @@ export {
   isCredentialsUserConfig,
   isCredentialsClientConfig,
   isRefreshGrantConfig,
-  isCredentialsPasswordConfig,
   isPasswordGrantNoCredentialsDir,
   rejectRequest,
   validateOAuthConfig,
