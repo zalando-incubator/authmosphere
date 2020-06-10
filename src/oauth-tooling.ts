@@ -9,6 +9,7 @@ import {
   validateOAuthConfig,
   isAuthorizationCodeGrantConfig,
   isCredentialsDirConfig,
+  isCredentialsUserConfig,
   isRefreshGrantConfig,
   extractUserCredentials,
   extractClientCredentials,
@@ -17,7 +18,6 @@ import {
 
 import {
   BodyParameters,
-  CredentialsUserClientConfig,
   CredentialsClientConfig,
   CredentialsUserConfig,
   Logger,
@@ -207,18 +207,16 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
 
   validateOAuthConfig(options);
 
-  const credentialsPromises = getCredentials(options);
-
-  return Promise.all(credentialsPromises)
-    .then(([clientData, userData]) => {
+  return getCredentials(options)
+    .then((credentials) => {
 
       let bodyParameters: BodyParameters;
 
-      if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+      if (isCredentialsUserConfig(credentials)) {
         bodyParameters = {
           'grant_type': options.grantType,
-          'username': userData.applicationUsername,
-          'password': userData.applicationPassword
+          'username': credentials.applicationUsername,
+          'password': credentials.applicationPassword
         };
       } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
         bodyParameters = {
@@ -248,36 +246,36 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
       if (options.bodyParams) {
         Object.assign(bodyParameters, options.bodyParams);
       }
-
-      const authorizationHeaderValue = getBasicAuthHeaderValue(clientData.clientId, clientData.clientSecret);
+      const authorizationHeaderValue = getBasicAuthHeaderValue(credentials.clientId, credentials.clientSecret);
 
       return requestAccessToken(bodyParameters, authorizationHeaderValue,
         options.accessTokenEndpoint, logOrNothing, options.queryParams);
     });
 }
 
-type convertSnakeCredentialsToCamel =
-  (options: any) => CredentialsUserClientConfig | CredentialsClientConfig | CredentialsUserConfig;
-const convertSnakeCredentialsToCamel: convertSnakeCredentialsToCamel = (options) => ({
+const transformClientCredentials = (options: Record<string, string>): CredentialsClientConfig => ({
   clientId: options.client_id,
-  clientSecret: options.client_secret,
+  clientSecret: options.client_secret
+});
+
+const transformUserCredentials = (options: Record<string, string>): CredentialsUserConfig => ({
   applicationUsername: options.application_username,
   applicationPassword: options.application_password
 });
 
-const getCredentials = (options: OAuthConfig): Promise<any>[] => {
+const getCredentials = (options: OAuthConfig) => {
 
   let getClientData;
   let getUserData;
 
   if (isCredentialsDirConfig(options)) {
     getClientData = getFileDataAsObject(options.credentialsDir, CLIENT_JSON)
-      .then(convertSnakeCredentialsToCamel);
+      .then(transformClientCredentials);
 
     // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
     if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
       getUserData = getFileDataAsObject(options.credentialsDir, USER_JSON)
-        .then(convertSnakeCredentialsToCamel);
+        .then(transformUserCredentials);
     }
   } else {
     getClientData = Promise.resolve(extractClientCredentials(options));
@@ -288,7 +286,10 @@ const getCredentials = (options: OAuthConfig): Promise<any>[] => {
     }
   }
 
-  return getUserData ? [getClientData, getUserData] : [getClientData];
+  return Promise.all([getUserData, getClientData])
+    .then(([userData, clientData]) =>
+      ({ ...userData, ...clientData })
+    );
 };
 
 export {
