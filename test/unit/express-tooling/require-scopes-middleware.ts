@@ -45,6 +45,8 @@ describe('express tooling', () => {
 
       // then
       setTimeout(() => {
+        // the definition of createResponseMock() ensures sendStatus is defined
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(responseMock.sendStatus).to.have.been.calledWith(403);
         done();
       });

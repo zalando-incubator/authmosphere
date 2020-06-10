@@ -178,6 +178,8 @@ describe('express tooling', () => {
         // tslint:disable-next-line
         expect(next).to.have.been.called;
         expect(getTokenInfo).to.have.been.calledWith('/oauth2/tokeninfo', 'auth1');
+        // authenticationMiddleware extends the request by $$tokeninfo, which is not part of the Request type
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((requestMock as any).$$tokeninfo).to.be.deep.equal({
           // access_token should be deleted
           expires_in: 3600,
@@ -217,6 +219,8 @@ describe('express tooling', () => {
       setTimeout(() => {
         // tslint:disable-next-line
         expect(next).to.have.been.called;
+        // authenticationMiddleware extends the request by $$tokeninfo, which is not part of the Request type
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((requestMock as any).$$tokeninfo).to.be.deep.equal({
           // access_token should be deleted
           expires_in: 3600,

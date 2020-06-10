@@ -1,19 +1,22 @@
 import {
-  Logger
+  Logger, LogFunction
 } from './types';
 
-const loggerOrNoop = (prop: string, obj: any) =>
-  (obj !== undefined && obj[prop] !== undefined) ? obj[prop].bind(obj) : () => undefined;
+const voidLogging: LogFunction = () => undefined;
+
+const loggerOrNoop = (logfunction?: LogFunction): LogFunction =>
+  logfunction ? logfunction : voidLogging;
 
 const safeLogger = (logger?: Logger): Logger => {
 
   return {
-    info: loggerOrNoop('info', logger),
-    debug: loggerOrNoop('debug', logger),
-    error: loggerOrNoop('error', logger),
-    fatal: loggerOrNoop('fatal', logger),
-    trace: loggerOrNoop('trace', logger),
-    warn: loggerOrNoop('warn', logger)
+    ...logger,
+    info: loggerOrNoop(logger?.info),
+    debug: loggerOrNoop(logger?.debug),
+    error: loggerOrNoop(logger?.error),
+    fatal: loggerOrNoop(logger?.fatal),
+    trace: loggerOrNoop(logger?.trace),
+    warn: loggerOrNoop(logger?.warn)
   };
 };
 

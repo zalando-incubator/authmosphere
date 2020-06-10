@@ -2,13 +2,15 @@
  * Defines a logger.
  * Can be console.log or any other framework you use on the server side and match this interface.
  */
+type LogFunction = (message: string, error?: any) => void;
+
 interface Logger {
-  info(message: string, error?: any): void;
-  debug(message: string, error?: any): void;
-  error(message: string, error?: any): void;
-  fatal(message: string, error?: any): void;
-  trace(message: string, error?: any): void;
-  warn(message: string, error?: any): void;
+  info: LogFunction;
+  debug: LogFunction;
+  error: LogFunction;
+  fatal: LogFunction;
+  trace: LogFunction;
+  warn: LogFunction;
 }
 
 enum LogLevel {
@@ -22,5 +24,6 @@ enum LogLevel {
 
 export {
   Logger,
-  LogLevel
+  LogLevel,
+  LogFunction
 };

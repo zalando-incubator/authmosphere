@@ -24,10 +24,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  const protocol = parsedUrl.protocol || '';
-  const host = parsedUrl.host || '';
-
-  return nock(`${protocol}//${host}`)
+  return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
     .post(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
@@ -56,10 +53,7 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  const protocol = parsedUrl.protocol || '';
-  const host = parsedUrl.host || '';
-
-  return nock(`${protocol}//${host}`)
+  return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
     .get(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
@@ -108,10 +102,7 @@ const mockEndpointWithErrorResponse =
 
     const parsedUrl = parseUrlOrThrow(options);
 
-    const protocol = parsedUrl.protocol || '';
-    const host = parsedUrl.host || '';
-
-    return nock(`${protocol}//${host}`)
+    return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
       .post(parsedUrl.path as string) // checked by parseUrlOrThrow
       .times(options.times || Number.MAX_SAFE_INTEGER)
       .query(true)
