@@ -253,12 +253,12 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
     });
 }
 
-const transformClientCredentials = (options: Record<string, string>): CredentialsClientConfig => ({
+const transformClientCredentials = (options: {[index: string]: string}): CredentialsClientConfig => ({
   clientId: options.client_id,
   clientSecret: options.client_secret
 });
 
-const transformUserCredentials = (options: Record<string, string>): CredentialsUserConfig => ({
+const transformUserCredentials = (options: {[index: string]: string}): CredentialsUserConfig => ({
   applicationUsername: options.application_username,
   applicationPassword: options.application_password
 });

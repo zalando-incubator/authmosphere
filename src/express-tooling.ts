@@ -133,7 +133,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
             logOrNothing.debug('Scopes validated successfully');
             nextFunction();
           } else {
-            logOrNothing.warn(`Scope validation failed for ${scopes.join(' ')}`);
+            logOrNothing.warn(`Scope validation failed for ${scopes.join(', ')}`);
             authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
           }
         });

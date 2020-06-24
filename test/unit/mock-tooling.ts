@@ -65,10 +65,10 @@ describe('mock-tooling', () => {
   });
 
   describe('mockTokeninfoEndpointWithErrorResponse', () => {
-    it('should throw error, if url is empty', () => {
-      return expect(() =>
-        mockTooling.mockTokeninfoEndpointWithErrorResponse({ url: '' }, HttpStatus.BAD_REQUEST)).to.throw(Error);
-    });
+    it('should throw error, if url is empty', () =>
+      expect(() =>
+        mockTooling.mockTokeninfoEndpointWithErrorResponse({ url: '' }, HttpStatus.BAD_REQUEST)).to.throw(Error)
+    );
 
     it('should return specified/configured status code and response body', () => {
       const url = 'https://www.github.com';

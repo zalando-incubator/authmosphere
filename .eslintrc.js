@@ -362,15 +362,9 @@ module.exports = {
       }
     ],
     "no-trailing-spaces": "error",
-    "no-underscore-dangle":
-      [
-        "error",
-        {
-          "allowAfterThis": true
-        }
-      ],
-      "no-unused-expressions": 0,
-      "chai-friendly/no-unused-expressions": 2,
+    "no-underscore-dangle": "off",
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": 2,
     "radix": "error",
     "spaced-comment": [
       "error",

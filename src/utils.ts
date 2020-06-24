@@ -60,9 +60,10 @@ const getHeaderValue = (req: Request, fieldName: string): string | undefined => 
 
   const headerValue = req && req.headers[fieldName];
 
-  const normalizedHeaderValue = Array.isArray(headerValue) ?
-    headerValue.join(' ') :
-    headerValue;
+  const normalizedHeaderValue =
+    Array.isArray(headerValue) ?
+      headerValue.join(' ') :
+      headerValue;
 
   return normalizedHeaderValue;
 };

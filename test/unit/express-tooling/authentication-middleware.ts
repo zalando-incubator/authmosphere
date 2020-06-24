@@ -39,9 +39,9 @@ describe('express tooling', () => {
       };
 
       // then
-      expect(() => {
-        authenticationMiddleware(config);
-      }).to.throw(TypeError);
+      expect(
+        () => authenticationMiddleware(config)
+      ).to.throw(TypeError);
     });
 
     it('should call #next on public endpoint', (done) => {

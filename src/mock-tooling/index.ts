@@ -62,8 +62,9 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
       // token to validate
       const givenToken =
         // either use token from query parameter...
-        uri.split('=')[1] ? uri.split('=')[1] :
-        // ...or from authorization header
+        uri.split('=')[1] ?
+          uri.split('=')[1] :
+          // ...or from authorization header
           this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
 
       if (givenToken) {
