@@ -48,10 +48,10 @@ function createAuthCodeRequestUri(authorizationEndpoint: string,
                                   queryParams?: { [index: string]: string }): string {
 
   const extendedQueryParams = {
-    ...queryParams,
     'client_id': clientId,
     'redirect_uri': redirectUri,
-    'response_type': 'code'
+    'response_type': 'code',
+    ...queryParams
   };
 
   const queryString = qs.stringify(extendedQueryParams);

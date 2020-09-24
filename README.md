@@ -91,7 +91,7 @@ app.get('/secured/route', requireScopesMiddleware(['scopeA', 'scopeB']), (reques
 * clone this repo
 * `npm install`
 * to build: `npm run build`
-* to lint: `npm run tslint`
+* to lint: `npm run lint`
 
 ## Testing
 

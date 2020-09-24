@@ -97,10 +97,10 @@ describe('oauth tooling', () => {
 
       // then
       const expected = `${authorizationEndpoint}` +
-        `?foo=bar` +
-        `&client_id=${clientId}` +
+        `?client_id=${clientId}` +
         `&redirect_uri=${redirectUri}` +
-        `&response_type=code`;
+        `&response_type=code` +
+        `&foo=bar`;
 
       expect(result).to.equal(expected);
     });
