@@ -17,7 +17,7 @@ import { getTokenInfo as defaultGetTokenInfo } from './oauth-tooling';
 import {
   AuthenticationMiddlewareOptions,
   ExtendedRequest,
-  onAuthorizationFailedHandler,
+  onAuthorizationFailedHandler as onAuthorizationFailedHandlerType,
   PrecedenceFunction,
   PrecedenceOptions,
   ScopeMiddlewareOptions,
@@ -29,13 +29,19 @@ import { safeLogger } from './safe-logger';
 const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 
 /**
- * A factory that returns a middleware that compares scopes attached to `express.Request` object with a given list (`scopes` parameter).
- * If all required scopes are matched, the middleware calls `next`. Otherwise, it rejects the request with _403 FORBIDDEN_.
+ * A factory that returns a middleware that compares scopes attached to `express.Request` object
+ * with a given list (`scopes` parameter).
+ * If all required scopes are matched, the middleware calls `next`.
+ * Otherwise, it rejects the request with _403 FORBIDDEN_.
  *
  * * ⚠️&nbsp;&nbsp;This middleware requires scope information to be attached to the `Express.request` object.
- * The `authenticationMiddleware` can do this job. Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
+ * The `authenticationMiddleware` can do this job.
+ * Otherwise `request.$$tokeninfo.scope: string[]` has to be set manually.
  *
- * There may apply cases where another type of authorization should be used. For that cases `options.precedenceFunction` has to be set. If the `precedence` function returns with anything else than resolved state normal scope validation is applied afterwards.
+ * There may apply cases where another type of authorization should be used.
+ * For that cases `options.precedenceFunction` has to be set.
+ * If the `precedence` function returns with anything else than resolved state normal
+ * scope validation is applied afterwards.
  *
  * Detailed middleware authorization flow:
  *
@@ -89,21 +95,21 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
 type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
 const requireScopesMiddleware: requireScopesMiddleware =
   (scopes, options = {}) =>
-    (request: ExtendedRequest, response: Response, nextFunction: NextFunction) => {
+    (request: ExtendedRequest, response: Response, nextFunction: NextFunction): Promise<unknown> => {
 
       const {
         logger,
-        precedenceOptions
+        precedenceOptions,
+        onAuthorizationFailedHandler
       } = options;
       // Need to do this to not shadow the symbol
-      const _onAuthorizationFailedHandler = options.onAuthorizationFailedHandler;
 
       const logOrNothing = safeLogger(logger);
 
-      const authorizationFailedHandler: onAuthorizationFailedHandler =
-        typeof _onAuthorizationFailedHandler === 'function' ?
+      const authorizationFailedHandler: onAuthorizationFailedHandlerType =
+        typeof onAuthorizationFailedHandler === 'function' ?
           (req, res, next, _scopes, _logger) =>
-            _onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
+            onAuthorizationFailedHandler(req, res, next, _scopes, _logger) :
           (req, res, next, _scopes, _logger) =>
             rejectRequest(res, _logger, HttpStatus.FORBIDDEN);
 
@@ -112,25 +118,25 @@ const requireScopesMiddleware: requireScopesMiddleware =
           precedenceOptions.precedenceFunction :
           () => Promise.resolve(false);
 
-      precedenceFunction(request, response, nextFunction)
-      .catch(error => {
-        logOrNothing.warn('Error while executing precedenceFunction', error);
-        // PrecedencFunction was not successful
-        //  false -> trigger fallback to default scope validation
-        return false;
-      })
-      .then(isAllowed => {
-        if (isAllowed) { // precedenceFunction grants access
-          logOrNothing.debug('PrecedenceFunction grants access');
-          nextFunction();
-        } else if (validateScopes(request, scopes)) {  // scope validation grants access
-          logOrNothing.debug('Scopes validated successfully');
-          nextFunction();
-        } else {
-          logOrNothing.warn(`Scope validation failed for ${scopes}`);
-          authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
-        }
-      });
+      return precedenceFunction(request, response, nextFunction)
+        .catch(error => {
+          logOrNothing.warn('Error while executing precedenceFunction', error);
+          // PrecedencFunction was not successful
+          //  false -> trigger fallback to default scope validation
+          return false;
+        })
+        .then(isAllowed => {
+          if (isAllowed) { // precedenceFunction grants access
+            logOrNothing.debug('PrecedenceFunction grants access');
+            nextFunction();
+          } else if (validateScopes(request, scopes)) {  // scope validation grants access
+            logOrNothing.debug('Scopes validated successfully');
+            nextFunction();
+          } else {
+            logOrNothing.warn(`Scope validation failed for ${scopes.join(', ')}`);
+            authorizationFailedHandler(request, response, nextFunction, scopes, logOrNothing);
+          }
+        });
     };
 
 /**
@@ -165,7 +171,7 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
   } = options;
 
   const logOrNothing = safeLogger(logger);
-  const getTokenInfo: GetTokenInfo<{}> = customGetTokenInfo || defaultGetTokenInfo;
+  const getTokenInfo: GetTokenInfo = customGetTokenInfo || defaultGetTokenInfo;
 
   if (!tokenInfoEndpoint) {
     logOrNothing.error('tokenInfoEndpoint must be defined');
@@ -178,7 +184,7 @@ const authenticationMiddleware: authenticationMiddleware = (options) => {
 
     const notAuthenticatedHandler: rejectRequest =
       typeof customNotAuthenticatedHandler === 'function' ?
-        (_req, _logger, status) => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
+        () => customNotAuthenticatedHandler(req, res, next, logOrNothing) :
         rejectRequest;
 
     const originalUrl = req.originalUrl;

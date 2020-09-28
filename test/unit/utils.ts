@@ -66,7 +66,7 @@ describe('utils', () => {
         applicationPassword
       };
 
-      const expected: object = {
+      const expected = {
         applicationUsername,
         applicationPassword
       };
@@ -90,7 +90,7 @@ describe('utils', () => {
         applicationPassword
       };
 
-      const expected: object = {
+      const expected = {
         clientId,
         clientSecret
       };

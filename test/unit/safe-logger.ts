@@ -7,7 +7,7 @@ import {
 } from '../../src';
 
 chai.use(chaiAsPromised);
-let expect = chai.expect;
+const expect = chai.expect;
 
 describe('safeLogger', () => {
   describe('logOrNothing', () => {
@@ -27,14 +27,19 @@ describe('safeLogger', () => {
 
     it('should execute logger function with this bounded correctly', () => {
       let called = false;
-      const logger: any = {
-        _test: () => {
+      const logger: Logger & {test: () => void} = {
+        test: () => {
           called = true;
         },
         info: function () {
-          this._test();
-        }
-      } as any as Logger;
+          this.test();
+        },
+        debug: () => undefined,
+        error: () => undefined,
+        fatal: () => undefined,
+        trace: () => undefined,
+        warn: () => undefined
+      };
 
       const result = () => safeLogger(logger).info('foo');
       expect(result).not.to.throw();

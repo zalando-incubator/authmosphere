@@ -12,7 +12,8 @@
     "lib/src/types",
     "src/types",
     "test",
-    "integration-test"
+    "integration-test",
+    ".eslintrc.js"
   ],
   "extension": [".ts"],
   "reporter": [

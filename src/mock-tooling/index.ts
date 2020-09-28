@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { extractAccessToken } from '../utils';
 
-let _tokens: Token[] = [];
+let mockedTokens: Token[] = [];
 
 /**
  * Creates a __very basic__ mock of token endpoint as defined in [RFC 6749](https://tools.ietf.org/html/rfc6749).
@@ -24,7 +24,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+  return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
     .post(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
@@ -35,7 +35,7 @@ const mockAccessTokenEndpoint = (options: MockOptions): nock.Scope => {
       const scope = body.scope ? body.scope.toString().split(' ') : undefined;
 
       const newToken = generateToken(scope);
-      _tokens.push(newToken);
+      mockedTokens.push(newToken);
 
       return newToken;
     });
@@ -53,24 +53,25 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 
   const parsedUrl = parseUrlOrThrow(options);
 
-  return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
+  return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
     .get(parsedUrl.path as string) // checked by parseUrlOrThrow
     .times(options.times || Number.MAX_SAFE_INTEGER)
     .query(true)
-    .reply(function(this: any, uri: string) {
+    .reply(function(this, uri) {
 
       // token to validate
       const givenToken =
         // either use token from query parameter...
-        uri.split('=')[1] ? uri.split('=')[1] :
-        // ...or from authorization header
-        this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
+        uri.split('=')[1] ?
+          uri.split('=')[1] :
+          // ...or from authorization header
+          this.req.headers.authorization ? extractAccessToken(this.req.headers.authorization[0]) : undefined;
 
       if (givenToken) {
 
         // concat all valid tokens (from this function call and potentially from
         // previous calls of `mockAccessTokenEndpoint`)
-        const validTokens = (tokens) ? _tokens.concat(tokens) : _tokens;
+        const validTokens = (tokens) ? mockedTokens.concat(tokens) : mockedTokens;
 
         // find token
         const foundIndex = validTokens.findIndex((token) => {
@@ -88,27 +89,27 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 };
 
 const mockAccessTokenEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockTokeninfoEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: object): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
 
     const parsedUrl = parseUrlOrThrow(options);
 
-    return nock(`${parsedUrl.protocol}//${parsedUrl.host}`)
-    .post(parsedUrl.path as string) // checked by parseUrlOrThrow
-    .times(options.times || Number.MAX_SAFE_INTEGER)
-    .query(true)
-    .reply(() => {
-      return [httpStatus, responseBody || {}];
-    });
+    return nock(`${parsedUrl.protocol as string}//${parsedUrl.host as string}`)
+      .post(parsedUrl.path as string) // checked by parseUrlOrThrow
+      .times(options.times || Number.MAX_SAFE_INTEGER)
+      .query(true)
+      .reply(() => {
+        return [httpStatus, responseBody || {}];
+      });
   };
 
 /**
@@ -117,7 +118,7 @@ const mockEndpointWithErrorResponse =
 const cleanMock = (): void => {
 
   nock.cleanAll();
-  _tokens = [];
+  mockedTokens = [];
 };
 
 const generateToken = (scopes?: string[]): Token => {

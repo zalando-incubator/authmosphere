@@ -17,7 +17,7 @@ const expect = chai.expect;
 
 describe('express tooling', () => {
 
-  const createRequestMock = (scopes: String[]): Request => ({
+  const createRequestMock = (scopes: string[]): Request => ({
     get: (name: string) => name,
     $$tokeninfo: {
       scope: scopes
@@ -25,7 +25,7 @@ describe('express tooling', () => {
   } as any as Request);
 
   const createResponseMock = (): Response => ({
-    sendStatus: sinon.spy((status: string) => undefined)
+    sendStatus: sinon.spy((status: string) => status)
   } as any as Response);
 
   describe('authenticationMiddleware', () => {
@@ -39,7 +39,9 @@ describe('express tooling', () => {
       };
 
       // then
-      expect(() => { authenticationMiddleware(config); }).to.throw(TypeError);
+      expect(
+        () => authenticationMiddleware(config)
+      ).to.throw(TypeError);
     });
 
     it('should call #next on public endpoint', (done) => {
@@ -52,9 +54,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/healthcheck',
-        headers: {},
-        ...createRequestMock([])
+        headers: {}
       } as any as Request;
 
       // when
@@ -78,9 +80,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: {},
-        ...createRequestMock([])
+        headers: {}
       } as any as Request;
 
       // when
@@ -104,9 +106,9 @@ describe('express tooling', () => {
         tokenInfoEndpoint: '/oauth2/tokeninfo'
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['auth1'] }
       } as any as Request;
 
       // when
@@ -129,9 +131,9 @@ describe('express tooling', () => {
         onNotAuthenticatedHandler: sinon.spy()
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['invalid auth'] },
-        ...createRequestMock([])
+        headers: { authorization: ['invalid auth'] }
       } as any as Request;
 
       // when
@@ -163,9 +165,9 @@ describe('express tooling', () => {
         getTokenInfo
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['Bearer auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['Bearer auth1'] }
       } as any as Request;
 
       // when
@@ -176,6 +178,8 @@ describe('express tooling', () => {
         // tslint:disable-next-line
         expect(next).to.have.been.called;
         expect(getTokenInfo).to.have.been.calledWith('/oauth2/tokeninfo', 'auth1');
+        // authenticationMiddleware extends the request by $$tokeninfo, which is not part of the Request type
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((requestMock as any).$$tokeninfo).to.be.deep.equal({
           // access_token should be deleted
           expires_in: 3600,
@@ -203,9 +207,9 @@ describe('express tooling', () => {
         getTokenInfo
       };
       const requestMock = {
+        ...createRequestMock([]),
         originalUrl: '/privateAPI',
-        headers: { authorization: ['Bearer auth1'] },
-        ...createRequestMock([])
+        headers: { authorization: ['Bearer auth1'] }
       } as any as Request;
 
       // when
@@ -215,6 +219,8 @@ describe('express tooling', () => {
       setTimeout(() => {
         // tslint:disable-next-line
         expect(next).to.have.been.called;
+        // authenticationMiddleware extends the request by $$tokeninfo, which is not part of the Request type
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((requestMock as any).$$tokeninfo).to.be.deep.equal({
           // access_token should be deleted
           expires_in: 3600,

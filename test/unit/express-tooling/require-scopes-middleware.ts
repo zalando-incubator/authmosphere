@@ -19,7 +19,7 @@ describe('express tooling', () => {
 
   const loggerMock = undefined;
 
-  const createRequestMock = (scopes: String[]): Request => ({
+  const createRequestMock = (scopes: string[]): Request => ({
     get: (name: string) => name,
     $$tokeninfo: {
       scope: scopes
@@ -27,7 +27,7 @@ describe('express tooling', () => {
   } as any as Request);
 
   const createResponseMock = (): Response => ({
-    sendStatus: sinon.spy((status: string) => undefined)
+    sendStatus: sinon.spy((status: string) => status)
   } as any as Response);
 
   describe('requireScopesMiddleware', () => {
@@ -45,6 +45,8 @@ describe('express tooling', () => {
 
       // then
       setTimeout(() => {
+        // the definition of createResponseMock() ensures sendStatus is defined
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(responseMock.sendStatus).to.have.been.calledWith(403);
         done();
       });

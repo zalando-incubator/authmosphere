@@ -1,5 +1,9 @@
 # Changelog
 
+## `authmosphere 3.0.0`
+
+This release is mostly about dependency updates and cleaning up, and probably non-breaking. However there are some types affected by changes due to an updated TypeScript version so we are not 100% sure about this. If you identify breaking behaviour/changes in this release, feel free to reach out to us.
+
 ## `authmosphere 2.0.0` - **BREAKING**
 
 ### General changes
