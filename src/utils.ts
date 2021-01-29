@@ -111,7 +111,10 @@ const extractAccessToken = (authHeader: string): string | undefined => {
 const setTokeninfo = (req: Request): (data: Token) => void => {
   return (data: Token) => {
 
-    const tokeninfo = { ...data };
+    const tokeninfo = {
+      ...data,
+      access_token: undefined
+    };
 
     // Avoid leaking of sensitive information
     delete tokeninfo.access_token;
@@ -129,6 +132,7 @@ const setTokeninfo = (req: Request): (data: Token) => void => {
  * @param status
  */
 type rejectRequest = (res: Response, logger: Logger, status: number) => void;
+// eslint-disable-next-line @typescript-eslint/no-redeclare -- intentionally naming the variable the same as the type
 const rejectRequest: rejectRequest = (res, logger, status) => {
 
   logger.info(`Request will be rejected with status ${status}`);

@@ -15,7 +15,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false, // Intentionally false
     "noFallthroughCasesInSwitch": true,
-    "strict": true
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@sinonjs/fake-timers": ["node_modules/@types/sinonjs__fake-timers"]
+    }
   },
   "include": [
     "src/**/*",
