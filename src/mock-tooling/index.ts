@@ -89,17 +89,17 @@ const mockTokeninfoEndpoint = (options: MockOptions, tokens?: Token[]): nock.Sco
 };
 
 const mockAccessTokenEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string | number | symbol, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockTokeninfoEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string | number | symbol, unknown>): nock.Scope => {
     return mockEndpointWithErrorResponse(options, httpStatus, responseBody);
   };
 
 const mockEndpointWithErrorResponse =
-  (options: MockOptions, httpStatus: number, responseBody?: Record<string, unknown>): nock.Scope => {
+  (options: MockOptions, httpStatus: number, responseBody?: Record<string | number | symbol, unknown>): nock.Scope => {
 
     const parsedUrl = parseUrlOrThrow(options);
 

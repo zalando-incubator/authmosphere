@@ -140,16 +140,16 @@ const rejectRequest: rejectRequest = (res, logger, status) => {
   res.sendStatus(status);
 };
 
-const isCredentialsDirConfig = (options: Record<string, unknown>): options is CredentialsDirConfig =>
+const isCredentialsDirConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsDirConfig =>
   options.credentialsDir !== undefined;
 
-const isCredentialsClientConfig = (options: Record<string, unknown>): options is CredentialsClientConfig =>
+const isCredentialsClientConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsClientConfig =>
   options.clientId !== undefined && options.clientSecret !== undefined;
 
-const isCredentialsUserConfig = (options: Record<string, unknown>): options is CredentialsUserConfig =>
+const isCredentialsUserConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsUserConfig =>
   options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
 
-const isPasswordGrantNoCredentialsDir = (options: Record<string, unknown>): options is CredentialsUserClientConfig =>
+const isPasswordGrantNoCredentialsDir = (options: Record<string | number | symbol, unknown>): options is CredentialsUserClientConfig =>
   options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
    isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
 

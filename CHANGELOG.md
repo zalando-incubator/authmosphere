@@ -1,8 +1,21 @@
 # Changelog
 
+## `authmosphere 3.0.2`
+
+* remove the last left over dependencies and files for TSLint
+* fix npm task
+* Change type ```Record<string, unknown>``` to ```Record<string | number | symbol, unknown>``` to support the full range of possible keys within an ```object```
+
+## `authmosphere 3.0.1 (unreleased)`
+
+* security updates and dependency updates
+
 ## `authmosphere 3.0.0`
 
 This release is mostly about dependency updates and cleaning up, and probably non-breaking. However there are some types affected by changes due to an updated TypeScript version so we are not 100% sure about this. If you identify breaking behaviour/changes in this release, feel free to reach out to us.
+
+Additional information 29.01.2021
+We removed as highly encouraged within Typescript the type ```{}``` by the type ```Record<string | number | symbol, unknown>``` in an exported interface. Meanwhile, we assume it is not breaking and experienced no problems since release.
 
 ## `authmosphere 2.0.0` - **BREAKING**
 
