@@ -111,7 +111,10 @@ const extractAccessToken = (authHeader: string): string | undefined => {
 const setTokeninfo = (req: Request): (data: Token) => void => {
   return (data: Token) => {
 
-    const tokeninfo = { ...data, ...{access_token: undefined} };
+    const tokeninfo = {
+      ...data,
+      access_token: undefined
+    };
 
     // Avoid leaking of sensitive information
     delete tokeninfo.access_token;
