@@ -93,6 +93,7 @@ const AUTHORIZATION_HEADER_FIELD_NAME = 'authorization';
  * @returns { function(any, any, any): undefined }
  */
 type requireScopesMiddleware = (scopes: string[], options?: ScopeMiddlewareOptions) => RequestHandler;
+// eslint-disable-next-line @typescript-eslint/no-redeclare -- intentionally naming the variable the same as the type
 const requireScopesMiddleware: requireScopesMiddleware =
   (scopes, options = {}) =>
     (request: ExtendedRequest, response: Response, nextFunction: NextFunction): Promise<unknown> => {
@@ -161,6 +162,7 @@ const requireScopesMiddleware: requireScopesMiddleware =
  * @returns express middleware
  */
 type authenticationMiddleware = (options: AuthenticationMiddlewareOptions) => RequestHandler;
+// eslint-disable-next-line @typescript-eslint/no-redeclare -- intentionally naming the variable the same as the type
 const authenticationMiddleware: authenticationMiddleware = (options) => {
 
   const {

@@ -252,7 +252,11 @@ module.exports = {
     "no-prototype-builtins": [
       "error"
     ],
-    "no-redeclare": "error",
+    "no-redeclare": "off",
+    "@typescript-eslint/no-redeclare": [
+      "error", {
+        "ignoreDeclarationMerge": true
+      }],
     "no-regex-spaces": [
       "error"
     ],
@@ -355,12 +359,8 @@ module.exports = {
     "no-eval": "error",
     "no-multiple-empty-lines": "error",
     "no-new-wrappers": "error",
-    "no-shadow": [
-      "error",
-      {
-        "hoist": "all"
-      }
-    ],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     "no-trailing-spaces": "error",
     "no-underscore-dangle": "off",
     "no-unused-expressions": 0,
