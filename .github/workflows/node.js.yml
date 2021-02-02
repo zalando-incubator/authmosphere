@@ -3,10 +3,7 @@
 
 name: authmosphere ci build
 
-on:
-  push:
-  pull_request:
-    types: [opened]
+on: [push]
 
 jobs:
   build:
