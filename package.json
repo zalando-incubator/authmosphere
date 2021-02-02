@@ -1,6 +1,6 @@
 {
   "name": "authmosphere",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "authmosphere is a library to support OAuth2 workflows in JavaScript projects.",
   "main": "./lib/src/index.js",
   "typings": "./lib/src/index.d.ts",
@@ -22,7 +22,7 @@
     "package.json"
   ],
   "engines": {
-    "node": ">=6.0"
+    "node": ">=10.0"
   },
   "dependencies": {
     "http-status": "1.5.0",
@@ -56,7 +56,6 @@
     "nyc": "15.1.0",
     "sinon": "9.2.4",
     "sinon-chai": "3.5.0",
-    "tslint": "6.1.3",
     "typescript": "4.1.3"
   },
   "scripts": {
@@ -69,7 +68,7 @@
     "lint": "eslint -c .eslintrc.js --ext .ts ./src/ ./test/",
     "lint:fix": "eslint --fix -c .eslintrc.js --ext .ts ./src/ ./test/",
     "build": "rm -rf lib && tsc",
-    "prepublishOnly": "npm run build && npm run test && npm run tslint"
+    "prepublishOnly": "npm run build && npm run test && npm run lint"
   },
   "repository": {
     "type": "git",

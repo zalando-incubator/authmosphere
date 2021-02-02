@@ -167,7 +167,7 @@ const getTokenInfo: GetTokenInfo =
         const status = response.status;
 
         return response.json()
-          .then((data: Record<string, unknown>) => {
+          .then((data: Record<string | number | symbol, unknown>) => {
 
             if (status === HttpStatus.OK) {
               logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);

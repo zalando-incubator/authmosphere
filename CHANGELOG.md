@@ -1,8 +1,23 @@
 # Changelog
 
-## `authmosphere 3.0.0`
+## `authmosphere 3.0.2`
+
+* remove the last left over dependencies and files for TSLint
+* fix npm task
+* Change type ```Record<string, unknown>``` to ```Record<string | number | symbol, unknown>``` to support the full range of possible keys within an ```object```
+
+## `authmosphere 3.0.1 (unreleased)`
+
+* security updates and dependency updates
+
+## `authmosphere 3.0.0 (prerelaesed)`
 
 This release is mostly about dependency updates and cleaning up, and probably non-breaking. However there are some types affected by changes due to an updated TypeScript version so we are not 100% sure about this. If you identify breaking behaviour/changes in this release, feel free to reach out to us.
+
+Additional information 29.01.2021
+We removed as highly encouraged within Typescript the type ```{}``` by the type ```Record<string | number | symbol, unknown>``` in an exported interface. Meanwhile, we assume the interface is not breaking and experienced no problems since release.
+
+Nevertheless we dropped the support for some older and unsupported Node versions with the first official release of this mayor version.
 
 ## `authmosphere 2.0.0` - **BREAKING**
 
@@ -143,7 +158,6 @@ mockAccessTokenEndpointWithErrorResponse(options: MockOptions, httpStatus: numbe
 ```
 
 Both functions set up a HTTP mock via [nock](https://github.com/node-nock/nock). A request to the mocked url (defined via [`MockOptions`](./src/types/MockOptions.ts)) will lead to a response with the given `httpStatus` and, if defined, `responseBody` (otherwise `{}`).
-
 
 ### Improved error handling
 
