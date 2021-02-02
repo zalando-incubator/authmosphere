@@ -68,7 +68,8 @@
     "lint": "eslint -c .eslintrc.js --ext .ts ./src/ ./test/",
     "lint:fix": "eslint --fix -c .eslintrc.js --ext .ts ./src/ ./test/",
     "build": "rm -rf lib && tsc",
-    "prepublishOnly": "npm run build && npm run test && npm run lint"
+    "prepublishOnly": "npm run build && npm run test && npm run lint",
+    "gh-ci-action": "npm run test && npm run lint"
   },
   "repository": {
     "type": "git",
