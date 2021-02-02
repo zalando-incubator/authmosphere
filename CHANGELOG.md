@@ -1,6 +1,10 @@
 # Changelog
 
-## `authmosphere 3.0.2`
+## `authmosphere 3.0.3`
+
+* fix linting error
+
+## `authmosphere 3.0.2 (unreleased)`
 
 * remove the last left over dependencies and files for TSLint
 * fix npm task
