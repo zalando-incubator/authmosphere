@@ -143,15 +143,18 @@ const rejectRequest: rejectRequest = (res, logger, status) => {
 const isCredentialsDirConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsDirConfig =>
   options.credentialsDir !== undefined;
 
-const isCredentialsClientConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsClientConfig =>
-  options.clientId !== undefined && options.clientSecret !== undefined;
+const isCredentialsClientConfig =
+  (options: Record<string | number | symbol, unknown>): options is CredentialsClientConfig =>
+    options.clientId !== undefined && options.clientSecret !== undefined;
 
-const isCredentialsUserConfig = (options: Record<string | number | symbol, unknown>): options is CredentialsUserConfig =>
-  options.applicationUsername !== undefined &&  options.applicationPassword !== undefined;
+const isCredentialsUserConfig =
+  (options: Record<string | number | symbol, unknown>): options is CredentialsUserConfig =>
+    options.applicationUsername !== undefined && options.applicationPassword !== undefined;
 
-const isPasswordGrantNoCredentialsDir = (options: Record<string | number | symbol, unknown>): options is CredentialsUserClientConfig =>
-  options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
-   isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
+const isPasswordGrantNoCredentialsDir =
+  (options: Record<string | number | symbol, unknown>): options is CredentialsUserClientConfig =>
+    options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT &&
+    isCredentialsUserConfig(options) && isCredentialsClientConfig(options);
 
 const checkCredentialsSource = (options: OAuthConfig) =>
   isCredentialsDirConfig(options) || isCredentialsClientConfig(options) || isPasswordGrantNoCredentialsDir(options);
