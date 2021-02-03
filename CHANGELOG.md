@@ -1,5 +1,10 @@
 # Changelog
 
+## `authmosphere 3.0.4`
+
+* updated nock and eslint
+* added ```.npmrc``` for reliable builds
+
 ## `authmosphere 3.0.3`
 
 * fix linting error
