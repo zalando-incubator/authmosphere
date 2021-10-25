@@ -6,7 +6,8 @@ import {
   getAccessToken,
   createAuthCodeRequestUri,
   OAuthGrantType,
-  OAuthConfig
+  OAuthConfig,
+  TokenCacheOAuthConfig
 } from '../../src';
 
 chai.use(chaiAsPromised);
@@ -116,7 +117,7 @@ describe('oauth tooling', () => {
           accessTokenEndpoint: '/access_token',
           credentialsDir: '/credentials',
           grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
-        } as any);
+        } as TokenCacheOAuthConfig);
       }).to.throw(TypeError);
     });
 
@@ -129,7 +130,7 @@ describe('oauth tooling', () => {
         tokenInfoEndpoint: '/tokeninfo',
         credentialsDir: '/credentials',
         grantType: OAuthGrantType.PASSWORD_CREDENTIALS_GRANT
-      } as any); // deactivate type system in order to test runtime behavior
+      } as TokenCacheOAuthConfig);
 
       return expect(tokenCache.get('bar')).to.be.rejected;
     });
