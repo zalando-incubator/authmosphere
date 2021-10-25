@@ -2,7 +2,7 @@
  * Defines a logger.
  * Can be console.log or any other framework you use on the server side and match this interface.
  */
-type LogFunction = (message: string, error?: any) => void;
+type LogFunction = (message: string, ...args: any[]) => void;
 
 interface Logger {
   info: LogFunction;
