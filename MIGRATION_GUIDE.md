@@ -1,5 +1,13 @@
 # Migration guide
 
+## Migrate from `authmosphere@2.x.x` or `authmosphere@2.x.x` to `authmosphere@2.x.x`
+
+Change the required node version to one of the following verions, as other versions (state: October 2021) are end-of-life:
+
+* Node.js 12.22 and above
+* Node.js 14 and above
+* Node.js 16 and above
+
 ## Migrate from `authmosphere@1.x.x` to `authmosphere@2.x.x`
 
 * run `npm install --save authmosphere@~2.0.0`

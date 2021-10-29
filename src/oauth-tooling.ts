@@ -173,7 +173,7 @@ const getTokenInfo: GetTokenInfo =
               logOrNothing.debug(`Successful request to ${tokenInfoUrl}`);
               return data as Token;
             } else {
-              logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}`, { status, data });
+              logOrNothing.debug(`Unsuccessful request to ${tokenInfoUrl}, Http status: ${status}`);
               return Promise.reject({ status, data });
             }
           });
