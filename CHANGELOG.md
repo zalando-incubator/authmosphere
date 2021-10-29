@@ -1,5 +1,10 @@
 # Changelog
 
+## `authmosphere 4.0.0`
+
+* Due to some dependency updates like Eslint, Node.js 10, 13, and 15 are no longer supported (see also [Eslint 8.0.0 migration guide](https://eslint.org/docs/8.0.0/user-guide/migrating-to-8.0.0))
+* Minor change in logging, to ensure a higher compatibility to multiple usable loggers
+
 ## `authmosphere 3.0.4`
 
 * updated nock and eslint

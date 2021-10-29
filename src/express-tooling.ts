@@ -120,8 +120,8 @@ const requireScopesMiddleware: requireScopesMiddleware =
           () => Promise.resolve(false);
 
       return precedenceFunction(request, response, nextFunction)
-        .catch(error => {
-          logOrNothing.warn('Error while executing precedenceFunction', error);
+        .catch(() => {
+          logOrNothing.warn('Error while executing precedenceFunction');
           // PrecedencFunction was not successful
           //  false -> trigger fallback to default scope validation
           return false;
