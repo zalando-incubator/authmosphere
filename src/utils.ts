@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFile } from 'fs/promises';
 import { Request, Response } from 'express';
 
 import {
@@ -13,20 +13,6 @@ import {
   RefreshGrantConfig,
   Token
 } from './types';
-
-const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
-  const readPromise: Promise<string> = new Promise((resolve, reject) => {
-    fs.readFile(fileName, encoding, (error, data) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(data.toString());
-    });
-  });
-
-  return readPromise;
-};
 
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
 const AUTHORIZATION_BASIC_PREFIX = 'Basic';
@@ -43,7 +29,7 @@ const getFileDataAsObject = (filePath: string, fileName: string): Promise<any> =
     filePath += '/';
   }
 
-  const promise = fsReadFile(filePath + fileName, 'utf-8')
+  const promise = readFile(filePath + fileName, 'utf-8')
     .then(JSON.parse);
 
   return promise;
