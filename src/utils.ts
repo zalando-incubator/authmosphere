@@ -1,5 +1,6 @@
-import { readFile } from 'fs/promises';
+import { readFile } from 'fs';
 import { Request, Response } from 'express';
+import { promisify } from 'util';
 
 import {
   AuthorizationCodeGrantConfig,
@@ -13,6 +14,8 @@ import {
   RefreshGrantConfig,
   Token
 } from './types';
+
+const fsReadFile = promisify(readFile);
 
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
 const AUTHORIZATION_BASIC_PREFIX = 'Basic';
@@ -29,7 +32,7 @@ const getFileDataAsObject = (filePath: string, fileName: string): Promise<any> =
     filePath += '/';
   }
 
-  const promise = readFile(filePath + fileName, 'utf-8')
+  const promise = fsReadFile(filePath + fileName, 'utf-8')
     .then(JSON.parse);
 
   return promise;
