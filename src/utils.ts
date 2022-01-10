@@ -1,5 +1,6 @@
-import * as fs from 'fs';
+import { readFile } from 'fs';
 import { Request, Response } from 'express';
+import { promisify } from 'util';
 
 import {
   AuthorizationCodeGrantConfig,
@@ -14,19 +15,7 @@ import {
   Token
 } from './types';
 
-const fsReadFile = (fileName: string, encoding: string): Promise<string> => {
-  const readPromise: Promise<string> = new Promise((resolve, reject) => {
-    fs.readFile(fileName, encoding, (error, data) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(data.toString());
-    });
-  });
-
-  return readPromise;
-};
+const fsReadFile = promisify(readFile);
 
 const AUTHORIZATION_BEARER_PREFIX = 'Bearer';
 const AUTHORIZATION_BASIC_PREFIX = 'Basic';
