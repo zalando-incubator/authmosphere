@@ -87,6 +87,8 @@ function requestAccessToken(bodyObject: BodyParameters,
       body: querystring.stringify(bodyObject),
       headers: {
         'Authorization': authorizationHeaderValue,
+        // eslint disables as content-type needs to be kebab-cased
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': OAUTH_CONTENT_TYPE
       }
     })
