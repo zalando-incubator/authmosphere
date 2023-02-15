@@ -29,6 +29,7 @@
     "http-status": "1.6.1",
     "nock": "13.2.9",
     "node-fetch": "2.6.7",
+    "rambda": "^7.4.0",
     "uuid": "9.0.0"
   },
   "devDependencies": {

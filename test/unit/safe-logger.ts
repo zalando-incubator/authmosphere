@@ -15,7 +15,8 @@ describe('safeLogger', () => {
     it('should execute logger function', () => {
       let called = false;
       const logger = {
-        info: () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        info: (_message: string ) => {
           called = true;
         }
       } as any as Logger;
@@ -31,7 +32,8 @@ describe('safeLogger', () => {
         test: () => {
           called = true;
         },
-        info: function () {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        info: function (_message: string ): void {
           this.test();
         },
         debug: () => undefined,
