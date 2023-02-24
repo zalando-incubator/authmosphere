@@ -26,12 +26,13 @@ describe('safeLogger', () => {
     });
 
     it('should execute logger function with this bounded correctly', () => {
-      let called = false;
-      const logger: Logger & {test: () => void} = {
-        test: () => {
-          called = true;
+      const logger: Logger & {test: () => void, called: boolean } = {
+        called: false,
+
+        test() {
+          this.called = true;
         },
-        info: function () {
+        info() {
           this.test();
         },
         debug: () => undefined,
@@ -43,7 +44,7 @@ describe('safeLogger', () => {
 
       const result = () => safeLogger(logger).info('foo');
       expect(result).not.to.throw();
-      return expect(called).to.be.true;
+      return expect(logger.called).to.be.true;
     });
 
     it('should not throw, if logger undefined', () => {
