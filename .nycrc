@@ -15,7 +15,6 @@
     "integration-test",
     ".eslintrc.js"
   ],
-  "extension": [".ts"],
   "reporter": [
     "lcov",
     "text",
