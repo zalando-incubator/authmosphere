@@ -220,7 +220,7 @@ function getAccessToken(options: OAuthConfig, logger?: Logger): Promise<Token> {
           'username': credentials.applicationUsername,
           'password': credentials.applicationPassword
         };
-      } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT) {
+      } else if (options.grantType === OAuthGrantType.CLIENT_CREDENTIALS_GRANT.valueOf()) {
         bodyParameters = {
           'grant_type': options.grantType
         };
@@ -275,7 +275,7 @@ const getCredentials = (options: OAuthConfig) => {
       .then(transformClientCredentials);
 
     // For PASSWORD_CREDENTIALS_GRANT we need user credentials as well
-    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT) {
+    if (options.grantType === OAuthGrantType.PASSWORD_CREDENTIALS_GRANT.valueOf()) {
       getUserData = getFileDataAsObject(options.credentialsDir, USER_JSON)
         .then(transformUserCredentials);
     }

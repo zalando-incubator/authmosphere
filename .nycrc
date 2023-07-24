@@ -7,10 +7,11 @@
     "coverage/**/*.js",
     "lib/integration-test/**/*",
     "lib/src/index.js",
-    "lib/src/index.d.ts",
     "lib/test/**/*",
     "lib/src/types",
+    "lib/**/*.d.ts",
     "src/types",
+    "src/index.ts",
     "test",
     "integration-test",
     ".eslintrc.js"

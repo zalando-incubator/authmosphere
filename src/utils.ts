@@ -188,10 +188,10 @@ const validateOAuthConfig = (options: OAuthConfig): void => {
 };
 
 const isAuthorizationCodeGrantConfig = (config: OAuthConfig): config is AuthorizationCodeGrantConfig =>
-  config.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT;
+  config.grantType === OAuthGrantType.AUTHORIZATION_CODE_GRANT.valueOf();
 
 const isRefreshGrantConfig = (config: OAuthConfig): config is RefreshGrantConfig =>
-  config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT;
+  config.grantType === OAuthGrantType.REFRESH_TOKEN_GRANT.valueOf();
 
 export {
   extractAccessToken,
