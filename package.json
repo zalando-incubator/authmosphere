@@ -54,7 +54,7 @@
     "mocha": "10.2.0",
     "sinon": "15.2.0",
     "sinon-chai": "3.7.0",
-    "typescript": "5.0.4"
+    "typescript": "5.1.6"
   },
   "scripts": {
     "test": "npm run build && mocha lib/test lib/integration-test --recursive",
