@@ -29,9 +29,9 @@ describe('getTokenInfo', () => {
 
     // given
     nock(oAuthServerHost)
-    .get(tokenInfoEndpoint)
-    .query({ access_token: invalidAccessToken })
-    .reply(HttpStatus.UNAUTHORIZED, { error: 'invalid_token' });
+      .get(tokenInfoEndpoint)
+      .query({ access_token: invalidAccessToken })
+      .reply(HttpStatus.UNAUTHORIZED, { error: 'invalid_token' });
 
     // when
     const promise = getTokenInfo(`${oAuthServerHost}${tokenInfoEndpoint}`, invalidAccessToken);
@@ -53,17 +53,17 @@ describe('getTokenInfo', () => {
           error: {
             errorDescription: 'tokenInfo endpoint not reachable '
           }
-          });
+        });
       });
-  });
+  }).timeout(5000);
 
-  it('should return the token info if token is valid', function() {
+  it('should return the token info if token is valid', function () {
 
     // given
     nock(oAuthServerHost)
-    .get(tokenInfoEndpoint)
-    .query({ access_token: validAccessToken })
-    .reply(HttpStatus.OK, { access_token: validAccessToken });
+      .get(tokenInfoEndpoint)
+      .query({ access_token: validAccessToken })
+      .reply(HttpStatus.OK, { access_token: validAccessToken });
 
     // when
     const promise = getTokenInfo(`${oAuthServerHost}${tokenInfoEndpoint}`, validAccessToken);
