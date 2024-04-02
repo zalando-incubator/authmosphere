@@ -83,6 +83,10 @@ module.exports = {
         leadingUnderscore: 'allow'
       },
       {
+        "selector": "import",
+        "format": ["camelCase", "PascalCase"]
+      },
+      {
         "selector": "default",
         "format": ["camelCase"],
         leadingUnderscore: 'allow'
