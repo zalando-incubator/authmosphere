@@ -9,3 +9,5 @@ approvals:
   veto:
     # veto/blocking a PR = comment that matches this regex
     pattern: "^(:\\-1:|👎)$"
+X-Zalando-Team: guild-opensource
+X-Zalando-Type: code
